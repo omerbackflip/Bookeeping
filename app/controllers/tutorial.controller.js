@@ -22,8 +22,8 @@ exports.create = (req, res) => {
     date: req.body.date,
     supplier: req.body.supplier,
     invoiceId: req.body.invoiceId,
-    remark: req.body.String,
-    excelRecID: req.body.Number,
+    remark: req.body.remark,
+    excelRecID: req.body.excelRecID,
   });
 
   // Save Tutorial in the database

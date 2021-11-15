@@ -103,25 +103,6 @@ export default {
     };
   },
 
-  // computed: {
-  //   headers() {
-  //     return [
-  //       { text: "Company", value: "company" },
-  //       { text: "Project", value: "project" },
-  //       { text: "Description", value: "description" },
-  //       { text: "Published", value: "published" },
-  //       { text: "Amount", value: "amount" },
-  //       { text: "Vat", value: "vat" },
-  //       { text: "Total", value: "total" },
-  //       { text: "Group", value: "group" },
-  //       { text: "Date", value: "date" },
-  //       { text: "Supplier", value: "supplier" },
-  //       { text: "Invoice ID", value: "invoiceId" },
-  //       { text: "Actions", value: "actions", sortable: false },
-  //     ];
-  //   },
-  // },
-
   methods: {
     rowClicked(row) {
       this.currInvoice = row;

@@ -25,20 +25,25 @@
                     />
                     <slot name="error" v-if="showErrorMessage">
                         <div class="invalid-feedback d-block">
-                            File type is invalid
+                            File type is invalid 1
                         </div>
                     </slot>
                 </div>
                 <div class="form-group">
                     <slot name="next" :load="load">
-                        <button type="submit" :disabled="disabledNextButton" :class="buttonClass" @click.prevent="load">
+                        <v-btn type="submit" :disabled="disabledNextButton" :class="buttonClass" @click="load">
                             {{ loadBtnText }}
-                        </button>
+                        </v-btn>
                     </slot>
+                    <v-btn class="my-3 mx-3" @click="loadToSchema">
+                        load To Schema
+                    </v-btn>
                 </div>
             </div>
-            <!-- {{ csv }} -->
 
+            {{ csv ? csv : "empty csv" }}
+
+<!---------------------------->
             <div class="vue-csv-uploader-part-two">
                 <div class="vue-csv-mapping" v-if="sample">
                     <table :class="tableClass">
@@ -50,10 +55,9 @@
                                 </tr>
                             </thead>
                         </slot>
-                        <tbody> 
+                        <tbody>
                             <tr v-for="(field, key) in fieldsToMap" :key="key">
-                                <td>{{ field.label }}</td>
-                                <!-- <td>{{ field }}</td> -->
+                                <td>{{ 'field.label' }}</td>
                                 <td>
                                     <select
                                         :class="tableSelectClass"
@@ -75,10 +79,10 @@
                         </slot>
                     </div>
                 </div>
-                <v-btn @click="saveInvoice">save</v-btn>
             </div>
 
-            {{ form.csv ? form.csv.length : 'empty'}}
+<!---------------------------->
+
 
 
         </div>
@@ -90,122 +94,62 @@ import {drop, every, forEach, get, isArray, map, set} from "lodash";
 import axios from "axios";
 import Papa from "papaparse";
 import mimeTypes from "mime-types";
-import TutorialDataService from "../services/TutorialDataService";
-
-
 
 export default {
     props: {
         value: Array,
-        url: {
-            type: String,
-        },
-        // mapFields: {
-        //     required: true,
-        // },
-        callback: {
-            type: Function,
-            default: () => ({}),
-        },
-        catch: {
-            type: Function,
-            default: () => ({}),
-        },
-        finally: {
-            type: Function,
-            default: () => ({}),
-        },
-        parseConfig: {
-            type: Object,
-            default() {
-                return {};
-            },
-        },
-        headers: {
-            default: null,
-        },
-        loadBtnText: {
-            type: String,
-            default: "Next",
-        },
-        submitBtnText: {
-            type: String,
-            default: "Submit",
-        },
-        ignoreOptionText: {
-            type: String,
-            default: "Ignore",
-        },
-        autoMatchFields: {
-            type: Boolean,
-            default: false,
-        },
-        autoMatchIgnoreCase: {
-            type: Boolean,
-            default: false,
-        },
-        tableClass: {
-            type: String,
-            default: "table",
-        },
-        checkboxClass: {
-            type: String,
-            default: "form-check-input",
-        },
-        buttonClass: {
-            type: String,
-            default: "btn btn-primary",
-        },
-        inputClass: {
-            type: String,
-            default: "form-control-file",
-        },
-        validation: {
-            type: Boolean,
-            default: true,
-        },
-        fileMimeTypes: {
-            type: Array,
-            default: () => {
+        url: { type: String},
+        mapFields: {required: true},  //previously it was true
+        //mapFields: {required: false}, //Added to remove warnings
+        callback: {type: Function, default: () => ({})},
+        catch: {type: Function, default: () => ({})},
+        finally: {type: Function, default: () => ({})},
+        parseConfig: {type: Object,default() {return {};}},
+        headers: {default: null},
+        loadBtnText: {type: String, default: "Load csv"},
+        submitBtnText: {type: String, default: "Submit"},
+        ignoreOptionText: {type: String, default: "Ignore"},
+        autoMatchFields: {type: Boolean, default: false},
+        autoMatchIgnoreCase: {type: Boolean, default: false},
+        tableClass: {type: String, default: "table"},
+        checkboxClass: {type: String, default: "form-check-input"},
+        buttonClass: {type: String, default: "btn btn-primary"},
+        inputClass: {type: String, default: "form-control-file"},
+        validation: {type: Boolean, default: true},
+        fileMimeTypes: {type: Array, default: () => {
                 return ["text/csv", "text/x-csv", "application/vnd.ms-excel", "text/plain"];
             },
         },
-        tableSelectClass: {
-            type: String,
-            default: "form-control",
-        },
-        canIgnore: {
-            type: Boolean,
-            default: false,
-        },
+        tableSelectClass: {type: String, default: "form-control"},
+        canIgnore: {type: Boolean, default: false},
     },
 
     data: () => ({
         form: {
             csv: null,
         },
-        fieldsToMap: [],
-        mapFields : [
-            "InvDate",
-            "invoiceID",
-             "Description",
-             "Amount",
-            "Vat",
-            "Total",
-            "Remark",
-            "supplier",
-            "published",
-            "ExcelRecordID",
-            "Project",
-             "Company",
-            "GroupID"
-        ],
+        fieldsToMap: ['aaaaa', 'uuuu'],
         map: {},
         hasHeaders: true,
         csv: null,
         sample: null,
         isValidFileMimeType: false,
         fileSelected: false,
+        invoice: {
+          company:      "",
+          project:      "",
+          description:  "",
+          published:    false,
+          amount:       null,
+          vat:          null,
+          total:        null,
+          group:        "",
+          date:         null,
+          supplier:     "",
+          invoiceId:    "",
+          remark:       "",
+          excelRecID:   null,
+        },  
     }),
 
     created() {
@@ -215,7 +159,6 @@ export default {
     methods: {
         initializeFromProps() {
             this.hasHeaders = this.headers;
-
             if (isArray(this.mapFields)) {
                 this.fieldsToMap = map(this.mapFields, (item) => {
                     return {
@@ -256,7 +199,7 @@ export default {
         buildMappedCsv() {
             const _this = this;
 
-            let csv = this.hasHeaders ? drop(this.csv) : this.csv;
+            let csv = this.hasHeaders ? drop(this.csv) : this.csv;  // this drop the header if hasHeaders
 
             return map(csv, (row) => {
                 let newRow = {};
@@ -288,8 +231,15 @@ export default {
 
             this.readFile((output) => {
                 _this.sample = get(Papa.parse(output, {preview: 2, skipEmptyLines: true}), "data");
-                _this.csv = get(Papa.parse(output, {skipEmptyLines: true}), "data");
+                _this.csv       = get(Papa.parse(output, {skipEmptyLines: true}), "data");
+                console.log(this.csv);
             });
+        },
+
+        loadToSchema() {
+            for (let i=0; i<this.csv.length; i++){
+                console.log(this.csv[[i]]);
+            }
         },
         readFile(callback) {
             let file = this.$refs.csv.files[0];
@@ -309,37 +259,6 @@ export default {
         },
         makeId(id) {
             return `${id}${this._uid}`;
-        },
-        saveInvoice() {
-            
-            for (let i = 1; i < this.form.csv.length; i++) { 
-                var data = {
-                    company:      this.form.csv[i].Company,
-                    description:  this.form.csv[i].Description,
-                    amount:       parseInt(this.form.csv[i].Amount),
-                    vat:          parseInt(this.form.csv[i].Vat),
-                    total:        parseInt(this.form.csv[i].Total),
-                    group:        parseInt(this.form.csv[i].GroupID),
-                    date:         this.form.csv[i].InvDate,
-                    supplier:     this.form.csv[i].supplier,
-                    invoiceId:    this.form.csv[i].invoiceID,
-                    remark:       this.form.csv[i].Remark,
-                    excelRecID:   parseInt(this.form.csv[i].ExcelRecordID),
-                    published:    this.form.csv[i].published,
-                    project:      this.form.csv[i].Project,
-                };
-                //var data = this.form.csv[2];
-                TutorialDataService.create(data)
-                .then(response => {
-                    this.invoice.id = response.data.id;
-                    //console.log(response.data);
-                    // this.submitted = true;
-                })
-                .catch(e => {
-                    console.log(e);
-                });
-                console.log (data);
-            }
         },
     },
 
@@ -362,7 +281,6 @@ export default {
                 }
             },
         },
-
         sample(newVal) {
             if (this.autoMatchFields) {
                 if (newVal !== null) {
@@ -381,13 +299,12 @@ export default {
                     });
                 }
             }
-        },
-        
+        },        
         mapFields() {
             this.initializeFromProps();
         }
     },
-    
+
     computed: {
         firstRow() {
             return get(this, "sample.0");

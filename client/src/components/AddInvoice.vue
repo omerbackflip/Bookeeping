@@ -111,10 +111,11 @@ import TutorialDataService from "../services/TutorialDataService";
           remark:       this.invoice.remark,
           excelRecID:   this.invoice.excelRecID,
         };
+        console.log(data);
         TutorialDataService.create(data)
           .then(response => {
             this.invoice.id = response.data.id;
-            console.log(response.data);
+            //console.log(response.data);
             // this.submitted = true;
           })
           .catch(e => {
