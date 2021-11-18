@@ -21,6 +21,8 @@
                 </v-list>
             </v-menu>
             
+        <v-btn color="success" v-bind="attrs" v-on="on">Add</v-btn>
+
             <v-btn color="gray">
                 <span>Sign Out</span>
                 <v-icon right>exit_to_app</v-icon>

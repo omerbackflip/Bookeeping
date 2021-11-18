@@ -37,7 +37,7 @@
                     </slot>
                 </div>
             </div>
-            <!-- {{ csv }} -->
+            {{ csv }}
 
             <div class="vue-csv-uploader-part-two">
                 <div class="vue-csv-mapping" v-if="sample">
@@ -78,7 +78,10 @@
                 <v-btn @click="saveInvoice">save</v-btn>
             </div>
 
-            {{ form.csv ? form.csv.length : 'empty'}}
+            <!-- {{ form.csv ? form.csv.length : 'empty'}} -->
+            {{ form.csv }}
+            
+          
 
 
         </div>
@@ -188,8 +191,8 @@ export default {
         mapFields : [
             "InvDate",
             "invoiceID",
-             "Description",
-             "Amount",
+            "Description",
+            "Amount",
             "Vat",
             "Total",
             "Remark",
@@ -197,7 +200,7 @@ export default {
             "published",
             "ExcelRecordID",
             "Project",
-             "Company",
+            "Company",
             "GroupID"
         ],
         map: {},
@@ -206,6 +209,7 @@ export default {
         sample: null,
         isValidFileMimeType: false,
         fileSelected: false,
+        //obj: '',
     }),
 
     created() {
@@ -311,7 +315,8 @@ export default {
             return `${id}${this._uid}`;
         },
         saveInvoice() {
-            
+            // this.obj = JSON.parse(this.form.csv);
+            // console.log(this.obj);
             for (let i = 1; i < this.form.csv.length; i++) { 
                 var data = {
                     company:      this.form.csv[i].Company,
@@ -328,17 +333,16 @@ export default {
                     published:    this.form.csv[i].published,
                     project:      this.form.csv[i].Project,
                 };
-                //var data = this.form.csv[2];
                 TutorialDataService.create(data)
                 .then(response => {
-                    this.invoice.id = response.data.id;
-                    //console.log(response.data);
-                    // this.submitted = true;
+                    //this.invoice.id = response.data.id;
+                    console.log(response.data);
                 })
                 .catch(e => {
                     console.log(e);
+                    console.log('--------')
+                    console.log(data)
                 });
-                console.log (data);
             }
         },
     },

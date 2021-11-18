@@ -1,6 +1,6 @@
 <template>
   <div class="text-center">
-    <v-dialog v-model="dialog" width="500">
+    <v-dialog v-model="dialog" width="2500">
       <template v-slot:activator="{ on, attrs }">
         <v-btn color="success" v-bind="attrs" v-on="on">Add</v-btn>
       </template>
@@ -111,7 +111,7 @@ import TutorialDataService from "../services/TutorialDataService";
           remark:       this.invoice.remark,
           excelRecID:   this.invoice.excelRecID,
         };
-        console.log(data);
+        //console.log(data);
         TutorialDataService.create(data)
           .then(response => {
             this.invoice.id = response.data.id;
@@ -123,11 +123,6 @@ import TutorialDataService from "../services/TutorialDataService";
           });
         this.dialog = false;
       },
-      
-      // newTutorial() {
-      //   this.submitted = false;
-      //   this.invoice = {};
-      // },
     },
   }
 </script>
