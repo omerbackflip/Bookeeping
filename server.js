@@ -16,6 +16,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 
+// Don’t forget to call connect() method in server.js (here, this file):
 const db = require("./app/models");
 
 db.mongoose
@@ -38,6 +39,7 @@ app.get("/", (req, res) => {
 });
 
 require("./app/routes/tutorial.routes")(app);
+require("./app/routes/book.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;

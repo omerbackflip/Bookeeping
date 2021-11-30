@@ -21,8 +21,6 @@
                 </v-list>
             </v-menu>
             
-        <v-btn color="success" v-bind="attrs" v-on="on">Add</v-btn>
-
             <v-btn color="gray">
                 <span>Sign Out</span>
                 <v-icon right>exit_to_app</v-icon>
@@ -54,9 +52,11 @@ export default {
             drawer: false,
             links: [
                 {icon: 'dashboard', text: 'Dashboard', route: '/'},
-                {icon: 'folder', text: 'My Projects (Tutorial)', route: '/tutorials'},
-                {icon: 'person', text: 'Team (Add)', route: '/add'},
+                {icon: 'folder', text: 'כרטסת ראשית', route: '/tutorials'},
+                {icon: 'person', text: 'הוסף רשומה (קוד מקורי)', route: '/add'},
                 {icon: 'folder', text: 'Load Scv', route: '/loadCsv'},
+                {icon: 'folder', text: 'הוסף חשבונית', route: '/addInv'},
+                {icon: 'folder', text: 'Load Csv Book', route: '/loadBookCsv'},
             ]
         }
     }

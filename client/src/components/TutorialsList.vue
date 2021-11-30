@@ -3,10 +3,9 @@
     <!-- <div class="input-group mb-3 mt-3">
       <input type="text" class="form-control" placeholder="Search..." v-model="searchStr"/>
       <v-btn @click="searchSTR" class="ml-2 mr-2"> Search </v-btn>
-    </div>
-    <AddInvoice></AddInvoice>  -->
+    </div>  -->
+    <!-- <AddInvoice></AddInvoice> -->
     <v-layout row wrap>
-
       <v-flex xs12 md10>
         <v-text-field
           v-model="search"
@@ -22,26 +21,27 @@
                       disable-pagination
                       hide-default-footer
                       fixed-header
-                      height="60vh">
+                      height="75vh"
+                      class="elevation-3"
+                      loading = "isLoading"
+                      loading-text="Loading... Please wait">
           <template v-slot:[`item.actions`]="{ item }"> 
-            <v-icon @click="deleteOne(item.id)">mdi-delete</v-icon>
+            <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
+            <v-icon small @click="deleteOne(item.id)">mdi-delete</v-icon>
           </template>
           <template v-slot:[`item.date`]="{ item }"> 
             <span> {{item.date | formatDate}}</span>
           </template>
         </v-data-table>
-        <v-btn class="m-3 btn btn-sm btn-danger" @click="removeAllTutorials">
-          Remove All
-        </v-btn>
+
       </v-flex>
 
-
       <!-- this section is the detailes of an invoice -->
-      <v-flex xs12 md2>
-        <v-container class="grey lighten-2 mx-5">
-          <div class="col-md-6">
+      <v-flex md2>
+        <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
+          <div class="col-md-12">
             <div v-if="currInvoice">
-              <h4>Tutorial</h4>
+              <h4>פרטים</h4>
               <div>
                 <label><strong>Company:</strong></label> {{ currInvoice.company }}
               </div>
@@ -63,34 +63,36 @@
             </div>
           </div>
         </v-container>
+        <v-btn class="m-3 btn btn-sm btn-danger" @click="removeAllTutorials">
+          Remove All
+        </v-btn>
       </v-flex>
     </v-layout>
-    <v-footer color="primary lighten-1" align="center">
-
+    <v-footer color="primary lighten-1" align="center" class="mt-5 mx-5"  elevation="10">
+      <v-form ref="form" >
         <v-row>
           <v-col >
-            <v-text-field v-model="invoice.company" label="Company"></v-text-field>
+            <v-text-field v-model="invoice.company" label="Company" :rules="fldRules"></v-text-field>
           </v-col>
           <v-col >
-            <v-text-field v-model="invoice.project" label="Project"></v-text-field>
+            <v-text-field v-model="invoice.project" label="Project" required></v-text-field>
           </v-col>
           <v-col >
-            <v-text-field v-model="invoice.description" label="Description"></v-text-field>
+            <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
           </v-col>
           <v-col >
-            <v-text-field v-model="invoice.amount" label="Amount"></v-text-field>
+            <v-text-field v-model="invoice.amount" label="Amount" required></v-text-field>
           </v-col>
           <v-col >
             <v-text-field v-model="invoice.vat" label="Vat"></v-text-field>
           </v-col>
           <v-col >
-            <v-text-field v-model="invoice.total" label="Total"></v-text-field>
+            <v-text-field v-model="invoice.total" label="Total" required></v-text-field>
           </v-col>              
           <v-col >
-            <v-text-field v-model="invoice.group" label="Group"></v-text-field>
+            <v-text-field v-model="invoice.group" label="Group" required></v-text-field>
           </v-col>
           <v-col >
-            <!-- <v-dialog ref="dialog" v-model="modal" :return-value.sync="invoice.date" persistent width="290px"> -->
             <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
               <template v-slot:activator="{ on, attrs }">
                 <v-text-field 
@@ -99,12 +101,13 @@
                   prepend-icon="mdi-calendar"
                   readonly
                   v-bind="attrs"
-                  v-on="on" >
+                  v-on="on" 
+                  required>
                 </v-text-field>
               </template> 
               <v-date-picker v-model="invoice.date" scrollable>
                 <v-spacer></v-spacer>
-                <v-btn text color="primary" @click="modal = false">Cancel</v-btn>
+                <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
                 <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
               </v-date-picker>
             </v-dialog>
@@ -121,15 +124,15 @@
           <v-col >
             <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
           </v-col> 
-
         </v-row>
         <v-btn @click="saveInvoice"> -Add- </v-btn>
-        <v-btn class="mx-3">Clear</v-btn>
-
+        <v-btn class="mx-3" @click="clearForm">Clear</v-btn>
+      </v-form>
     </v-footer>
   </div>
-
 </template>
+
+
 
 <script>
 import TutorialDataService from "../services/TutorialDataService";
@@ -187,7 +190,8 @@ export default {
         remark:       "",
         excelRecID:   null,
       },  
-
+      fldRules: [v => !!v || 'Field is required'],
+      isLoading: true,
     };
   },
 
@@ -195,25 +199,27 @@ export default {
     rowClicked(row) {
       this.currInvoice = row;
       //this.currentIndex = index;
-      //console.log("company = " + row.company);
     },
 
     deleteOne(id) {
-      TutorialDataService.delete(id)
-        .then((response) => {
-          console.log(response.data);
-          this.refreshList();
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      if (window.confirm('Are you sure you want to delete one item ?')){
+        TutorialDataService.delete(id)
+          .then((response) => {
+            console.log(response.data);
+            this.refreshList();
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
     },
+
 
     retrieveTutorials() {
       TutorialDataService.getAll()
         .then((response) => {
           this.tutorials = response.data;
-          console.log(response.data);
+          //console.log(response.data);
         })
         .catch((e) => {
           console.log(e);
@@ -255,8 +261,7 @@ export default {
     //     });
     // },
 
-    deleteItem(id) {
-      //this function doesnt work.... check why 28.09.21
+    deleteItem(id) { //this function doesnt work.... check why 28.09.21
       const index = this.tutorial.indexOf((x) => x.id === id);
       this.tutorial.splice(index, 1);
     },
@@ -280,20 +285,33 @@ export default {
       TutorialDataService.create(data)
         .then(response => {
           this.invoice.id = response.data.id;
-          //console.log(response.data);
-          // this.submitted = true;
+          this.refreshList();
+          this.clearForm();
         })
         .catch(e => {
           console.log(e);
         });
-      this.dialog = false;
+      //this.dialog = false;
     },
+
+    clearForm (){
+      this.$refs.form.reset()
+    },
+
+    editOne(id) {
+      this.$router.push({ name: "tutorial-details", params: { id: id } });
+    },
+
   },
 
   mounted() {
     this.retrieveTutorials();
+    this.isLoading = false;
   },
 };
+
+
+
 </script>
 
 <style>

@@ -11,7 +11,7 @@
                             @change="toggleHasHeaders"
                         />
                         <label class="form-check-label" :for="makeId('hasHeaders')">
-                            File Has Headers
+                            File Has Headers  -  Book !!!!!
                         </label>
                     </slot>
                 </div>
@@ -31,13 +31,12 @@
                 </div>
                 <div class="form-group">
                     <slot name="next" :load="load">
-                        <button type="submit" :disabled="disabledNextButton" :class="buttonClass" @click.prevent="load">
-                            {{ loadBtnText }}
-                        </button>
+                        <!-- <button type="submit" :disabled="disabledNextButton" :class="buttonClass" @click.prevent="load"> {{ loadBtnText }} </button> -->
+                        <v-btn  type="submit" :disabled="disabledNextButton" :class="buttonClass" @click.prevent="load" :loading="loading" > {{ loadBtnText }} </v-btn>
                     </slot>
                 </div>
             </div>
-            {{ csv }}
+            <!-- {{ csv }} -->
 
             <div class="vue-csv-uploader-part-two">
                 <div class="vue-csv-mapping" v-if="sample">
@@ -75,9 +74,9 @@
                         </slot>
                     </div>
                 </div>
-                <v-btn @click="saveInvoice">save</v-btn>
+                <v-btn class="ma-2" :loading="loading" :disabled="loading" @click="saveBook">save</v-btn>
             </div>
-            {{ form.csv }}
+            <!-- {{ form.csv }} -->
         </div>
     </div>
 </template>
@@ -87,7 +86,7 @@ import {drop, every, forEach, get, isArray, map, set} from "lodash";
 import axios from "axios";
 import Papa from "papaparse";
 import mimeTypes from "mime-types";
-import TutorialDataService from "../services/TutorialDataService";
+import BookDataService from "../services/BookDataService";
 
 
 
@@ -183,19 +182,17 @@ export default {
         },
         fieldsToMap: [],
         mapFields : [
-            "InvDate",
-            "invoiceID",
-            "Description",
-            "Amount",
-            "Vat",
-            "Total",
-            "Remark",
-            "supplier",
-            "published",
-            "ExcelRecordID",
-            "Project",
-            "Company",
-            "GroupID"
+            "asmchta_date",
+            "record_id",
+            "record_schum",
+            "pratim",
+            "asmacta1",
+            "schum_hova",
+            "schum_zchut",
+            "cust_lname",
+            "cust_fname",
+            "bs_item_name",
+            "bs_group_name",
         ],
         map: {},
         hasHeaders: true,
@@ -204,6 +201,7 @@ export default {
         isValidFileMimeType: false,
         fileSelected: false,
         //obj: '',
+        loading: false,
     }),
 
     created() {
@@ -308,37 +306,45 @@ export default {
         makeId(id) {
             return `${id}${this._uid}`;
         },
-        saveInvoice() {
-            // this.obj = JSON.parse(this.form.csv);
-            // console.log(this.obj);
-            for (let i = 1; i < this.form.csv.length; i++) { 
-                var data = {
-                    company:      this.form.csv[i].Company,
-                    description:  this.form.csv[i].Description,
-                    amount:       parseInt(this.form.csv[i].Amount),
-                    vat:          parseInt(this.form.csv[i].Vat),
-                    total:        parseInt(this.form.csv[i].Total),
-                    group:        parseInt(this.form.csv[i].GroupID),
-                    date:         this.form.csv[i].InvDate,
-                    supplier:     this.form.csv[i].supplier,
-                    invoiceId:    this.form.csv[i].invoiceID,
-                    remark:       this.form.csv[i].Remark,
-                    excelRecID:   parseInt(this.form.csv[i].ExcelRecordID),
-                    published:    this.form.csv[i].published.trim() === 'T' ? true : false,
-                    project:      this.form.csv[i].Project,
-                };
-                TutorialDataService.create(data)
-                .then(response => {
-                    //this.invoice.id = response.data.id;
-                    console.log(response.data);
-                })
-                .catch(e => {
-                    console.log(e);
-                    console.log('--------')
-                    console.log(data)
-                });
+        saveBook() {
+
+            if (window.confirm('This operation will delete all currnet records in Book table...')){
+                this.loading = true;                    
+                BookDataService.deleteAll()
+                    .then((response) => {
+                        console.log(response.data);
+                        for (let i = 1; i < this.form.csv.length; i++) { 
+                            var data = {
+                                asmchta_date:   this.form.csv[i].asmchta_date,
+                                record_id:      parseInt(this.form.csv[i].record_id),
+                                record_schum:   parseInt(this.form.csv[i].record_schum),
+                                pratim:         this.form.csv[i].pratim,
+                                asmacta1:       parseInt(this.form.csv[i].asmacta1),
+                                schum_hova:     parseInt(this.form.csv[i].schum_hova),
+                                schum_zchut:    parseInt(this.form.csv[i].schum_zchut),
+                                cust_lname:     this.form.csv[i].cust_lname,
+                                cust_fname:     this.form.csv[i].cust_fname,
+                                bs_item_name:   this.form.csv[i].bs_item_name,
+                                bs_group_name:  this.form.csv[i].bs_group_name,                
+                            };
+                            BookDataService.create(data)
+                            .then(response => {
+                                console.log(response.data);
+                            })
+                            .catch(e => {
+                                console.log(e);
+                                console.log('--------')
+                                console.log(e.data);
+                            });
+                        }
+                    })
+                    .catch((e) => {
+                        console.log(e);
+                    });
+                this.loading = false;
             }
-        },
+        }
+
     },
 
     watch: {
