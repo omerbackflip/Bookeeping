@@ -37,5 +37,10 @@ export default new Router({
       name: "loadBookCsv",
       component: () => import("./components/ImportCsvBook")
     },
+    {
+      path: "/bookingList",
+      name: "bookingList",
+      component: () => import("./components/BookingList")
+    },
   ]
 });

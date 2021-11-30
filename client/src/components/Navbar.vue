@@ -51,12 +51,12 @@ export default {
         return {
             drawer: false,
             links: [
-                {icon: 'dashboard', text: 'Dashboard', route: '/'},
-                {icon: 'folder', text: 'כרטסת ראשית', route: '/tutorials'},
+                {icon: 'dashboard', text: 'כרטסת ראשית', route: '/'},
                 {icon: 'person', text: 'הוסף רשומה (קוד מקורי)', route: '/add'},
                 {icon: 'folder', text: 'Load Scv', route: '/loadCsv'},
                 {icon: 'folder', text: 'הוסף חשבונית', route: '/addInv'},
                 {icon: 'folder', text: 'Load Csv Book', route: '/loadBookCsv'},
+                {icon: 'folder', text: 'כרטסת רו"ח', route: '/bookingList'},
             ]
         }
     }
