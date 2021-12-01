@@ -123,7 +123,7 @@ export default {
         },
         loadBtnText: {
             type: String,
-            default: "Next",
+            default: "Load Invoices",
         },
         submitBtnText: {
             type: String,

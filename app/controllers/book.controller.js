@@ -5,12 +5,13 @@ const Book = db.books;
 exports.create = (req, res) => {
   // Validate request
   if (!req.body.asmchta_date) {
-    res.status(400).send({ message: "Content can not be empty!" });
+    res.status(400).send({ message: "'asmchta_date' field can not be empty!" });
     return;
   }
 
   // Create a Book
   const book = new Book({
+    company:        req.body.company,
     asmchta_date:   req.body.asmchta_date,
     record_id:      req.body.record_id,
     record_schum:   req.body.record_schum,

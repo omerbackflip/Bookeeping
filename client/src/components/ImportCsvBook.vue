@@ -15,6 +15,18 @@
                         </label>
                     </slot>
                 </div>
+                <div class="radioBtn">
+                    <v-radio-group v-model="company">
+                        <v-radio
+                            label="ביצועים"
+                            value="ביצועים"
+                        ></v-radio>
+                        <v-radio
+                            label="יזמות"
+                            value="יזמות"
+                        ></v-radio>
+                    </v-radio-group>
+                </div>
                 <div class="form-group csv-import-file">
                     <input
                         ref="csv"
@@ -122,7 +134,7 @@ export default {
         },
         loadBtnText: {
             type: String,
-            default: "Next",
+            default: "Load Book",
         },
         submitBtnText: {
             type: String,
@@ -202,6 +214,7 @@ export default {
         fileSelected: false,
         //obj: '',
         loading: false,
+        company:  '',
     }),
 
     created() {
@@ -307,7 +320,6 @@ export default {
             return `${id}${this._uid}`;
         },
         saveBook() {
-
             if (window.confirm('This operation will delete all currnet records in Book table...')){
                 this.loading = true;                    
                 BookDataService.deleteAll()
@@ -315,6 +327,7 @@ export default {
                         console.log(response.data);
                         for (let i = 1; i < this.form.csv.length; i++) { 
                             var data = {
+                                company:        this.company,
                                 asmchta_date:   this.form.csv[i].asmchta_date,
                                 record_id:      parseInt(this.form.csv[i].record_id),
                                 record_schum:   parseInt(this.form.csv[i].record_schum),
@@ -344,7 +357,6 @@ export default {
                 this.loading = false;
             }
         }
-
     },
 
     watch: {
