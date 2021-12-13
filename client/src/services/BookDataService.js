@@ -28,6 +28,10 @@ class BookDataService {
   findByTitle(title) {
     return http.get(`/books?description=${title}`);
   }
+
+  findByRecord_id(title) {
+    return http.get(`/books?record_id=${title}`);
+  }
 }
 
 export default new BookDataService();

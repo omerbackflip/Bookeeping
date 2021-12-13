@@ -32,6 +32,16 @@
           <template v-slot:[`item.date`]="{ item }"> 
             <span> {{item.date | formatDate}}</span>
           </template>
+          <template v-slot:[`item.description`]="{ item }"> 
+            <div v-if = "itemToEdit === item.id">
+              <v-text-field v-model="item.description"
+                            :id="`itemEdit-${item.id}`"
+                            @blur="unFocus()"/>
+            </div>
+            <div v-else @click="setEdit(item)">
+              <span> {{item.description}}</span>
+            </div>
+          </template>
         </v-data-table>
 
       </v-flex>
@@ -40,21 +50,46 @@
       <v-flex md2>
         <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <div class="col-md-12">
-            <div v-if="currInvoice">
-              <h4>פרטים</h4>
+            <div v-if="CorrolatedBook[0]">
+              <h4 class="text-center"><strong><u>קליטה אצל רו"ח</u></strong></h4>
               <div>
-                <label><strong>Company:</strong></label> {{ currInvoice.company }}
+                <label><strong>Company:</strong></label> {{ CorrolatedBook[0].company }}
               </div>
               <div>
-                <label><strong>Description:</strong></label>
-                {{ currInvoice.description }}
+                <label><strong>asmchta_date:</strong></label> {{ CorrolatedBook[0].asmchta_date }}
               </div>
               <div>
-                <label><strong>Status:</strong></label>
-                {{ currInvoice.published ? "Published" : "Pending" }}
+                <label><strong>record_id:</strong></label><strong class="red--text text--lighten-1"> {{ CorrolatedBook[0].record_id }} </strong>
               </div>
-              <a :href="'/tutorials/' + currInvoice.id">
-                Edit the Invoice ID - {{currInvoice.invoiceId}}
+              <div>
+                <label><strong>record_schum:</strong></label> {{ CorrolatedBook[0].record_schum }}
+              </div>
+              <div>
+                <label><strong>pratim:</strong></label> {{ CorrolatedBook[0].pratim }}
+              </div>
+              <div>
+                <label><strong>asmacta1:</strong></label> {{ CorrolatedBook[0].asmacta1 }}
+              </div>
+              <div>
+                <label><strong>schum_hova:</strong></label> {{ CorrolatedBook[0].schum_hova }}
+              </div>
+              <div>
+                <label><strong>schum_zchut:</strong></label> {{ CorrolatedBook[0].schum_zchut }}
+              </div>
+              <div>
+                <label><strong>cust_lname:</strong></label> {{ CorrolatedBook[0].cust_lname }}
+              </div>
+              <div>
+                <label><strong>cust_fname:</strong></label> {{ CorrolatedBook[0].cust_fname }}
+              </div>
+              <div>
+                <label><strong>bs_item_name:</strong></label> {{ CorrolatedBook[0].bs_item_name }}
+              </div>
+              <div>
+                <label><strong>bs_group_name:</strong></label> {{ CorrolatedBook[0].bs_group_name }}
+              </div>
+              <a :href="'/books/' + CorrolatedBook[0].id">
+                Edit the Invoice with excelRecID - {{CorrolatedBook[0].record_id}}
               </a>
             </div>
             <div v-else>
@@ -68,67 +103,69 @@
         </v-btn>
       </v-flex>
     </v-layout>
-    <v-footer color="primary lighten-1" align="center" class="mt-5 mx-5"  elevation="10">
-      <v-form ref="form" >
-        <v-row>
-          <v-col >
-            <v-text-field v-model="invoice.company" label="Company" :rules="fldRules"></v-text-field>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.project" label="Project" required></v-text-field>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.amount" label="Amount" required></v-text-field>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.vat" label="Vat"></v-text-field>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.total" label="Total" required></v-text-field>
-          </v-col>              
-          <v-col >
-            <v-text-field v-model="invoice.group" label="Group" required></v-text-field>
-          </v-col>
-          <v-col >
-            <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
-              <template v-slot:activator="{ on, attrs }">
-                <v-text-field 
-                  v-model="invoice.date"
-                  label="Date"
-                  prepend-icon="mdi-calendar"
-                  readonly
-                  v-bind="attrs"
-                  v-on="on" 
-                  required>
-                </v-text-field>
-              </template> 
-              <v-date-picker v-model="invoice.date" scrollable>
-                <v-spacer></v-spacer>
-                <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
-                <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
-              </v-date-picker>
-            </v-dialog>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.supplier" label="Supplier"></v-text-field>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.invoiceId" label="Invouce Id"></v-text-field>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
-          </v-col>
-          <v-col >
-            <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
-          </v-col> 
-        </v-row>
-        <v-btn @click="saveInvoice"> -Add- </v-btn>
-        <v-btn class="mx-3" @click="clearForm">Clear</v-btn>
-      </v-form>
-    </v-footer>
+    <v-flex md10>
+      <v-footer color="primary lighten-1" align="center" class="mt-5"  elevation="10">
+        <v-form ref="form" >
+          <v-row>
+            <v-col >
+              <v-text-field v-model="invoice.company" label="Company" :rules="fldRules"></v-text-field>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.project" label="Project" required></v-text-field>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.amount" label="Amount" required></v-text-field>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.vat" label="Vat"></v-text-field>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.total" label="Total" required></v-text-field>
+            </v-col>              
+            <v-col >
+              <v-text-field v-model="invoice.group" label="Group" required></v-text-field>
+            </v-col>
+            <v-col >
+              <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-text-field 
+                    v-model="invoice.date"
+                    label="Date"
+                    prepend-icon="mdi-calendar"
+                    readonly
+                    v-bind="attrs"
+                    v-on="on" 
+                    required>
+                  </v-text-field>
+                </template> 
+                <v-date-picker v-model="invoice.date" scrollable>
+                  <v-spacer></v-spacer>
+                  <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
+                  <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
+                </v-date-picker>
+              </v-dialog>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.supplier" label="Supplier"></v-text-field>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.invoiceId" label="Invouce Id"></v-text-field>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
+            </v-col>
+            <v-col >
+              <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
+            </v-col> 
+          </v-row>
+          <v-btn @click="saveInvoice"> -Add- </v-btn>
+          <v-btn class="mx-3" @click="clearForm">Clear</v-btn>
+        </v-form>
+      </v-footer>
+    </v-flex>
   </div>
 </template>
 
@@ -136,6 +173,7 @@
 
 <script>
 import TutorialDataService from "../services/TutorialDataService";
+import BookDataService from "../services/BookDataService";
 // import AddInvoice from "./AddInvoice.vue"
 import Vue from 'vue'
 import moment from 'moment'
@@ -192,13 +230,22 @@ export default {
       },  
       fldRules: [v => !!v || 'Field is required'],
       isLoading: true,
+      itemToEdit: "",
+      CorrolatedBook: "",
     };
   },
 
   methods: {
     rowClicked(row) {
       this.currInvoice = row;
-      //this.currentIndex = index;
+      BookDataService.findByRecord_id(row.excelRecID)
+        .then((response) => {
+          this.CorrolatedBook = response.data;
+          // console.log(this.CorrolatedBook[0].record_schum);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
     },
 
     deleteOne(id) {
@@ -302,6 +349,17 @@ export default {
       this.$router.push({ name: "tutorial-details", params: { id: id } });
     },
 
+    setEdit(item) {
+      this.itemToEdit = item.id;
+      setTimeout( () => {
+        document.getElementById(`itemEdit-${item.id}`).focus()
+      }, 1 );
+    },
+
+    unFocus() {
+      this.itemToEdit = '';
+    },
+
   },
 
   mounted() {
@@ -316,7 +374,7 @@ export default {
 
 <style>
 .list {
-  text-align: right;
+  text-align: left;
   max-width: auto;
   margin: auto;
 }

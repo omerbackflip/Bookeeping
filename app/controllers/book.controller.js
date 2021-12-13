@@ -45,9 +45,9 @@ exports.create = (req, res) => {
 //Eli Gadot - change the search from title to description 
 //also change in TutorialDataService from /books?title to /books?description)
 exports.findAll = (req, res) => {
-  const search = req.query.description;
-  var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};
-
+  const search = req.query.record_id;
+  var condition = {record_id:  search};
+  //var condition = search ? { record_id:  search  } : {};
   Book.find(condition)
     .then(data => {
       res.send(data);
@@ -74,7 +74,7 @@ exports.findOne = (req, res) => {
     .catch(err => {
       res
         .status(500)
-        .send({ message: "Error retrieving Book with id=" + id });
+        .send({ message: "Error retrieving Book with id=====" + id });
     });
 };
 
