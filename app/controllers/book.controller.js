@@ -5,7 +5,7 @@ const Book = db.books;
 exports.create = (req, res) => {
   // Validate request
   if (!req.body.asmchta_date) {
-    res.status(400).send({ message: "'asmchta_date' field can not be empty!" });
+    //res.status(400).send({ message: "'asmchta_date' field can not be empty! יתרת פתיחה " });
     return;
   }
 
@@ -46,8 +46,7 @@ exports.create = (req, res) => {
 //also change in TutorialDataService from /books?title to /books?description)
 exports.findAll = (req, res) => {
   const search = req.query.record_id;
-  var condition = {record_id:  search};
-  //var condition = search ? { record_id:  search  } : {};
+  var condition = search ? { record_id:  search  } : {};
   Book.find(condition)
     .then(data => {
       res.send(data);

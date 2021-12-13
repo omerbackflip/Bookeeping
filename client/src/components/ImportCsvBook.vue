@@ -87,6 +87,7 @@
                     </div>
                 </div>
                 <v-btn class="ma-2" :loading="loading" :disabled="loading" @click="saveBook">save</v-btn>
+                <v-btn class="ma-2" @click="deleteAll">Delete All</v-btn>
             </div>
             <!-- {{ form.csv }} -->
         </div>
@@ -320,12 +321,10 @@ export default {
             return `${id}${this._uid}`;
         },
         saveBook() {
-            if (window.confirm('This operation will delete all currnet records in Book table...')){
+            if (window.confirm('Confirm Save Book table...')){
                 this.loading = true;                    
-                BookDataService.deleteAll()
-                    .then((response) => {
-                        console.log(response.data);
-                        for (let i = 1; i < this.form.csv.length; i++) { 
+                    for (let i = 1; i < this.form.csv.length; i++) { 
+                        if (this.form.csv[i].asmchta_date) { // if no date - probbaly is Yitra...
                             var data = {
                                 company:        this.company,
                                 asmchta_date:   this.form.csv[i].asmchta_date,
@@ -350,11 +349,13 @@ export default {
                                 console.log(e.data);
                             });
                         }
-                    })
-                    .catch((e) => {
-                        console.log(e);
-                    });
+                    }
                 this.loading = false;
+            }
+        },
+        deleteAll() {
+            if (window.confirm('Confirm Delete all Book table...')){
+                BookDataService.deleteAll()
             }
         }
     },

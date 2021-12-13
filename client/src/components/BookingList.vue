@@ -110,6 +110,7 @@ export default {
       //searchStr: "",
       search: '',
       headers:[
+        { text: "company", value: "company", class: 'primary title' },
         { text: "asmchta_date", value: "asmchta_date", class: 'primary title' },
         { text: "record_id", value: "record_id", class: 'primary title'},
         { text: "record_schum", value: "record_schum", class: 'primary title' },
