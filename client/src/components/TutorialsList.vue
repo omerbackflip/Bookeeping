@@ -23,6 +23,8 @@
                       fixed-header
                       height="75vh"
                       class="elevation-3"
+                      group-by:=""
+                      show-group-by
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
           <template v-slot:[`item.actions`]="{ item }"> 
@@ -48,6 +50,17 @@
 
       <!-- this section is the detailes of an invoice -->
       <v-flex md2>
+      <export-excel 
+        :data="tutorials" 
+        :fields="xlsHeders"
+        type="xls"
+        name="export"
+        title="This is Title"
+        footer="This is footer"
+        class="mt-5">
+        <v-icon>mdi-download</v-icon>
+        Download To Excel
+      </export-excel>
         <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <div class="col-md-12">
             <div v-if="CorrolatedBook[0]">
@@ -177,7 +190,8 @@ import BookDataService from "../services/BookDataService";
 // import AddInvoice from "./AddInvoice.vue"
 import Vue from 'vue'
 import moment from 'moment'
-
+import excel from 'vue-excel-export'
+Vue.use(excel)
 
 Vue.filter('formatDate', function(value) {
   if (value) {
@@ -197,21 +211,36 @@ export default {
       //searchStr: "",
       search: '',
       headers:[
-        { text: "P", value: "published", class: 'success title' },
+        { text: "P", value: "published", class: 'success title', groupable: false  },
         { text: "Company", value: "company", class: 'success title'},
         { text: "Project", value: "project", class: 'success title' },
-        { text: "Description", value: "description", class: 'success title' },
-        { text: "Amount", value: "amount", class: 'success title' },
-        { text: "Vat", value: "vat", class: 'success title' },
-        { text: "Total", value: "total", class: 'success title' },
+        { text: "Description", value: "description", class: 'success title', groupable: false },
+        { text: "Amount", value: "amount", class: 'success title', groupable: false  },
+        { text: "Vat", value: "vat", class: 'success title', groupable: false  },
+        { text: "Total", value: "total", class: 'success title', groupable: false  },
         { text: "Group", value: "group", class: 'success title' },
-        { text: "Date", value: "date", class: 'success title' },
+        { text: "Date", value: "date", class: 'success title', groupable: false  },
         { text: "Supplier", value: "supplier", class: 'success title' },
-        { text: "Invoice ID", value: "invoiceId", class: 'success title' },
-        { text: "Excel Rec ID", value: "excelRecID", class: 'success title' },
-        { text: "Remark", value: "remark", class: 'success title' },
-        { text: "Act.", value: "actions", sortable: false, class: 'success title' },
+        { text: "Invoice ID", value: "invoiceId", class: 'success title', groupable: false  },
+        { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false  },
+        { text: "Remark", value: "remark", class: 'success title', groupable: false  },
+        { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
       ],
+      xlsHeders:{
+        "חברה"        : "company", 
+        "פרויקט"      : "project", 
+        "תאור"        :"description",
+        "סכום"        :"amount",
+        "מע-מ"        :"vat",
+        "סה-כ"        :"total",
+        "קיבוץ"       :"group",
+        "תאריך"       :"date",
+        "ספק"         :"supplier",
+        "חשבונית"     :"invoiceId",
+        "excelRecID"  :"excelRecID",
+        "הערה"        :"remark",
+        "נשלח"        : "published"
+      },
       invoice: {
         id:           null,
         company:      "",
