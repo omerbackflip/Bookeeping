@@ -34,11 +34,23 @@
           <template v-slot:[`item.date`]="{ item }"> 
             <span> {{item.date | formatDate}}</span>
           </template>
+          <template v-slot:[`item.total`]="{ item }"> 
+            <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
+          </template>
+          <template v-slot:[`item.vat`]="{ item }"> 
+            <span> {{item.vat ? item.vat.toLocaleString() : ''}}</span>
+          </template>
+          <template v-slot:[`item.amount`]="{ item }"> 
+            <span> {{item.amount ? item.amount.toLocaleString() : ''}}</span>
+          </template>
+          <template v-slot:[`item.published`]="{ item }"> 
+            <v-checkbox v-model="item.published" @click="updateOne(item)"> </v-checkbox>
+          </template>
           <template v-slot:[`item.description`]="{ item }"> 
             <div v-if = "itemToEdit === item.id">
               <v-text-field v-model="item.description"
                             :id="`itemEdit-${item.id}`"
-                            @blur="unFocus()"/>
+                            @blur="updateOne(item)"/>
             </div>
             <div v-else @click="setEdit(item)">
               <span> {{item.description}}</span>
@@ -50,17 +62,19 @@
 
       <!-- this section is the detailes of an invoice -->
       <v-flex md2>
-      <export-excel 
-        :data="tutorials" 
-        :fields="xlsHeders"
-        type="xls"
-        name="export"
-        title="This is Title"
-        footer="This is footer"
-        class="mt-5">
-        <v-icon>mdi-download</v-icon>
-        Download To Excel
-      </export-excel>
+        <export-excel 
+          :data="tutorials" 
+          :fields="xlsHeders"
+          type="xls"
+          name="export"
+          title="This is Title"
+          footer="This is footer"
+          class="mt-5">
+          <v-btn> 
+            <v-icon>mdi-download</v-icon> 
+            Download To Excel
+          </v-btn>
+        </export-excel>
         <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <div class="col-md-12">
             <div v-if="CorrolatedBook[0]">
@@ -266,15 +280,17 @@ export default {
 
   methods: {
     rowClicked(row) {
-      this.currInvoice = row;
-      BookDataService.findByRecord_id(row.excelRecID)
-        .then((response) => {
-          this.CorrolatedBook = response.data;
-          // console.log(this.CorrolatedBook[0].record_schum);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      if (row.excelRecID) {
+        this.currInvoice = row;
+        BookDataService.findByRecord_id(row.excelRecID)
+          .then((response) => {
+            this.CorrolatedBook = response.data;
+            // console.log(this.CorrolatedBook[0].record_schum);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
     },
 
     deleteOne(id) {
@@ -378,15 +394,23 @@ export default {
       this.$router.push({ name: "tutorial-details", params: { id: id } });
     },
 
+    updateOne(item) {
+      TutorialDataService.update(item.id, item)
+        .then(response => {
+          console.log(response.data);
+          this.message = 'The updateOne() updated successfully!';
+        })
+        .catch(e => {
+          console.log(e);
+        });
+        this.itemToEdit = '';
+    },
+
     setEdit(item) {
       this.itemToEdit = item.id;
       setTimeout( () => {
         document.getElementById(`itemEdit-${item.id}`).focus()
       }, 1 );
-    },
-
-    unFocus() {
-      this.itemToEdit = '';
     },
 
   },
