@@ -42,5 +42,10 @@ export default new Router({
       name: "bookingList",
       component: () => import("./components/BookingList")
     },
+    {
+      path: "/tableList",
+      name: "tableList",
+      component: () => import("./components/TableList")
+    },
   ]
 });

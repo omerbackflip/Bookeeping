@@ -57,6 +57,7 @@ export default {
                 {icon: 'folder', text: 'הוסף חשבונית', route: '/addInv'},
                 {icon: 'folder', text: 'Load Csv Book', route: '/loadBookCsv'},
                 {icon: 'folder', text: 'כרטסת רו"ח', route: '/bookingList'},
+                {icon: 'folder', text: 'טבלת הטבלאות', route: '/tableList'},
             ]
         }
     }

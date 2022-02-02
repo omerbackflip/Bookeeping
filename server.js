@@ -40,6 +40,7 @@ app.get("/", (req, res) => {
 
 require("./app/routes/tutorial.routes")(app);
 require("./app/routes/book.routes")(app);
+require("./app/routes/table.routes")(app);
 
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
