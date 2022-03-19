@@ -23,8 +23,6 @@
                       fixed-header
                       height="75vh"
                       class="elevation-3"
-                      group-by:=""
-                      show-group-by
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
           <template v-slot:[`item.actions`]="{ item }"> 
@@ -65,7 +63,7 @@
         <export-excel 
           :data="tutorials" 
           :fields="xlsHeders"
-          type="xls"
+          type="xlsx"
           name="export"
           title="This is Title"
           footer="This is footer"
@@ -118,6 +116,7 @@
               <a :href="'/books/' + CorrolatedBook[0].id">
                 Edit the Invoice with excelRecID - {{CorrolatedBook[0].record_id}}
               </a>
+              {{CorrolatedBook[0].id}}
             </div>
             <div v-else>
               <br />

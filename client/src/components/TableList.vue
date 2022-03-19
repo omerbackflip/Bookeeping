@@ -10,12 +10,12 @@
         <v-text-field
           v-model="search"
           append-icon="mdi-magnify"
-          label="Search1"
+          label="חיפוש"
           single-line
           hide-details
         ></v-text-field>
         <v-data-table :headers="headers" 
-                      :items="tables" 
+                      :items="tables"
                       :search="search"
                       disable-pagination
                       hide-default-footer
@@ -25,17 +25,41 @@
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
           <template v-slot:[`item.actions`]="{ item }"> 
-            <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
-            <v-icon small @click="deleteOne(item.id)">mdi-delete</v-icon>
+            <!-- <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon> -->
+            <div>
+              <v-icon small @click="(itemToEdit === item.id) ? updateOne(item) : setEdit(item)">
+                {{(itemToEdit === item.id) ? "mdi-floppy" : "mdi-pencil"}}
+              </v-icon>
+              <v-icon small @click="deleteOne(item.id)">mdi-delete</v-icon>
+            </div>
           </template>
           <template v-slot:[`item.description`]="{ item }"> 
             <div v-if = "itemToEdit === item.id">
               <v-text-field v-model="item.description"
-                            :id="`itemEdit-${item.id}`"
-                            @blur="updateOne(item)"/>
+                            :id="`itemEdit-${item.id}`"/>
             </div>
+            <!-- <div v-else @click="setEdit(item)"> -->
             <div v-else @click="setEdit(item)">
               <span> {{item.description}}</span>
+            </div>
+          </template>
+          <template v-slot:[`item.table_id`]="{ item }"> 
+            <div v-if = "itemToEdit === item.id">
+              <v-text-field v-model="item.table_id"
+                            :id="`itemEdit-${item.id}`"/>
+                            <!-- @blur="updateOne(item)"/> -->
+            </div>
+            <div v-else @click="setEdit(item)">
+              <span> {{item.table_id}}</span>
+            </div>
+          </template>
+          <template v-slot:[`item.table_code`]="{ item }"> 
+            <div v-if = "itemToEdit === item.id">
+              <v-text-field v-model="item.table_code"
+                            :id="`itemEdit-${item.id}`"/>
+            </div>
+            <div v-else @click="setEdit(item)">
+              <span> {{item.table_code}}</span>
             </div>
           </template>
         </v-data-table>
