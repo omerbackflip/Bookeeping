@@ -28,6 +28,10 @@ class TableDataService {
   findByTitle(title) {
     return http.get(`/tables?description=${title}`);
   }
+  
+  findByTableID(table_id) {
+    return http.get(`/tables?table_id=${table_id}`);
+  }
 }
 
 export default new TableDataService();

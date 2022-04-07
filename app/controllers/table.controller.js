@@ -36,10 +36,8 @@ exports.create = (req, res) => {
 //Eli Gadot - change the search from title to description 
 //also change in TableDataService from /tables?title to /tables?description)
 exports.findAll = (req, res) => {
-  const search = req.query.description;
-  var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};
-
-  Table.find(condition)
+  //var condition = search ? { table_id: { $regex: new RegExp(search), $options: "i" } } : {};
+  Table.find(req.query)
     .then(data => {
       res.send(data);
     })

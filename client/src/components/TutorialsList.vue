@@ -134,10 +134,24 @@
         <v-form ref="form" >
           <v-row>
             <v-col >
-              <v-text-field v-model="invoice.company" label="Company" :rules="fldRules"></v-text-field>
+              <!-- <v-text-field v-model="invoice.company" label="Company" :rules="fldRules"></v-text-field> -->
+              <v-combobox
+                v-model="invoice.company"
+                :items="companyName"
+                label="Company"
+                outlined
+                dense
+              ></v-combobox>
             </v-col>
             <v-col >
-              <v-text-field v-model="invoice.project" label="Project" required></v-text-field>
+              <!-- <v-text-field v-model="invoice.project" label="Project" required></v-text-field> -->
+              <v-combobox
+                v-model="invoice.project"
+                :items="projectName"
+                label="Project"
+                outlined
+                dense
+              ></v-combobox>
             </v-col>
             <v-col >
               <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
@@ -175,7 +189,14 @@
               </v-dialog>
             </v-col>
             <v-col >
-              <v-text-field v-model="invoice.supplier" label="Supplier"></v-text-field>
+              <!-- <v-text-field v-model="invoice.supplier" label="Supplier"></v-text-field> -->
+              <v-combobox
+                v-model="invoice.supplier"
+                :items="supplierName"
+                label="Supplier"
+                outlined
+                dense
+              ></v-combobox>
             </v-col>
             <v-col >
               <v-text-field v-model="invoice.invoiceId" label="Invouce Id"></v-text-field>
@@ -200,6 +221,7 @@
 <script>
 import TutorialDataService from "../services/TutorialDataService";
 import BookDataService from "../services/BookDataService";
+import TableDataService from "../services/TableDataService";
 // import AddInvoice from "./AddInvoice.vue"
 import Vue from 'vue'
 import moment from 'moment'
@@ -221,6 +243,9 @@ export default {
       tutorials: [],
       currInvoice: null,
       currentIndex: -1,
+      companyName : [],
+      projectName : [],
+      supplierName: [],
       //searchStr: "",
       search: '',
       headers:[
@@ -311,6 +336,43 @@ export default {
         .then((response) => {
           this.tutorials = response.data;
           //console.log(response.data);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+    loadRefTables() {
+      TableDataService.findByTableID(1) // Retrive company array
+        .then((response) => {
+          this.companyName = response.data.map(company => company.description);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+
+      TableDataService.findByTableID(2) // Retrive project array
+        .then((response) => {
+          this.projectName = response.data.map(project => project.description);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+
+      TableDataService.findByTableID(3) // Retrive supplier array
+        .then((response) => {
+          this.supplierName = response.data.map(project => project.description);
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
+
+
+    loadTable:function async (table_id) {
+      TableDataService.findByTableID(table_id)
+        .then((response) => {
+          return (response.data.map(code => code.description));
         })
         .catch((e) => {
           console.log(e);
@@ -416,6 +478,9 @@ export default {
 
   mounted() {
     this.retrieveTutorials();
+    this.loadRefTables();
+    // this.companyName = this.loadTable(1);
+    // console.log(this.companyName)
     this.isLoading = false;
   },
 };
