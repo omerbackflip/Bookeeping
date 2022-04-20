@@ -1,7 +1,7 @@
 <template>
   <div class="list row">
     <!-- <div class="input-group mb-3 mt-3">
-      <input type="text" class="form-control" placeholder="Search..." v-model="searchStr"/>
+      <input type="text" class="form-control" placeholder="Search in description field" v-model="searchStr"/>
       <v-btn @click="searchSTR" class="ml-2 mr-2"> Search </v-btn>
     </div>  -->
     <!-- <AddInvoice></AddInvoice> -->
@@ -55,7 +55,85 @@
             </div>
           </template>
         </v-data-table>
-
+        <v-footer color="primary lighten-1" align="center" class="mt-1"  elevation="10">
+          <v-form ref="form" >
+            <v-row>
+              <v-col >
+                <v-combobox
+                  v-model="invoice.company"
+                  :items="companyName"
+                  label="Company"
+                  outlined
+                  dense
+                ></v-combobox>
+              </v-col>
+              <v-col >
+                <v-combobox
+                  v-model="invoice.project"
+                  :items="projectName"
+                  label="Project"
+                  outlined
+                  dense
+                ></v-combobox>
+              </v-col>
+              <v-col >
+                <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
+              </v-col>
+              <v-col >
+                <v-text-field v-model="invoice.amount" label="Amount" required></v-text-field>
+              </v-col>
+              <v-col >
+                <v-text-field v-model="invoice.vat" label="Vat"></v-text-field>
+              </v-col>
+              <v-col >
+                <v-text-field v-model="invoice.total" label="Total" required></v-text-field>
+              </v-col>              
+              <v-col >
+                <v-text-field v-model="invoice.group" label="Group" required></v-text-field>
+              </v-col>
+              <v-col >
+                <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-text-field 
+                      v-model="invoice.date"
+                      label="Date"
+                      prepend-icon="mdi-calendar"
+                      readonly
+                      v-bind="attrs"
+                      v-on="on" 
+                      required>
+                    </v-text-field>
+                  </template> 
+                  <v-date-picker v-model="invoice.date" scrollable>
+                    <v-spacer></v-spacer>
+                    <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
+                    <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
+                  </v-date-picker>
+                </v-dialog>
+              </v-col>
+              <v-col >
+                <v-combobox
+                  v-model="invoice.supplier"
+                  :items="supplierName"
+                  label="Supplier"
+                  outlined
+                  dense
+                ></v-combobox>
+              </v-col>
+              <v-col >
+                <v-text-field v-model="invoice.invoiceId" label="Invouce Id"></v-text-field>
+              </v-col>
+              <v-col >
+                <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
+              </v-col>
+              <v-col >
+                <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
+              </v-col> 
+            </v-row>
+            <v-btn @click="saveInvoice"> -Add- </v-btn>
+            <v-btn class="mx-3" @click="clearForm">Clear</v-btn>
+          </v-form>
+        </v-footer>
       </v-flex>
 
       <!-- this section is the detailes of an invoice -->
@@ -127,92 +205,23 @@
         <v-btn class="m-3 btn btn-sm btn-danger" @click="removeAllTutorials">
           Remove All
         </v-btn>
+        <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
+          <h5 style="text-align:center">{{currInvoice.supplier}}   -   {{this.supplierTotal.toLocaleString()}}</h5>
+          <v-data-table :headers="supplierHeaders"
+                        :items="supplierFilter" 
+                        disable-pagination
+                        hide-default-footer
+                        fixed-header
+                        class="elevation-3"
+                        dense>
+            <template v-slot:[`item.total`]="{ item }"> 
+              <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
+            </template>
+          </v-data-table>
+        </v-container>
       </v-flex>
     </v-layout>
-    <v-flex md10>
-      <v-footer color="primary lighten-1" align="center" class="mt-5"  elevation="10">
-        <v-form ref="form" >
-          <v-row>
-            <v-col >
-              <!-- <v-text-field v-model="invoice.company" label="Company" :rules="fldRules"></v-text-field> -->
-              <v-combobox
-                v-model="invoice.company"
-                :items="companyName"
-                label="Company"
-                outlined
-                dense
-              ></v-combobox>
-            </v-col>
-            <v-col >
-              <!-- <v-text-field v-model="invoice.project" label="Project" required></v-text-field> -->
-              <v-combobox
-                v-model="invoice.project"
-                :items="projectName"
-                label="Project"
-                outlined
-                dense
-              ></v-combobox>
-            </v-col>
-            <v-col >
-              <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
-            </v-col>
-            <v-col >
-              <v-text-field v-model="invoice.amount" label="Amount" required></v-text-field>
-            </v-col>
-            <v-col >
-              <v-text-field v-model="invoice.vat" label="Vat"></v-text-field>
-            </v-col>
-            <v-col >
-              <v-text-field v-model="invoice.total" label="Total" required></v-text-field>
-            </v-col>              
-            <v-col >
-              <v-text-field v-model="invoice.group" label="Group" required></v-text-field>
-            </v-col>
-            <v-col >
-              <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-text-field 
-                    v-model="invoice.date"
-                    label="Date"
-                    prepend-icon="mdi-calendar"
-                    readonly
-                    v-bind="attrs"
-                    v-on="on" 
-                    required>
-                  </v-text-field>
-                </template> 
-                <v-date-picker v-model="invoice.date" scrollable>
-                  <v-spacer></v-spacer>
-                  <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
-                  <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
-                </v-date-picker>
-              </v-dialog>
-            </v-col>
-            <v-col >
-              <!-- <v-text-field v-model="invoice.supplier" label="Supplier"></v-text-field> -->
-              <v-combobox
-                v-model="invoice.supplier"
-                :items="supplierName"
-                label="Supplier"
-                outlined
-                dense
-              ></v-combobox>
-            </v-col>
-            <v-col >
-              <v-text-field v-model="invoice.invoiceId" label="Invouce Id"></v-text-field>
-            </v-col>
-            <v-col >
-              <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
-            </v-col>
-            <v-col >
-              <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
-            </v-col> 
-          </v-row>
-          <v-btn @click="saveInvoice"> -Add- </v-btn>
-          <v-btn class="mx-3" @click="clearForm">Clear</v-btn>
-        </v-form>
-      </v-footer>
-    </v-flex>
+    
   </div>
 </template>
 
@@ -243,9 +252,15 @@ export default {
       tutorials: [],
       currInvoice: null,
       currentIndex: -1,
-      companyName : [],
-      projectName : [],
-      supplierName: [],
+      companyName   : [],
+      projectName   : [],
+      supplierName  : [],
+      supplierFilter: [],
+      supplierTotal : 0,
+      supplierHeaders: [
+        { text: "Total", value: "total", align:'right'},
+        { text: "Description", value: "description", align:'right'},
+      ],
       //searchStr: "",
       search: '',
       headers:[
@@ -304,8 +319,8 @@ export default {
 
   methods: {
     rowClicked(row) {
+      this.currInvoice = row;
       if (row.excelRecID) {
-        this.currInvoice = row;
         BookDataService.findByRecord_id(row.excelRecID)
           .then((response) => {
             this.CorrolatedBook = response.data;
@@ -314,6 +329,14 @@ export default {
           .catch((e) => {
             console.log(e);
           });
+      }
+      if(row.supplier){
+        this.supplierFilter = this.tutorials.filter(supp => supp.supplier === row.supplier);
+        //this.supplierTotal = this.supplierFilter.reduce(num1 => num1.total);
+        this.supplierTotal = 0;
+        for (let i=0; i< this.supplierFilter.length ;i++ ){
+          this.supplierTotal += this.supplierFilter[i].total;
+        }
       }
     },
 
@@ -381,7 +404,7 @@ export default {
 
     refreshList() {
       this.retrieveTutorials();
-      this.currInvoice = null;
+      this.currInvoice = this.tutorials[0];
       this.currentIndex = -1;
     },
 
@@ -403,16 +426,15 @@ export default {
       }
     },
 
-    // searchSTR() {
-    //   TutorialDataService.findByTitle(this.searchStr)
-    //     .then((response) => {
-    //       this.tutorials = response.data;
-    //       console.log(response.data);
-    //     })
-    //     .catch((e) => {
-    //       console.log(e);
-    //     });
-    // },
+    searchSTR() {
+      TutorialDataService.findByTitle(this.searchStr)
+        .then((response) => {
+          this.tutorials = response.data;
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    },
 
     deleteItem(id) { //this function doesnt work.... check why 28.09.21
       const index = this.tutorial.indexOf((x) => x.id === id);

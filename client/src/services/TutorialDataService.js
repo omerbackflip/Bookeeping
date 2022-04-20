@@ -28,6 +28,16 @@ class TutorialDataService {
   findByTitle(title) {
     return http.get(`/tutorials?description=${title}`);
   }
+
+  findByInvoiceAndUpdate(company, invoiceId, excelRecID){
+    return http.put(`/tutorials/update-records`, {
+      excelRecID,
+      company,
+      invoiceId
+
+    })
+  }
+
 }
 
 export default new TutorialDataService();

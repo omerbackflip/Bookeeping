@@ -313,7 +313,7 @@ export default {
             // console.log(this.obj);
             for (let i = 1; i < this.form.csv.length; i++) { 
                 var data = {
-                    company:      this.form.csv[i].Company,
+                    company:      this.form.csv[i].Company && this.form.csv[i].Company.replace(/\s+/g, '') ,
                     description:  this.form.csv[i].Description,
                     amount:       parseInt(this.form.csv[i].Amount),
                     vat:          parseInt(this.form.csv[i].Vat),

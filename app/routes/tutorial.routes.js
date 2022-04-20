@@ -12,6 +12,8 @@ module.exports = app => {
 
   var router = require("express").Router();
 
+  // Update an invoice with Excel_Rec_ID
+  router.put("/update-records", tutorials.updateExcelRecID);
   // Create a new Tutorial
   router.post("/", tutorials.create);
 
@@ -32,6 +34,7 @@ module.exports = app => {
 
   // Delete all Tutorials
   router.delete("/", tutorials.deleteAll);
+
 
   app.use('/api/tutorials', router);
 };

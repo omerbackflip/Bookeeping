@@ -106,6 +106,32 @@ exports.update = (req, res) => {
 };
 
 
+//Update an invoice identified by the company and invoice_id in the request:
+exports.updateExcelRecID = (req, res) => {
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data to update can not be empty!"
+    });
+  }
+  const company = req.body.company;
+  const invoiceId = req.body.invoiceId;
+  const excelRecID = req.body.excelRecID;
+  Tutorial.findOneAndUpdate({company:company, invoiceId:invoiceId}, {excelRecID: excelRecID})
+    .then(data => {
+      if (!data) {
+        res.status(400).send({
+          message: `Cannot update invoice with invoiceId=${invoiceId}. Maybe invoice was not found!`
+        });
+      } else res.send({ message: "Invoice was updated successfully." });
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error updating Invoice with imvoiceId=" + invoiceId
+      });
+    });
+};
+
+
 //Delete a Tutorial with the specified id:
 exports.delete = (req, res) => {
   const id = req.params.id;

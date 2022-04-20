@@ -100,6 +100,7 @@ import axios from "axios";
 import Papa from "papaparse";
 import mimeTypes from "mime-types";
 import BookDataService from "../services/BookDataService";
+import TutorialDataService from "../services/TutorialDataService";
 
 
 
@@ -340,13 +341,15 @@ export default {
                                 bs_group_name:  this.form.csv[i].bs_group_name,                
                             };
                             BookDataService.create(data)
-                            .then(response => {
-                                console.log(response.data);
+                            .then(async response => {
+                                //update Excel_rec_id in invoices 
+                                const res = await TutorialDataService.findByInvoiceAndUpdate(response.data.company, 
+                                                                                             response.data.asmacta1,
+                                                                                             response.data.record_id);
+                                console.log(res);
                             })
                             .catch(e => {
-                                console.log(e);
-                                console.log('--------')
-                                console.log(e.data);
+                                console.log("error from importCsvBook " + e.message);
                             });
                         }
                     }

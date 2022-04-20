@@ -6,7 +6,7 @@
     </div>  -->
     <!-- <AddInvoice></AddInvoice> -->
     <v-layout row wrap>
-      <v-flex xs12 md10>
+      <v-flex xs12 md3>
         <v-text-field
           v-model="search"
           append-icon="mdi-magnify"
