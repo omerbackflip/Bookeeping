@@ -7,13 +7,36 @@
     <!-- <AddInvoice></AddInvoice> -->
     <v-layout row wrap>
       <v-flex xs12 md10>
-        <v-text-field
-          v-model="search"
-          append-icon="mdi-magnify"
-          label="Search1"
-          single-line
-          hide-details
-        ></v-text-field>
+        <v-row>
+          <v-col cols="12" sm="6" md="3">
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="Search1"
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <export-excel 
+              :data="tutorials" 
+              :fields="xlsHeders"
+              type="xlsx"
+              name="export"
+              title="This is Title"
+              footer="This is footer"
+              class="mt-5">
+              <v-btn class="btn btn-danger"> 
+                <v-icon>mdi-download</v-icon>Download To Excel
+              </v-btn>
+            </export-excel>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+              <v-btn class="m-3 btn btn-danger" @click="removeAllTutorials">
+                Remove All
+              </v-btn>
+          </v-col>
+        </v-row>
         <v-data-table :headers="headers" 
                       :items="tutorials" 
                       :search="search"
@@ -23,11 +46,16 @@
                       fixed-header
                       height="75vh"
                       class="elevation-3"
+                      item-key="_id"
+                      :show-expand="true"
+                      :single-expand="true"
+                      :expanded.sync="expanded"
+                      :item-class="itemRowBackground"
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
           <template v-slot:[`item.actions`]="{ item }"> 
-            <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
-            <v-icon small @click="deleteOne(item.id)">mdi-delete</v-icon>
+            <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
+            <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
           </template>
           <template v-slot:[`item.date`]="{ item }"> 
             <span> {{item.date | formatDate}}</span>
@@ -45,14 +73,19 @@
             <v-checkbox v-model="item.published" @click="updateOne(item)"> </v-checkbox>
           </template>
           <template v-slot:[`item.description`]="{ item }"> 
-            <div v-if = "itemToEdit === item.id">
+            <div v-if = "itemToEdit === item._id">
               <v-text-field v-model="item.description"
-                            :id="`itemEdit-${item.id}`"
+                            :id="`itemEdit-${item._id}`"
                             @blur="updateOne(item)"/>
             </div>
             <div v-else @click="setEdit(item)">
               <span> {{item.description}}</span>
             </div>
+          </template>
+          <template v-slot:expanded-item="{ headers, item }">
+            <td :colspan="headers.length">
+              {{item.pratim}} - {{item.record_schum}} - {{item.cust_lname}}
+            </td>
           </template>
         </v-data-table>
         <v-footer color="primary lighten-1" align="center" class="mt-1"  elevation="10">
@@ -138,20 +171,7 @@
 
       <!-- this section is the detailes of an invoice -->
       <v-flex md2>
-        <export-excel 
-          :data="tutorials" 
-          :fields="xlsHeders"
-          type="xlsx"
-          name="export"
-          title="This is Title"
-          footer="This is footer"
-          class="mt-5">
-          <v-btn> 
-            <v-icon>mdi-download</v-icon> 
-            Download To Excel
-          </v-btn>
-        </export-excel>
-        <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
+        <!-- <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <div class="col-md-12">
             <div v-if="CorrolatedBook[0]">
               <h4 class="text-center"><strong><u>קליטה אצל רו"ח</u></strong></h4>
@@ -201,10 +221,7 @@
               <p>Please click on an Invoice...</p>
             </div>
           </div>
-        </v-container>
-        <v-btn class="m-3 btn btn-sm btn-danger" @click="removeAllTutorials">
-          Remove All
-        </v-btn>
+        </v-container> -->
         <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <h5 style="text-align:center">{{currInvoice.supplier}}   -   {{this.supplierTotal.toLocaleString()}}</h5>
           <v-data-table :headers="supplierHeaders"
@@ -257,6 +274,7 @@ export default {
       supplierName  : [],
       supplierFilter: [],
       supplierTotal : 0,
+      expanded: [],
       supplierHeaders: [
         { text: "Total", value: "total", align:'right'},
         { text: "Description", value: "description", align:'right'},
@@ -278,6 +296,7 @@ export default {
         { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false  },
         { text: "Remark", value: "remark", class: 'success title', groupable: false  },
         { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
+        //{ text: "Pratim", value: "pratim", sortable: false, class: 'success title', groupable: false  },
       ],
       xlsHeders:{
         "חברה"        : "company", 
@@ -320,6 +339,7 @@ export default {
   methods: {
     rowClicked(row) {
       this.currInvoice = row;
+      this.CorrolatedBook = '';
       if (row.excelRecID) {
         BookDataService.findByRecord_id(row.excelRecID)
           .then((response) => {
@@ -358,7 +378,6 @@ export default {
       TutorialDataService.getAll()
         .then((response) => {
           this.tutorials = response.data;
-          //console.log(response.data);
         })
         .catch((e) => {
           console.log(e);
@@ -478,10 +497,9 @@ export default {
     },
 
     updateOne(item) {
-      TutorialDataService.update(item.id, item)
+      TutorialDataService.update(item._id, item)
         .then(response => {
           console.log(response.data);
-          this.message = 'The updateOne() updated successfully!';
         })
         .catch(e => {
           console.log(e);
@@ -490,11 +508,17 @@ export default {
     },
 
     setEdit(item) {
-      this.itemToEdit = item.id;
+          console.log(item);
+      this.itemToEdit = item._id;
       setTimeout( () => {
-        document.getElementById(`itemEdit-${item.id}`).focus()
+        document.getElementById(`itemEdit-${item._id}`).focus()
       }, 1 );
     },
+
+		//Background of row if added, area or sub area
+		itemRowBackground(item) {
+			return item.pratim ? 'bg-green' : '';
+		},
 
   },
 
@@ -517,4 +541,9 @@ export default {
   max-width: auto;
   margin: auto;
 }
+
+.bg-green{
+	background-color: lightgreen !important;
+}
+
 </style>

@@ -1,5 +1,6 @@
 const db = require("../models");
 const Tutorial = db.tutorials;
+const Book = db.books;
 
 //Create and Save a new Tutorial:
 exports.create = (req, res) => {
@@ -45,20 +46,27 @@ exports.create = (req, res) => {
 //We use req.query.title to get query string from the Request and consider it as condition for findAll() method.
 //Eli Gadot - change the search from title to description 
 //also change in TutorialDataService from /tutorials?title to /tutorials?description)
-exports.findAll = (req, res) => {
+exports.findAll = async (req, res) => {
   const search = req.query.description;
   var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};
 
-  Tutorial.find(condition)
-    .then(data => {
-      res.send(data);
-    })
-    .catch(err => {
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while retrieving tutorials."
-      });
-    });
+  const data = await Tutorial.find(condition).lean();
+  try{
+    const allData = await Promise.all(data.map(async (mapData) =>{
+      if(await Book.exists({company:mapData.company, record_id:mapData.excelRecID})) {
+      // if(mapData.excelRecID) {
+        const item = await Book.findOne({company:mapData.company, record_id:mapData.excelRecID});
+        return {...mapData,
+                    pratim: item.pratim,
+                    record_schum:item.record_schum,
+                    cust_lname:item.cust_lname,
+                    cust_fname:item.cust_fname};
+      } else return mapData
+    }))
+    res.send(allData);
+  } catch(err){
+      res.status(500).send({message: err.message || "Some error occurred while retrieving tutorials."});
+    };
 };
 
 
