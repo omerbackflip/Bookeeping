@@ -44,7 +44,13 @@
                 <div class="form-group">
                     <slot name="next" :load="load">
                         <!-- <button type="submit" :disabled="disabledNextButton" :class="buttonClass" @click.prevent="load"> {{ loadBtnText }} </button> -->
-                        <v-btn  type="submit" :disabled="disabledNextButton" :class="buttonClass" @click.prevent="load" :loading="loading" > {{ loadBtnText }} </v-btn>
+                        <v-btn  type="submit" 
+                                :disabled="disabledNextButton"
+                                :class="buttonClass" 
+                                @click.prevent="load" 
+                                :loading="loading" > 
+                            {{ loadBtnText }} 
+                        </v-btn>
                     </slot>
                 </div>
             </div>
@@ -64,7 +70,6 @@
                         <tbody> 
                             <tr v-for="(field, key) in fieldsToMap" :key="key">
                                 <td>{{ field.label }}</td>
-                                <!-- <td>{{ field }}</td> -->
                                 <td>
                                     <select
                                         :class="tableSelectClass"
@@ -76,6 +81,10 @@
                                             {{ column }}
                                         </option>
                                     </select>
+                                    <!-- <v-select
+                                        v-model="map[field.key]"
+                                        :items="firstRow"
+                                    ></v-select> -->
                                 </td>
                             </tr>
                         </tbody>
@@ -148,7 +157,7 @@ export default {
         },
         autoMatchFields: {
             type: Boolean,
-            default: false,
+            default: true,
         },
         autoMatchIgnoreCase: {
             type: Boolean,
@@ -198,6 +207,7 @@ export default {
         mapFields : [
             "asmchta_date",
             "record_id",
+            "year",
             "record_schum",
             "pratim",
             "asmacta1",
@@ -322,14 +332,16 @@ export default {
             return `${id}${this._uid}`;
         },
         saveBook() {
-            if (window.confirm('Confirm Save Book table...')){
+            if (window.confirm(`Confirm Saveing ${this.form.csv.length} records into Book table...`)){
                 this.loading = true;                    
-                    for (let i = 1; i < this.form.csv.length; i++) { 
+                    for (let i = 1; i < this.form.csv.length; i++) { // first row [0] is the title row
                         if (this.form.csv[i].asmchta_date) { // if no date - probbaly is Yitra...
+                        console.log(this.form.csv[i])
                             var data = {
                                 company:        this.company,
                                 asmchta_date:   this.form.csv[i].asmchta_date,
                                 record_id:      parseInt(this.form.csv[i].record_id),
+                                year:           parseInt(this.form.csv[i].year),
                                 record_schum:   parseInt(this.form.csv[i].record_schum),
                                 pratim:         this.form.csv[i].pratim,
                                 asmacta1:       parseInt(this.form.csv[i].asmacta1),
@@ -345,15 +357,22 @@ export default {
                                 //update Excel_rec_id in invoices 
                                 const res = await TutorialDataService.findByInvoiceAndUpdate(response.data.company, 
                                                                                              response.data.asmacta1,
-                                                                                             response.data.record_id);
-                                console.log(res);
+                                                                                             response.data.record_id)
+                                .then (res1 =>{
+                                    console.log(res1);
+                                    console.log(res);
+                                })
+                                .catch(e => {
+                                    console.log("error while trying to update record_id " + e);
+                                });
                             })
                             .catch(e => {
-                                console.log("error from importCsvBook " + e.message);
+                                console.log("error while insert new Book " + e);
                             });
                         }
                     }
                 this.loading = false;
+                window.alert(`${this.form.csv.length} records were processed`)
             }
         },
         deleteAll() {

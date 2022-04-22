@@ -25,14 +25,14 @@
               name="export"
               title="This is Title"
               footer="This is footer"
-              class="mt-5">
+              class="mt-3">
               <v-btn class="btn btn-danger"> 
                 <v-icon>mdi-download</v-icon>Download To Excel
               </v-btn>
             </export-excel>
           </v-col>
           <v-col cols="12" sm="6" md="3">
-              <v-btn class="m-3 btn btn-danger" @click="removeAllTutorials">
+              <v-btn class="mt-3 btn btn-danger" @click="removeAllTutorials">
                 Remove All
               </v-btn>
           </v-col>
@@ -46,15 +46,15 @@
                       fixed-header
                       height="75vh"
                       class="elevation-3"
-                      item-key="_id"
-                      :show-expand="true"
-                      :single-expand="true"
-                      :expanded.sync="expanded"
                       :item-class="itemRowBackground"
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
+                      <!-- item-key="_id"
+                      :show-expand="true"
+                      :single-expand="true"
+                      :expanded.sync="expanded"> -->
           <template v-slot:[`item.actions`]="{ item }"> 
-            <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
+            <v-icon small @click="editInvoice(item)">mdi-pencil</v-icon>
             <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
           </template>
           <template v-slot:[`item.date`]="{ item }"> 
@@ -82,13 +82,13 @@
               <span> {{item.description}}</span>
             </div>
           </template>
-          <template v-slot:expanded-item="{ headers, item }">
+          <!-- <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length">
               {{item.pratim}} - {{item.record_schum}} - {{item.cust_lname}}
             </td>
-          </template>
+          </template> -->
         </v-data-table>
-        <v-footer color="primary lighten-1" align="center" class="mt-1"  elevation="10">
+        <v-footer color="primary lighten-1" align="center" elevation="10">
           <v-form ref="form" >
             <v-row>
               <v-col >
@@ -96,7 +96,6 @@
                   v-model="invoice.company"
                   :items="companyName"
                   label="Company"
-                  outlined
                   dense
                 ></v-combobox>
               </v-col>
@@ -105,7 +104,6 @@
                   v-model="invoice.project"
                   :items="projectName"
                   label="Project"
-                  outlined
                   dense
                 ></v-combobox>
               </v-col>
@@ -149,7 +147,6 @@
                   v-model="invoice.supplier"
                   :items="supplierName"
                   label="Supplier"
-                  outlined
                   dense
                 ></v-combobox>
               </v-col>
@@ -169,7 +166,7 @@
         </v-footer>
       </v-flex>
 
-      <!-- this section is the detailes of an invoice -->
+      <!-- this section is the summary of the supplier -->
       <v-flex md2>
         <!-- <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <div class="col-md-12">
@@ -461,22 +458,7 @@ export default {
     },
 
     saveInvoice() {
-      var data = {
-        company:      this.invoice.company,
-        description:  this.invoice.description,
-        amount:       this.invoice.amount,
-        vat:          this.invoice.vat,
-        total:        this.invoice.total,
-        group:        this.invoice.group,
-        date:         this.invoice.date,
-        supplier:     this.invoice.supplier,
-        invoiceId:    this.invoice.invoiceId,
-        remark:       this.invoice.remark,
-        excelRecID:   this.invoice.excelRecID,
-        published:    this.invoice.published,
-        project:      this.invoice.project,
-      };
-      TutorialDataService.create(data)
+      TutorialDataService.create(this.invoice)
         .then(response => {
           this.invoice.id = response.data.id;
           this.refreshList();
@@ -485,15 +467,30 @@ export default {
         .catch(e => {
           console.log(e);
         });
-      //this.dialog = false;
     },
 
     clearForm (){
       this.$refs.form.reset()
     },
 
-    editOne(id) {
+    editOne(id) { // this is example how to call to different page using router
       this.$router.push({ name: "tutorial-details", params: { id: id } });
+    },
+
+    editInvoice(item) {
+        this.invoice.company = item.company,
+        this.invoice.description = item.description,
+        this.invoice.amount = item.amount,
+        this.invoice.vat = item.vat,
+        this.invoice.total = item.total,
+        this.invoice.group = item.group,
+        this.invoice.date = item.date,
+        this.invoice.supplier = item.supplier,
+        this.invoice.invoiceId = item.invoiceId,
+        this.invoice.remark = item.remark,
+        this.invoice.excelRecID = item.excelRecID,
+        this.invoice.published = item.published,
+        this.invoice.project = item.project
     },
 
     updateOne(item) {
@@ -508,7 +505,6 @@ export default {
     },
 
     setEdit(item) {
-          console.log(item);
       this.itemToEdit = item._id;
       setTimeout( () => {
         document.getElementById(`itemEdit-${item._id}`).focus()

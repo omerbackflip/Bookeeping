@@ -34,13 +34,13 @@
             <!-- <span> {{item.asmchta_date | formatDate}}</span> -->
           </template>
           <template v-slot:[`item.record_schum`]="{ item }"> 
-            <span> {{ item.record_schum.toLocaleString() }}</span>
+            <span> {{ item.record_schum ? item.record_schum.toLocaleString() : ''}}</span>
           </template>                
           <template v-slot:[`item.schum_hova`]="{ item }"> 
-            <span> {{ item.schum_hova.toLocaleString() }}</span>
+            <span> {{ item.schum_hova ? item.schum_hova.toLocaleString() : '' }}</span>
           </template>                
           <template v-slot:[`item.schum_zchut`]="{ item }"> 
-            <span> {{ item.schum_zchut.toLocaleString() }}</span>
+            <span> {{ item.schum_zchut ? item.schum_zchut.toLocaleString() : '' }}</span>
           </template>        
         </v-data-table>
 
@@ -113,15 +113,16 @@ export default {
         { text: "company", value: "company", class: 'primary title' },
         { text: "asmchta_date", value: "asmchta_date", class: 'primary title' },
         { text: "record_id", value: "record_id", class: 'primary title'},
+        { text: "year", value: "year", class: 'primary title'},
         { text: "record_schum", value: "record_schum", class: 'primary title' },
         { text: "pratim", value: "pratim", class: 'primary title' },
         { text: "asmacta1", value: "asmacta1", class: 'primary title' },
         { text: "schum_hova", value: "schum_hova", class: 'primary title' },
         { text: "schum_zchut", value: "schum_zchut", class: 'primary title' },
-        // { text: "cust_lname", value: "cust_lname", class: 'primary title' },
-        // { text: "cust_fname", value: "cust_fname", class: 'primary title' },
-        // { text: "bs_item_name", value: "bs_item_name", class: 'primary title' },
-        // { text: "bs_group_name", value: "bs_group_name", class: 'primary title' },
+        { text: "cust_lname", value: "cust_lname", class: 'primary title' },
+        { text: "cust_fname", value: "cust_fname", class: 'primary title' },
+        { text: "bs_item_name", value: "bs_item_name", class: 'primary title' },
+        { text: "bs_group_name", value: "bs_group_name", class: 'primary title' },
         { text: "Act.", value: "actions", sortable: false, class: 'primary title' },
       ],
       book: {

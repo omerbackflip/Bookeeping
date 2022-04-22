@@ -4,6 +4,7 @@ module.exports = mongoose => {
       company: String,
       asmchta_date: String,
       record_id: Number,
+      year: Number,
       record_schum: Number,
       pratim: String,
       asmacta1: Number,

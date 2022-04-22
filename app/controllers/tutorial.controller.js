@@ -102,19 +102,19 @@ exports.update = (req, res) => {
     .then(data => {
       if (!data) {
         res.status(404).send({
-          message: `Cannot update Tutorial with id=${id}. Maybe Tutorial was not found!`
+          message: `Cannot update Invoice with id=${id}. Maybe Invoice was not found!`
         });
-      } else res.send({ message: "Tutorial was updated successfully." });
+      } else res.send({ message: `Invoice ${req.body.invoiceId} was updated successfully. ` });
     })
     .catch(err => {
       res.status(500).send({
-        message: "Error updating Tutorial with id=" + id
+        message: "Error updating Invoice with id=" + id
       });
     });
 };
 
 
-//Update an invoice identified by the company and invoice_id in the request:
+//Update an invoice identified by the company and invoice_id in the body:
 exports.updateExcelRecID = (req, res) => {
   if (!req.body) {
     return res.status(400).send({

@@ -37,7 +37,7 @@
                     </slot>
                 </div>
             </div>
-            {{ csv }}
+            <!-- {{ csv }} -->
 
             <div class="vue-csv-uploader-part-two">
                 <div class="vue-csv-mapping" v-if="sample">
@@ -77,7 +77,7 @@
                 </div>
                 <v-btn @click="saveInvoice">save</v-btn>
             </div>
-            {{ form.csv }}
+            <!-- {{ form.csv }} -->
         </div>
     </div>
 </template>
@@ -135,7 +135,7 @@ export default {
         },
         autoMatchFields: {
             type: Boolean,
-            default: false,
+            default: true,
         },
         autoMatchIgnoreCase: {
             type: Boolean,
@@ -309,34 +309,32 @@ export default {
             return `${id}${this._uid}`;
         },
         saveInvoice() {
-            // this.obj = JSON.parse(this.form.csv);
-            // console.log(this.obj);
-            for (let i = 1; i < this.form.csv.length; i++) { 
-                var data = {
-                    company:      this.form.csv[i].Company && this.form.csv[i].Company.replace(/\s+/g, '') ,
-                    description:  this.form.csv[i].Description,
-                    amount:       parseInt(this.form.csv[i].Amount),
-                    vat:          parseInt(this.form.csv[i].Vat),
-                    total:        parseInt(this.form.csv[i].Total),
-                    group:        parseInt(this.form.csv[i].GroupID),
-                    date:         this.form.csv[i].InvDate,
-                    supplier:     this.form.csv[i].supplier,
-                    invoiceId:    this.form.csv[i].invoiceID,
-                    remark:       this.form.csv[i].Remark,
-                    excelRecID:   parseInt(this.form.csv[i].ExcelRecordID),
-                    published:    this.form.csv[i].published.trim() === 'T' ? true : false,
-                    project:      this.form.csv[i].Project,
-                };
-                TutorialDataService.create(data)
-                .then(response => {
-                    //this.invoice.id = response.data.id;
-                    console.log(response.data);
-                })
-                .catch(e => {
-                    console.log(e);
-                    console.log('--------')
-                    console.log(data)
-                });
+            if (window.confirm(`Confirm Saveing ${this.form.csv.length} records into Tutorial table...`)){
+                for (let i = 1; i < this.form.csv.length; i++) { 
+                    var data = {
+                        company:      this.form.csv[i].Company && this.form.csv[i].Company.replace(/\s+/g, '') ,
+                        description:  this.form.csv[i].Description,
+                        amount:       parseInt(this.form.csv[i].Amount),
+                        vat:          parseInt(this.form.csv[i].Vat),
+                        total:        parseInt(this.form.csv[i].Total),
+                        group:        parseInt(this.form.csv[i].GroupID),
+                        date:         this.form.csv[i].InvDate,
+                        supplier:     this.form.csv[i].supplier,
+                        invoiceId:    this.form.csv[i].invoiceID,
+                        remark:       this.form.csv[i].Remark,
+                        excelRecID:   parseInt(this.form.csv[i].ExcelRecordID),
+                        published:    this.form.csv[i].published.trim() === 'T' ? true : false,
+                        project:      this.form.csv[i].Project,
+                    };
+                    TutorialDataService.create(data)
+                    .then(response => {
+                        console.log(response.data);
+                    })
+                    .catch(e => {
+                        console.log("error while insert new Tutorial " + e);
+                    });
+                }
+                window.alert(`${this.form.csv.length} records were processed`)
             }
         },
     },

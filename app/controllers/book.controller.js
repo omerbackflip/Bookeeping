@@ -14,6 +14,7 @@ exports.create = (req, res) => {
     company:        req.body.company,
     asmchta_date:   req.body.asmchta_date,
     record_id:      req.body.record_id,
+    year:           req.body.year,
     record_schum:   req.body.record_schum,
     pratim:         req.body.pratim,
     asmacta1:       req.body.asmacta1,
