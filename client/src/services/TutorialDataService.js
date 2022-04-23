@@ -29,12 +29,12 @@ class TutorialDataService {
     return http.get(`/tutorials?description=${title}`);
   }
 
-  findByInvoiceAndUpdate(company, invoiceId, excelRecID){
+  findByInvoiceAndUpdate(company, year, invoiceId, excelRecID){
     return http.put(`/tutorials/update-records`, {
-      excelRecID,
       company,
-      invoiceId
-
+      year,
+      invoiceId,
+      excelRecID
     })
   }
 

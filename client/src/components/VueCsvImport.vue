@@ -195,7 +195,8 @@ export default {
             "ExcelRecordID",
             "Project",
             "Company",
-            "GroupID"
+            "GroupID",
+            "Year"
         ],
         map: {},
         hasHeaders: true,
@@ -325,6 +326,7 @@ export default {
                         excelRecID:   parseInt(this.form.csv[i].ExcelRecordID),
                         published:    this.form.csv[i].published.trim() === 'T' ? true : false,
                         project:      this.form.csv[i].Project,
+                        year:      this.form.csv[i].Year,
                     };
                     TutorialDataService.create(data)
                     .then(response => {

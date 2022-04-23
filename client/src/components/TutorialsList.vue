@@ -61,7 +61,12 @@
             <span> {{item.date | formatDate}}</span>
           </template>
           <template v-slot:[`item.total`]="{ item }"> 
-            <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on }">
+                  <span v-on="on"> {{item.total ? item.total.toLocaleString() : ''}}</span>
+              </template>
+              <span>{{item.pratim}} - {{Number(item.record_schum).toLocaleString()}} - {{item.cust_lname}}</span>
+            </v-tooltip>
           </template>
           <template v-slot:[`item.vat`]="{ item }"> 
             <span> {{item.vat ? item.vat.toLocaleString() : ''}}</span>
@@ -281,6 +286,7 @@ export default {
       headers:[
         { text: "P", value: "published", class: 'success title', groupable: false  },
         { text: "Company", value: "company", class: 'success title'},
+        { text: "Year", value: "year", class: 'success title'},
         { text: "Project", value: "project", class: 'success title' },
         { text: "Description", value: "description", class: 'success title', groupable: false },
         { text: "Amount", value: "amount", class: 'success title', groupable: false  },
@@ -325,6 +331,7 @@ export default {
         invoiceId:    "",
         remark:       "",
         excelRecID:   null,
+        year:         null,
       },  
       fldRules: [v => !!v || 'Field is required'],
       isLoading: true,

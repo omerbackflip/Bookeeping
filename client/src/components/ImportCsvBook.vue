@@ -356,6 +356,7 @@ export default {
                             .then(async response => {
                                 //update Excel_rec_id in invoices 
                                 const res = await TutorialDataService.findByInvoiceAndUpdate(response.data.company, 
+                                                                                             response.data.year,
                                                                                              response.data.asmacta1,
                                                                                              response.data.record_id)
                                 .then (res1 =>{

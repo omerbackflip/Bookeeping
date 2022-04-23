@@ -25,6 +25,7 @@ exports.create = (req, res) => {
     invoiceId: req.body.invoiceId,
     remark: req.body.remark,
     excelRecID: req.body.excelRecID,
+    year: req.body.year,
   });
 
   // Save Tutorial in the database
@@ -122,9 +123,10 @@ exports.updateExcelRecID = (req, res) => {
     });
   }
   const company = req.body.company;
+  const year = req.body.year;
   const invoiceId = req.body.invoiceId;
   const excelRecID = req.body.excelRecID;
-  Tutorial.findOneAndUpdate({company:company, invoiceId:invoiceId}, {excelRecID: excelRecID})
+  Tutorial.findOneAndUpdate({company:company, year:year, invoiceId:invoiceId}, {excelRecID: excelRecID})
     .then(data => {
       if (!data) {
         res.status(400).send({

@@ -14,6 +14,7 @@ module.exports = mongoose => {
       invoiceId: String,
       remark: String,
       excelRecID: Number,
+      year: Number,
     },
     { timestamps: true }
   );
