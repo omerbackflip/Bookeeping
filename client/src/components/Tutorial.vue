@@ -16,6 +16,13 @@
       </div>
 
       <div class="form-group">
+        <label for="excelRecID">excelRecID</label>
+        <input type="text" class="form-control" id="excelRecID"
+          v-model="currentTutorial.excelRecID"
+        />
+      </div>
+
+      <div class="form-group">
         <label><strong>Status:</strong></label>
         {{ currentTutorial.published ? "Published" : "Pending" }}
       </div>

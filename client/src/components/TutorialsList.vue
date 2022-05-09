@@ -48,13 +48,14 @@
                       class="elevation-3"
                       :item-class="itemRowBackground"
                       loading = "isLoading"
-                      loading-text="Loading... Please wait">
-                      <!-- item-key="_id"
+                      loading-text="Loading... Please wait"
+                      item-key="_id"
                       :show-expand="true"
                       :single-expand="true"
-                      :expanded.sync="expanded"> -->
+                      :expanded.sync="expanded">
+                      <!-- @item-expanded="onExpand"> -->
           <template v-slot:[`item.actions`]="{ item }"> 
-            <v-icon small @click="editInvoice(item)">mdi-pencil</v-icon>
+            <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
             <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
           </template>
           <template v-slot:[`item.date`]="{ item }"> 
@@ -87,11 +88,11 @@
               <span> {{item.description}}</span>
             </div>
           </template>
-          <!-- <template v-slot:expanded-item="{ headers, item }">
+          <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length">
               {{item.pratim}} - {{item.record_schum}} - {{item.cust_lname}}
             </td>
-          </template> -->
+          </template>
         </v-data-table>
         <v-footer color="primary lighten-1" align="center" elevation="10">
           <v-form ref="form" >
@@ -120,6 +121,9 @@
               </v-col>
               <v-col >
                 <v-text-field v-model="invoice.vat" label="Vat"></v-text-field>
+              </v-col>
+              <v-col >
+                <v-text-field v-model="invoice.year" label="Year"></v-text-field>
               </v-col>
               <v-col >
                 <v-text-field v-model="invoice.total" label="Total" required></v-text-field>
@@ -175,48 +179,48 @@
       <v-flex md2>
         <!-- <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <div class="col-md-12">
-            <div v-if="CorrolatedBook[0]">
+            <div v-if="corrolatedBook[0]">
               <h4 class="text-center"><strong><u>קליטה אצל רו"ח</u></strong></h4>
               <div>
-                <label><strong>Company:</strong></label> {{ CorrolatedBook[0].company }}
+                <label><strong>Company:</strong></label> {{ corrolatedBook[0].company }}
               </div>
               <div>
-                <label><strong>asmchta_date:</strong></label> {{ CorrolatedBook[0].asmchta_date }}
+                <label><strong>asmchta_date:</strong></label> {{ corrolatedBook[0].asmchta_date }}
               </div>
               <div>
-                <label><strong>record_id:</strong></label><strong class="red--text text--lighten-1"> {{ CorrolatedBook[0].record_id }} </strong>
+                <label><strong>record_id:</strong></label><strong class="red--text text--lighten-1"> {{ corrolatedBook[0].record_id }} </strong>
               </div>
               <div>
-                <label><strong>record_schum:</strong></label> {{ CorrolatedBook[0].record_schum }}
+                <label><strong>record_schum:</strong></label> {{ corrolatedBook[0].record_schum }}
               </div>
               <div>
-                <label><strong>pratim:</strong></label> {{ CorrolatedBook[0].pratim }}
+                <label><strong>pratim:</strong></label> {{ corrolatedBook[0].pratim }}
               </div>
               <div>
-                <label><strong>asmacta1:</strong></label> {{ CorrolatedBook[0].asmacta1 }}
+                <label><strong>asmacta1:</strong></label> {{ corrolatedBook[0].asmacta1 }}
               </div>
               <div>
-                <label><strong>schum_hova:</strong></label> {{ CorrolatedBook[0].schum_hova }}
+                <label><strong>schum_hova:</strong></label> {{ corrolatedBook[0].schum_hova }}
               </div>
               <div>
-                <label><strong>schum_zchut:</strong></label> {{ CorrolatedBook[0].schum_zchut }}
+                <label><strong>schum_zchut:</strong></label> {{ corrolatedBook[0].schum_zchut }}
               </div>
               <div>
-                <label><strong>cust_lname:</strong></label> {{ CorrolatedBook[0].cust_lname }}
+                <label><strong>cust_lname:</strong></label> {{ corrolatedBook[0].cust_lname }}
               </div>
               <div>
-                <label><strong>cust_fname:</strong></label> {{ CorrolatedBook[0].cust_fname }}
+                <label><strong>cust_fname:</strong></label> {{ corrolatedBook[0].cust_fname }}
               </div>
               <div>
-                <label><strong>bs_item_name:</strong></label> {{ CorrolatedBook[0].bs_item_name }}
+                <label><strong>bs_item_name:</strong></label> {{ corrolatedBook[0].bs_item_name }}
               </div>
               <div>
-                <label><strong>bs_group_name:</strong></label> {{ CorrolatedBook[0].bs_group_name }}
+                <label><strong>bs_group_name:</strong></label> {{ corrolatedBook[0].bs_group_name }}
               </div>
-              <a :href="'/books/' + CorrolatedBook[0].id">
-                Edit the Invoice with excelRecID - {{CorrolatedBook[0].record_id}}
+              <a :href="'/books/' + corrolatedBook[0].id">
+                Edit the Invoice with excelRecID - {{corrolatedBook[0].record_id}}
               </a>
-              {{CorrolatedBook[0].id}}
+              {{corrolatedBook[0].id}}
             </div>
             <div v-else>
               <br />
@@ -248,7 +252,7 @@
 
 <script>
 import TutorialDataService from "../services/TutorialDataService";
-import BookDataService from "../services/BookDataService";
+// import BookDataService from "../services/BookDataService";
 import TableDataService from "../services/TableDataService";
 // import AddInvoice from "./AddInvoice.vue"
 import Vue from 'vue'
@@ -284,26 +288,27 @@ export default {
       //searchStr: "",
       search: '',
       headers:[
-        { text: "P", value: "published", class: 'success title', groupable: false  },
-        { text: "Company", value: "company", class: 'success title'},
-        { text: "Year", value: "year", class: 'success title'},
+        { text: "^", value: "data-table-expand", class: 'success title', groupable: false },
+        { text: "G", value: "group", class: 'success title' },
+        { text: "Comp.", value: "company", class: 'success title', width: '4%'},
         { text: "Project", value: "project", class: 'success title' },
-        { text: "Description", value: "description", class: 'success title', groupable: false },
+        { text: "Date", value: "date", class: 'success title', groupable: false  },
+        { text: "Description", value: "description", class: 'success title', groupable: false, width: '7%' },
+        { text: "Supplier", value: "supplier", class: 'success title' },
         { text: "Amount", value: "amount", class: 'success title', groupable: false  },
         { text: "Vat", value: "vat", class: 'success title', groupable: false  },
         { text: "Total", value: "total", class: 'success title', groupable: false  },
-        { text: "Group", value: "group", class: 'success title' },
-        { text: "Date", value: "date", class: 'success title', groupable: false  },
-        { text: "Supplier", value: "supplier", class: 'success title' },
         { text: "Invoice ID", value: "invoiceId", class: 'success title', groupable: false  },
-        { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false  },
-        { text: "Remark", value: "remark", class: 'success title', groupable: false  },
+        { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false, width: '4%'  },
+        { text: "Remark", value: "remark", class: 'success title', groupable: false, width: '5%'  },
         { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
+        { text: "P", value: "published", class: 'success title', groupable: false  },
+        //{ text: "Year", value: "year", class: 'success title'},
         //{ text: "Pratim", value: "pratim", sortable: false, class: 'success title', groupable: false  },
       ],
       xlsHeders:{
-        "חברה"        : "company", 
-        "פרויקט"      : "project", 
+        "חברה"        :"company", 
+        "פרויקט"      :"project", 
         "תאור"        :"description",
         "סכום"        :"amount",
         "מע-מ"        :"vat",
@@ -314,7 +319,7 @@ export default {
         "חשבונית"     :"invoiceId",
         "excelRecID"  :"excelRecID",
         "הערה"        :"remark",
-        "נשלח"        : "published"
+        "נשלח"        :"published"
       },
       invoice: {
         id:           null,
@@ -336,24 +341,24 @@ export default {
       fldRules: [v => !!v || 'Field is required'],
       isLoading: true,
       itemToEdit: "",
-      CorrolatedBook: "",
+      corrolatedBook: "",
     };
   },
 
   methods: {
     rowClicked(row) {
       this.currInvoice = row;
-      this.CorrolatedBook = '';
-      if (row.excelRecID) {
-        BookDataService.findByRecord_id(row.excelRecID)
-          .then((response) => {
-            this.CorrolatedBook = response.data;
-            // console.log(this.CorrolatedBook[0].record_schum);
-          })
-          .catch((e) => {
-            console.log(e);
-          });
-      }
+      // this.corrolatedBook = '';
+      // if (row.excelRecID) {
+      //   BookDataService.findByRecord_id(row.excelRecID)
+      //     .then((response) => {
+      //       this.corrolatedBook = response.data;
+      //       // console.log(this.corrolatedBook[0].record_schum);
+      //     })
+      //     .catch((e) => {
+      //       console.log(e);
+      //     });
+      // }
       if(row.supplier){
         this.supplierFilter = this.tutorials.filter(supp => supp.supplier === row.supplier);
         //this.supplierTotal = this.supplierFilter.reduce(num1 => num1.total);
@@ -485,6 +490,7 @@ export default {
     },
 
     editInvoice(item) {
+        this.updateMode = true,
         this.invoice.company = item.company,
         this.invoice.description = item.description,
         this.invoice.amount = item.amount,
@@ -518,10 +524,14 @@ export default {
       }, 1 );
     },
 
-		//Background of row if added, area or sub area
+		//Background of row if added to Book table
 		itemRowBackground(item) {
 			return item.pratim ? 'bg-green' : '';
 		},
+
+    // onExpand() {
+    //   console.log(this.expanded);
+    // }
 
   },
 

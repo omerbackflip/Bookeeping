@@ -115,28 +115,27 @@ exports.update = (req, res) => {
 };
 
 
-//Update an invoice identified by the company and invoice_id in the body:
+//Update an invoice identified by the company, yaer and invoice_id in the body:
 exports.updateExcelRecID = (req, res) => {
   if (!req.body) {
     return res.status(400).send({
       message: "Data to update can not be empty!"
     });
   }
-  const company = req.body.company;
-  const year = req.body.year;
-  const invoiceId = req.body.invoiceId;
-  const excelRecID = req.body.excelRecID;
-  Tutorial.findOneAndUpdate({company:company, year:year, invoiceId:invoiceId}, {excelRecID: excelRecID})
+  Tutorial.findOneAndUpdate({ company:req.body.company, 
+                              year:req.body.year,
+                              invoiceId:req.body.invoiceId}, 
+                            {excelRecID: req.body.excelRecID})
     .then(data => {
       if (!data) {
         res.status(400).send({
-          message: `Cannot update invoice with invoiceId=${invoiceId}. Maybe invoice was not found!`
+          message: `Cannot update invoice with invoiceId=${req.body.invoiceId}. Maybe invoice was not found!`
         });
       } else res.send({ message: "Invoice was updated successfully." });
     })
     .catch(err => {
       res.status(500).send({
-        message: "Error updating Invoice with imvoiceId=" + invoiceId
+        message: "Error updating Invoice with imvoiceId=" + req.body.invoiceId
       });
     });
 };

@@ -4,7 +4,7 @@
       <input type="text" class="form-control" placeholder="Search..." v-model="searchStr"/>
       <v-btn @click="searchSTR" class="ml-2 mr-2"> Search </v-btn>
     </div>  -->
-    <!-- <AddInvoice></AddInvoice> -->
+    <AddInvoice/>
     <v-layout row wrap>
       <v-flex xs12 md10>
         <v-text-field
@@ -87,6 +87,7 @@
 <script>
 import BookDataService from "../services/BookDataService";
 //import TutorialDataService from "../services/TutorialDataService";
+import AddInvoice from "./AddInvoice.vue"
 
 import Vue from 'vue'
 import moment from 'moment'
@@ -100,7 +101,7 @@ Vue.filter('formatDate', function(value) {
 });
 
 export default {
-  // components: {AddInvoice},
+  components: {AddInvoice},
   name: "booking-list",
   data() {
     return {
