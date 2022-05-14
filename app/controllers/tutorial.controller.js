@@ -195,3 +195,28 @@ exports.findAllPublished = (req, res) => {
       });
     });
 };
+
+
+//Save bulk of invoices in the body:
+exports.saveBulk = (req, res) => {
+  //console.log(req.body)
+  if (!req.body) {
+    return res.status(400).send({
+      message: "Data of bulk to update can not be empty!"
+    });
+  }
+  Tutorial.insertMany ( req.body )
+    .then(data => {
+      if (!data) {
+        res.status(400).send({
+          message: "Fail saving bulk of invoices"
+        });
+      } else 
+        res.send({ message: "Bulk of invoices saved successfully." });
+    })
+    .catch(err => {
+      res.status(500).send({
+        message: "Error saving bulk of Invoices"
+      });
+    });
+};

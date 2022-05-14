@@ -15,9 +15,63 @@
           hide-details
         ></v-text-field>
         <v-data-table :headers="headers" 
-                      :items="tables"
+                      :items="tableID"
                       :search="search"
                       disable-pagination
+                      hide-default-footer
+                      fixed-header
+                      height="75vh"
+                      @click:row="filterTbl"
+                      dense
+                      class="elevation-3"
+                      loading = "isLoading"
+                      loading-text="Loading... Please wait">
+          <template v-slot:[`item.actions`]="{ item }"> 
+            <!-- <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon> -->
+            <div>
+              <v-icon small @click="(itemToEdit === item.id) ? updateOne(item) : setEdit(item)">
+                {{(itemToEdit === item.id) ? "mdi-floppy" : "mdi-pencil"}}
+              </v-icon>
+              <v-icon small @click="deleteOne(item.id)">mdi-delete</v-icon>
+            </div>
+          </template>
+          <template v-slot:[`item.description`]="{ item }"> 
+            <div v-if = "itemToEdit === item.id">
+              <v-text-field v-model="item.description"
+                            :id="`itemEdit-${item.id}`"/>
+            </div>
+            <!-- <div v-else @click="setEdit(item)"> -->
+            <div v-else @click="setEdit(item)">
+              <span> {{item.description}}</span>
+            </div>
+          </template>
+          <template v-slot:[`item.table_id`]="{ item }"> 
+            <div v-if = "itemToEdit === item.id">
+              <v-text-field v-model="item.table_id"
+                            :id="`itemEdit-${item.id}`"/>
+                            <!-- @blur="updateOne(item)"/> -->
+            </div>
+            <div v-else @click="setEdit(item)">
+              <span> {{item.table_id}}</span>
+            </div>
+          </template>
+          <template v-slot:[`item.table_code`]="{ item }"> 
+            <div v-if = "itemToEdit === item.id">
+              <v-text-field v-model="item.table_code"
+                            :id="`itemEdit-${item.id}`"/>
+            </div>
+            <div v-else @click="setEdit(item)">
+              <span> {{item.table_code}}</span>
+            </div>
+          </template>
+        </v-data-table>
+      </v-flex>
+      <v-flex xs12 md4 mt-3>
+        <div class="title"> {{ tableTitle ? tableTitle : 'Title' }} </div>
+        <v-data-table :headers="headers" 
+                      :items="tableCode"
+                      disable-pagination
+                      dense
                       hide-default-footer
                       fixed-header
                       height="75vh"
@@ -63,8 +117,8 @@
             </div>
           </template>
         </v-data-table>
-
       </v-flex>
+
       <v-flex md10>
         <v-footer color="primary lighten-1" align="center" class="mt-2" elevation="10">
           <v-form ref="form" >
@@ -98,6 +152,9 @@ export default {
   data() {
     return {
       tables: [],
+      tableID: [],
+      tableCode: [],
+      tableTitle: '',
       currInvoice: null,
       currentIndex: -1,
       search: '',
@@ -119,8 +176,6 @@ export default {
   },
 
   methods: {
-
-
     deleteOne(id) {
       if (window.confirm('Are you sure you want to delete one item ?')){
         TableDataService.delete(id)
@@ -134,11 +189,11 @@ export default {
       }
     },
 
-
     retrieveTables() {
       TableDataService.getAll()
         .then((response) => {
           this.tables = response.data;
+          this.tableID = response.data.filter(item => item.table_id === 99);
         })
         .catch((e) => {
           console.log(e);
@@ -196,7 +251,13 @@ export default {
         });
     },
 
+    filterTbl(row) {
+      this.tableCode = this.tables.filter(item => item.table_id === row.table_code)
+      this.tableTitle = row.description;
+    }
+  },
 
+  computed: {
 
   },
 
@@ -214,5 +275,11 @@ export default {
   text-align: left;
   max-width: auto;
   margin: auto;
+}
+.title {
+border: 3px solid blue;
+text-align: center;
+font-weight: bold;
+font-size: 16px;
 }
 </style>

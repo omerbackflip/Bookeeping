@@ -12,7 +12,6 @@
   "dependencies": {
     "axios": "^0.21.4",
     "core-js": "^3.6.5",
-    "env-cmd": "^10.1.0",
     "material-design-icons-iconfont": "^6.1.0",
     "moment": "^2.29.1",
     "papaparse": "^5.3.1",

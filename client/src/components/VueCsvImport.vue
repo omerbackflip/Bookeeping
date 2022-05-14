@@ -75,7 +75,7 @@
                         </slot>
                     </div>
                 </div>
-                <v-btn @click="saveInvoice">save</v-btn>
+                <v-btn @click="saveInvoice1">save</v-btn>
             </div>
             <!-- {{ form.csv }} -->
         </div>
@@ -183,20 +183,20 @@ export default {
         },
         fieldsToMap: [],
         mapFields : [
-            "InvDate",
-            "invoiceID",
-            "Description",
-            "Amount",
-            "Vat",
-            "Total",
-            "Remark",
+            "date",
+            "invoiceId",
+            "description",
+            "amount",
+            "vat",
+            "total",
+            "remark",
             "supplier",
             "published",
-            "ExcelRecordID",
-            "Project",
-            "Company",
-            "GroupID",
-            "Year"
+            "excelRecId",
+            "project",
+            "company",
+            "group",
+            "year"
         ],
         map: {},
         hasHeaders: true,
@@ -234,6 +234,14 @@ export default {
         submit() {
             const _this = this;
             this.form.csv = this.buildMappedCsv();
+            this.form.csv = this.form.csv.splice(1,this.form.csv.length); // remove the first header row
+            this.form.csv.map( (item) => {  //convert string to Number to fits with schema definition
+                item.amount = Number(item.amount);
+                item.vat = Number(item.vat);
+                item.total = Number(item.total);
+                item.group = Number(item.group);
+                item.excelRecID = Number(item.excelRecID);
+                item.published = (item.published === 'T '); })
             this.$emit("input", this.form.csv);
 
             if (this.url) {
@@ -336,6 +344,16 @@ export default {
                         console.log("error while insert new Tutorial " + e);
                     });
                 }
+                window.alert(`${this.form.csv.length} records were processed`)
+            }
+        },
+        saveInvoice1() {
+            if (window.confirm(`Confirm Saveing ${this.form.csv.length} records into Tutorial table...`)){
+                TutorialDataService.saveBulk(this.form.csv)
+                .then(response => {
+                    console.log(response.data); })
+                .catch(e => {
+                    console.log("error while saing bulk " + e); });
                 window.alert(`${this.form.csv.length} records were processed`)
             }
         },

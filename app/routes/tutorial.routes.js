@@ -15,6 +15,9 @@ module.exports = app => {
   // Update an invoice with Excel_Rec_ID
   router.put("/update-records", tutorials.updateExcelRecID);
   
+  // Save Bulk of invoices
+  router.post("/save-bulk", tutorials.saveBulk);
+  
   // Create a new Tutorial
   router.post("/", tutorials.create);
 

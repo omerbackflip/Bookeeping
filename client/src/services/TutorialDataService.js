@@ -38,6 +38,10 @@ class TutorialDataService {
     })
   }
 
+  saveBulk(bulk) {
+    return http.post(`/tutorials/save-bulk`,bulk);
+  }
+
 }
 
 export default new TutorialDataService();

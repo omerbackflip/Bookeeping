@@ -230,8 +230,22 @@
         </v-container> -->
         <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <h5 style="text-align:center">{{currInvoice.supplier}}   -   {{this.supplierTotal.toLocaleString()}}</h5>
-          <v-data-table :headers="supplierHeaders"
+          <v-data-table :headers="sideHeaders"
                         :items="supplierFilter" 
+                        disable-pagination
+                        hide-default-footer
+                        fixed-header
+                        class="elevation-3"
+                        dense>
+            <template v-slot:[`item.total`]="{ item }"> 
+              <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
+            </template>
+          </v-data-table>
+        </v-container>
+        <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
+          <h5 style="text-align:center">{{currInvoice.project}}   -   {{this.projectTotal.toLocaleString()}}</h5>
+          <v-data-table :headers="sideHeaders"
+                        :items="projectFilter" 
                         disable-pagination
                         hide-default-footer
                         fixed-header
@@ -278,13 +292,15 @@ export default {
       companyName   : [],
       projectName   : [],
       supplierName  : [],
-      supplierFilter: [],
-      supplierTotal : 0,
       expanded: [],
-      supplierHeaders: [
+      supplierTotal : 0,
+      supplierFilter: [],
+      sideHeaders: [
         { text: "Total", value: "total", align:'right'},
         { text: "Description", value: "description", align:'right'},
       ],
+      projectTotal : 0,
+      projectFilter: [],
       //searchStr: "",
       search: '',
       headers:[
@@ -295,9 +311,9 @@ export default {
         { text: "Date", value: "date", class: 'success title', groupable: false  },
         { text: "Description", value: "description", class: 'success title', groupable: false, width: '7%' },
         { text: "Supplier", value: "supplier", class: 'success title' },
-        { text: "Amount", value: "amount", class: 'success title', groupable: false  },
-        { text: "Vat", value: "vat", class: 'success title', groupable: false  },
-        { text: "Total", value: "total", class: 'success title', groupable: false  },
+        { text: "Amount", value: "amount", class: 'success title', groupable: false, align:'right'  },
+        { text: "Vat", value: "vat", class: 'success title', groupable: false, align:'right'  },
+        { text: "Total", value: "total", class: 'success title', groupable: false, align:'right'  },
         { text: "Invoice ID", value: "invoiceId", class: 'success title', groupable: false  },
         { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false, width: '4%'  },
         { text: "Remark", value: "remark", class: 'success title', groupable: false, width: '5%'  },
@@ -365,6 +381,11 @@ export default {
         this.supplierTotal = 0;
         for (let i=0; i< this.supplierFilter.length ;i++ ){
           this.supplierTotal += this.supplierFilter[i].total;
+        }
+        this.projectFilter = this.tutorials.filter(supp => supp.project === row.project);
+        this.projectTotal = 0;
+        for (let i=0; i< this.projectFilter.length ;i++ ){
+          this.projectTotal += this.projectFilter[i].total;
         }
       }
     },
