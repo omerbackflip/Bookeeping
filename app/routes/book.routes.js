@@ -11,7 +11,10 @@ module.exports = app => {
   const books = require("../controllers/book.controller.js");
 
   var router = require("express").Router();
-
+  
+  // Save Bulk of invoices
+  router.post("/save-bulk", books.saveBulk);
+  
   // Create a new Book
   router.post("/", books.create);
 

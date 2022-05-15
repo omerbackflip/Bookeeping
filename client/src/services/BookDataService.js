@@ -32,6 +32,11 @@ class BookDataService {
   findByRecord_id(title) {
     return http.get(`/books?record_id=${title}`);
   }
+  
+  saveBulk(bulk) {
+    return http.post(`/books/save-bulk`,bulk);
+  }
+
 }
 
 export default new BookDataService();

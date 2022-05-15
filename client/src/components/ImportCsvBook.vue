@@ -95,7 +95,7 @@
                         </slot>
                     </div>
                 </div>
-                <v-btn class="ma-2" :loading="loading" :disabled="loading" @click="saveBook">save</v-btn>
+                <v-btn class="ma-2" :loading="loading" :disabled="loading" @click="saveBook1">save</v-btn>
                 <v-btn class="ma-2" @click="deleteAll">Delete All</v-btn>
             </div>
             <!-- {{ form.csv }} -->
@@ -256,6 +256,14 @@ export default {
         submit() {
             const _this = this;
             this.form.csv = this.buildMappedCsv();
+            this.form.csv = this.form.csv.splice(1,this.form.csv.length); // remove the first header row
+            this.form.csv.map( (item) => {  //convert string to Number to fits with schema definition
+                item.record_id = Number(item.record_id);
+                item.year = Number(item.year);
+                item.record_schum = Number(item.record_schum);
+                item.asmacta1 = Number(item.asmacta1);
+                item.schum_hova = Number(item.schum_hova);
+                item.schum_zchut = Number(item.schum_zchut); })
             this.$emit("input", this.form.csv);
 
             if (this.url) {
@@ -373,6 +381,16 @@ export default {
                         }
                     }
                 this.loading = false;
+                window.alert(`${this.form.csv.length} records were processed`)
+            }
+        },
+        saveBook1() {
+            if (window.confirm(`Confirm Saveing ${this.form.csv.length} records into Book table...`)){
+                BookDataService.saveBulk(this.form.csv)
+                .then(response => {
+                    console.log(response.data); })
+                .catch(e => {
+                    console.log("error while saing bulk " + e); });
                 window.alert(`${this.form.csv.length} records were processed`)
             }
         },
