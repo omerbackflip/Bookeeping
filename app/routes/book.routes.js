@@ -6,6 +6,8 @@
 //    /api/books/:id: GET, PUT, DELETE
 //    /api/books/published: GET
 
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 module.exports = app => {
   const books = require("../controllers/book.controller.js");
@@ -13,7 +15,7 @@ module.exports = app => {
   var router = require("express").Router();
   
   // Save Bulk of invoices
-  router.post("/save-bulk", books.saveBulk);
+  router.post("/save-bulk",upload.single('file') , books.saveBulk);
   
   // Create a new Book
   router.post("/", books.create);

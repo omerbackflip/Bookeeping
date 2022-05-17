@@ -1,5 +1,9 @@
 const db = require("../models");
 const Book = db.books;
+const {transformCSVData} = require('../util/util');
+const XLSX = require('xlsx');
+const Tutorial = db.tutorials;
+var fs = require('fs');
 
 //Create and Save a new Book:
 exports.create = (req, res) => {
@@ -161,25 +165,75 @@ exports.findAllPublished = (req, res) => {
 };
 
 //Save bulk of invoices in the body:
-exports.saveBulk = (req, res) => {
-  //console.log(req.body)
-  if (!req.body) {
-    return res.status(400).send({
-      message: "Data of bulk to update can not be empty!"
-    });
-  }
-  Book.insertMany ( req.body )
-    .then(data => {
-      if (!data) {
-        res.status(400).send({
-          message: "Fail saving bulk of invoices"
-        });
-      } else 
-        res.send({ message: "Bulk of invoices saved successfully." });
-    })
-    .catch(err => {
-      res.status(500).send({
-        message: "Error saving bulk of Invoices"
-      });
-    });
+exports.saveBulk = async (req, res) => {
+	//console.log(req.body)
+	if (!req.body) {
+		return res.status(400).send({
+			message: "Data of bulk to update can not be empty!"
+		});
+	}
+
+	try {
+		var workbook = XLSX.readFile(`uploads/${req.file.filename}`);
+		var sheet_name_list = workbook.SheetNames;
+		const data = transformCSVData(sheet_name_list, workbook);
+		if (data) {
+			const filteredData = [].concat.apply([], data).filter((element) => element !== null);
+			if (filteredData && filteredData.length) {
+        const data = await getMappedItems(filteredData,req.body.company);
+				const result = await Book.insertMany(data, {ordered: true});
+        unLinkFile(`uploads/${req.file.filename}`);
+				if (result) {
+					return res.send({
+						hasErrors: false,
+						message: "Data successfully Imported"
+					})
+				}
+			}
+		}
+
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error saving bulk of Invoices"
+		});
+	}
+};
+
+async function getMappedItems(filteredData,company) {
+	const data = await Promise.all(filteredData.map(async (item, i) => {
+
+    if (item.asmchta_date) { // if no date - probbaly is Yitra...
+      await updateExcelRecID(company , item.year, item.asmacta1 , item.record_id);
+    }
+  
+		return {
+      company,
+      asmchta_date: item.asmchta_date,
+      record_id: item.record_id,
+      year: item.year,
+      record_schum: item.record_schum,
+      pratim: item.pratim,
+      asmacta1: item.asmacta1,
+      schum_hova: item.schum_hova,
+      schum_zchut: item.schum_zchut,
+      cust_lname: item.cust_lname,
+      cust_fname: item.cust_fname,
+      bs_item_name: item.bs_item_name,
+      bs_group_name: item.bs_group_name,
+		}
+	}));
+	return data;
+}
+function unLinkFile(path) {
+	fs.unlinkSync(path);
+}
+
+async function updateExcelRecID(company, year,invoiceId,excelRecID) {
+  return await Tutorial.findOneAndUpdate({
+		company,
+		year,
+		invoiceId
+	},
+		{ excelRecID });
 };

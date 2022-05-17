@@ -37,22 +37,49 @@
               </v-btn>
           </v-col>
         </v-row>
-        <v-data-table :headers="headers" 
-                      :items="tutorials" 
-                      :search="search"
-                      @click:row="rowClicked"
-                      disable-pagination
-                      hide-default-footer
-                      fixed-header
-                      height="75vh"
-                      class="elevation-3"
-                      :item-class="itemRowBackground"
-                      loading = "isLoading"
-                      loading-text="Loading... Please wait"
-                      item-key="_id"
-                      :show-expand="true"
-                      :single-expand="true"
-                      :expanded.sync="expanded">
+        <v-data-table 
+            :headers="headers"
+            :items="tutorialsLimited" 
+            :search="search"
+            @click:row="rowClicked"
+            @scroll.native="onScroll"
+            id="virtual-scroll-table"
+            disable-pagination
+            hide-default-footer
+            fixed-header
+            class="elevation-3"
+            :item-class="itemRowBackground"
+            loading = "isLoading"
+            loading-text="Loading... Please wait"
+            item-key="_id"
+            :show-expand="true"
+            :single-expand="true"
+            :expanded.sync="expanded"
+          >
+          <template
+              v-if="start > 0"
+              v-slot:body.prepend
+            >
+              <tr>
+                <td
+                  :colspan="headers.length"
+                  :style="'padding-top:'+(startHeight-70)+'px'"
+                >
+                </td>
+              </tr>
+            </template>
+            <template
+              v-if="start + perPage < this.tutorials.length"
+              v-slot:body.append
+            >
+              <tr>
+                <td
+                  :colspan="headers.length"
+                  :style="'padding-top:'+endHeight+'px'"
+                >
+                </td>
+              </tr>
+            </template>
                       <!-- @item-expanded="onExpand"> -->
           <template v-slot:[`item.actions`]="{ item }"> 
             <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
@@ -78,6 +105,7 @@
           <template v-slot:[`item.published`]="{ item }"> 
             <v-checkbox v-model="item.published" @click="updateOne(item)"> </v-checkbox>
           </template>
+          
           <template v-slot:[`item.description`]="{ item }"> 
             <div v-if = "itemToEdit === item._id">
               <v-text-field v-model="item.description"
@@ -88,6 +116,7 @@
               <span> {{item.description}}</span>
             </div>
           </template>
+
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length">
               {{item.pratim}} - {{item.record_schum}} - {{item.cust_lname}}
@@ -358,6 +387,10 @@ export default {
       isLoading: true,
       itemToEdit: "",
       corrolatedBook: "",
+      start: 0,
+      timeout: null,
+      rowHeight: 24,
+      perPage: 25,
     };
   },
 
@@ -553,12 +586,39 @@ export default {
     // onExpand() {
     //   console.log(this.expanded);
     // }
+    onScroll(e) {
+      // debounce if scrolling fast
+      this.timeout && clearTimeout(this.timeout);
+ 
+      this.timeout = setTimeout(() => {
+        const { scrollTop } = e.target;
+        console.log("scrolling",scrollTop)
+        const rows = Math.ceil(scrollTop / this.rowHeight);
 
+        this.start = rows + this.perPage > this.tutorials.length ?
+          this.tutorials.length - this.perPage: rows;
+
+        this.$nextTick(() => {
+          e.target.scrollTop = scrollTop;
+        });
+      }, 20);
+    },
   },
-
+  computed: {
+    tutorialsLimited() {
+      return this.tutorials.slice(this.start, this.perPage+this.start);
+    },
+    startHeight() {
+      return this.start * this.rowHeight - 32;
+    },
+    endHeight() {
+      return this.rowHeight * (this.tutorials.length - this.start);
+    },
+  },
   mounted() {
     this.retrieveTutorials();
     this.loadRefTables();
+    document.getElementById('virtual-scroll-table').addEventListener('wheel', this.onScroll);
     // this.companyName = this.loadTable(1);
     // console.log(this.companyName)
     this.isLoading = false;
@@ -579,5 +639,9 @@ export default {
 .bg-green{
 	background-color: lightgreen !important;
 }
-
+#virtual-scroll-table {
+  max-height: 75vh;
+  height: 75vh;
+  overflow: auto;
+}
 </style>

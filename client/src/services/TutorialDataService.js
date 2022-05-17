@@ -1,5 +1,6 @@
 import http from "../http-common";
-
+import axios from "axios";
+const baseUrl = process.env.VUE_APP_API_URL;
 class TutorialDataService {
   getAll() {
     return http.get("/tutorials");
@@ -29,7 +30,7 @@ class TutorialDataService {
     return http.get(`/tutorials?description=${title}`);
   }
 
-  findByInvoiceAndUpdate(company, year, invoiceId, excelRecID){
+  findByInvoiceAndUpdate(company, year, invoiceId, excelRecID) {
     return http.put(`/tutorials/update-records`, {
       company,
       year,
@@ -38,8 +39,14 @@ class TutorialDataService {
     })
   }
 
-  saveBulk(bulk) {
-    return http.post(`/tutorials/save-bulk`,bulk);
+  async saveBulk(bulk) {
+    var formData = new FormData();
+    formData.append("file", bulk);
+    return await axios.post(`${baseUrl}/tutorials/save-bulk`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   }
 
 }

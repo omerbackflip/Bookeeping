@@ -19,6 +19,7 @@
                     <input
                         ref="csv"
                         type="file"
+                        @change="setCsvFile"
                         @change.prevent="validFileMimeType"
                         :class="inputClass"
                         name="csv"
@@ -29,18 +30,18 @@
                         </div>
                     </slot>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <slot name="next" :load="load">
                         <button type="submit" :disabled="disabledNextButton" :class="buttonClass" @click.prevent="load">
                             {{ loadBtnText }}
                         </button>
                     </slot>
-                </div>
+                </div> -->
             </div>
             <!-- {{ csv }} -->
 
             <div class="vue-csv-uploader-part-two">
-                <div class="vue-csv-mapping" v-if="sample">
+                <!-- <div class="vue-csv-mapping" v-if="sample">
                     <table :class="tableClass">
                         <slot name="thead">
                             <thead>
@@ -53,7 +54,6 @@
                         <tbody> 
                             <tr v-for="(field, key) in fieldsToMap" :key="key">
                                 <td>{{ field.label }}</td>
-                                <!-- <td>{{ field }}</td> -->
                                 <td>
                                     <select
                                         :class="tableSelectClass"
@@ -74,8 +74,8 @@
                             <input type="submit" :class="buttonClass" @click.prevent="submit" :value="submitBtnText"/>
                         </slot>
                     </div>
-                </div>
-                <v-btn @click="saveInvoice1">save</v-btn>
+                </div> -->
+                <v-btn @click="importTutorialRecords">save</v-btn>
             </div>
             <!-- {{ form.csv }} -->
         </div>
@@ -318,7 +318,7 @@ export default {
             return `${id}${this._uid}`;
         },
         saveInvoice() {
-            if (window.confirm(`Confirm Saveing ${this.form.csv.length} records into Tutorial table...`)){
+            if (window.confirm(`Confirm importing records into Tutorial table...`)){
                 for (let i = 1; i < this.form.csv.length; i++) { 
                     var data = {
                         company:      this.form.csv[i].Company && this.form.csv[i].Company.replace(/\s+/g, '') ,
@@ -347,14 +347,19 @@ export default {
                 window.alert(`${this.form.csv.length} records were processed`)
             }
         },
-        saveInvoice1() {
-            if (window.confirm(`Confirm Saveing ${this.form.csv.length} records into Tutorial table...`)){
-                TutorialDataService.saveBulk(this.form.csv)
-                .then(response => {
-                    console.log(response.data); })
-                .catch(e => {
-                    console.log("error while saing bulk " + e); });
-                window.alert(`${this.form.csv.length} records were processed`)
+        setCsvFile(event){
+            if(event && event.target && event.target.files[0]) {
+                this.form.csv = event.target.files[0];
+            }
+        },
+        async importTutorialRecords() {
+            try {
+                if (window.confirm(`Confirm Importing records into Tutorial table...`)){
+                    await TutorialDataService.saveBulk(this.form.csv)
+                    window.alert(`Records were processed and saved`)
+                }                
+            } catch (error) {
+                console.log("error while saing bulk " + error);                
             }
         },
     },

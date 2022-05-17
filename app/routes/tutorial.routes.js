@@ -5,7 +5,8 @@
 //    /api/tutorials: GET, POST, DELETE
 //    /api/tutorials/:id: GET, PUT, DELETE
 //    /api/tutorials/published: GET
-
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
 module.exports = app => {
   const tutorials = require("../controllers/tutorial.controller.js");
@@ -16,7 +17,7 @@ module.exports = app => {
   router.put("/update-records", tutorials.updateExcelRecID);
   
   // Save Bulk of invoices
-  router.post("/save-bulk", tutorials.saveBulk);
+  router.post("/save-bulk",upload.single('file'), tutorials.saveBulk);
   
   // Create a new Tutorial
   router.post("/", tutorials.create);

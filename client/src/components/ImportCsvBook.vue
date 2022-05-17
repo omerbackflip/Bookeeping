@@ -31,6 +31,7 @@
                     <input
                         ref="csv"
                         type="file"
+                        @change="setCsvFile"
                         @change.prevent="validFileMimeType"
                         :class="inputClass"
                         name="csv"
@@ -41,9 +42,8 @@
                         </div>
                     </slot>
                 </div>
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <slot name="next" :load="load">
-                        <!-- <button type="submit" :disabled="disabledNextButton" :class="buttonClass" @click.prevent="load"> {{ loadBtnText }} </button> -->
                         <v-btn  type="submit" 
                                 :disabled="disabledNextButton"
                                 :class="buttonClass" 
@@ -52,12 +52,12 @@
                             {{ loadBtnText }} 
                         </v-btn>
                     </slot>
-                </div>
+                </div> -->
             </div>
             <!-- {{ csv }} -->
 
             <div class="vue-csv-uploader-part-two">
-                <div class="vue-csv-mapping" v-if="sample">
+                <!-- <div class="vue-csv-mapping" v-if="sample">
                     <table :class="tableClass">
                         <slot name="thead">
                             <thead>
@@ -81,21 +81,17 @@
                                             {{ column }}
                                         </option>
                                     </select>
-                                    <!-- <v-select
-                                        v-model="map[field.key]"
-                                        :items="firstRow"
-                                    ></v-select> -->
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
-                    <div class="form-group" v-if="url">
+                    </table> -->
+                    <!-- <div class="form-group" v-if="url">
                         <slot name="submit" :submit="submit">
                             <input type="submit" :class="buttonClass" @click.prevent="submit" :value="submitBtnText"/>
                         </slot>
-                    </div>
-                </div>
-                <v-btn class="ma-2" :loading="loading" :disabled="loading" @click="saveBook1">save</v-btn>
+                    </div> -->
+                <!-- </div> -->
+                <v-btn class="ma-2" :loading="loading" :disabled="loading" @click="importBookRecords">save</v-btn>
                 <v-btn class="ma-2" @click="deleteAll">Delete All</v-btn>
             </div>
             <!-- {{ form.csv }} -->
@@ -384,14 +380,19 @@ export default {
                 window.alert(`${this.form.csv.length} records were processed`)
             }
         },
-        saveBook1() {
-            if (window.confirm(`Confirm Saveing ${this.form.csv.length} records into Book table...`)){
-                BookDataService.saveBulk(this.form.csv)
-                .then(response => {
-                    console.log(response.data); })
-                .catch(e => {
-                    console.log("error while saing bulk " + e); });
-                window.alert(`${this.form.csv.length} records were processed`)
+        setCsvFile(event){
+            if(event && event.target && event.target.files[0]) {
+                this.form.csv = event.target.files[0];
+            }
+        },
+        async importBookRecords() {
+            try {
+                if (window.confirm(`Confirm Importing records into Book table...`)){
+                    await BookDataService.saveBulk(this.form.csv,this.company)
+                    window.alert(`Records were processed and saved`)
+                }                
+            } catch (error) {
+                console.log("error while saing bulk " + error);                
             }
         },
         deleteAll() {

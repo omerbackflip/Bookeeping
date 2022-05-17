@@ -1,5 +1,6 @@
 import http from "../http-common";
-
+import axios from "axios";
+const baseUrl = process.env.VUE_APP_API_URL;
 class BookDataService {
   getAll() {
     return http.get("/books");
@@ -33,8 +34,15 @@ class BookDataService {
     return http.get(`/books?record_id=${title}`);
   }
   
-  saveBulk(bulk) {
-    return http.post(`/books/save-bulk`,bulk);
+  async saveBulk(bulk,company) {
+    var formData = new FormData();
+    formData.append("file", bulk);
+    formData.append("company", company);
+    return await axios.post(`${baseUrl}/books/save-bulk`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   }
 
 }
