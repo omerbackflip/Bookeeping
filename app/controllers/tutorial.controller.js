@@ -252,16 +252,16 @@ function unLinkFile(path) {
 function getMappedItems(filteredData) {
 	const data = filteredData.map((item, i) => {
 		return {
-			company: item['Company '].replace(/\s+/g, ''),
-			project: item['Project '].replace(/\s+/g, ''),
-			description: item['Description '].replace(/\s+/g, ''),
+			company: item['Company '] && item['Company '].replace(/\s+/g, ''),
+			project: item['Project '] && item['Project '].replace(/\s+/g, ''),
+			description: item['Description '] && item['Description '].replace(/\s+/g, ''),
 			published: item['published '],
 			amount: item['Amount '],
 			vat: item['Vat '],
 			total: item['Total '],
 			group: item['GroupID '],
 			date: item['InvDate '],
-			supplier: item['supplier '].replace(/\s+/g, ''),
+			supplier: item['supplier '] && item['supplier '].replace(/\s+/g, ''),
 			invoiceId: item['invoiceID '],
 			remark: item['Remark '],
 			excelRecID: item['ExcelRecordID  '],
