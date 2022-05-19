@@ -223,10 +223,11 @@ exports.saveBulk = async (req, res) => {
 		var workbook = XLSX.readFile(`uploads/${req.file.filename}`);
 		var sheet_name_list = workbook.SheetNames;
 		const data = transformCSVData(sheet_name_list, workbook);
+		console.log(data);
 		if (data) {
 			const filteredData = [].concat.apply([], data).filter((element) => element !== null);
 			if (filteredData && filteredData.length) {
-				const result = await Tutorial.insertMany(getMappedItems(filteredData), {ordered: true});
+				const result = await Tutorial.insertMany(filteredData, {ordered: true});
 				unLinkFile(`uploads/${req.file.filename}`);
 				if (result) {
 					return res.send({
