@@ -1,9 +1,8 @@
 const db = require("../models");
 const Book = db.books;
-const {transformCSVData} = require('../util/util');
-const XLSX = require('xlsx');
 const Tutorial = db.tutorials;
 var fs = require('fs');
+const csv=require('csvtojson')
 
 //Create and Save a new Book:
 exports.create = (req, res) => {
@@ -174,14 +173,10 @@ exports.saveBulk = async (req, res) => {
 	}
 
 	try {
-		var workbook = XLSX.readFile(`uploads/${req.file.filename}`);
-		var sheet_name_list = workbook.SheetNames;
-		const data = transformCSVData(sheet_name_list, workbook);
+    const data=await csv().fromFile(`uploads/${req.file.filename}`);
 		if (data) {
-			const filteredData = [].concat.apply([], data).filter((element) => element !== null);
-			if (filteredData && filteredData.length) {
-        const data = await getMappedItems(filteredData,req.body.company);
-				const result = await Book.insertMany(data, {ordered: true});
+        const allData = await getMappedItems(data,req.body.company);
+				const result = await Book.insertMany(allData, {ordered: true});
         unLinkFile(`uploads/${req.file.filename}`);
 				if (result) {
 					return res.send({
@@ -189,7 +184,6 @@ exports.saveBulk = async (req, res) => {
 						message: "Data successfully Imported"
 					})
 				}
-			}
 		}
 
 	} catch (error) {

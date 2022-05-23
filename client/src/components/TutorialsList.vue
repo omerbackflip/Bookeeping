@@ -592,7 +592,6 @@ export default {
  
       this.timeout = setTimeout(() => {
         const { scrollTop } = e.target;
-        console.log("scrolling",scrollTop)
         const rows = Math.ceil(scrollTop / this.rowHeight);
 
         this.start = rows + this.perPage > this.tutorials.length ?

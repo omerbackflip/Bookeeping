@@ -4,7 +4,7 @@ module.exports = mongoose => {
       company: String,
       project: String,
       description: String,
-      published: false,
+      published: Boolean,
       amount: Number,
       vat: Number,
       total: Number,

@@ -1,8 +1,7 @@
 const db = require("../models");
 const Tutorial = db.tutorials;
 const Book = db.books;
-const XLSX = require('xlsx');
-const {transformCSVData} = require('../util/util');
+const csv=require('csvtojson')
 var fs = require('fs');
 
 //Create and Save a new Tutorial:
@@ -57,9 +56,8 @@ exports.findAll = async (req, res) => {
 	const data = await Tutorial.find(condition).lean();
 	try {
 		const allData = await Promise.all(data.map(async (mapData) => {
-			mapData.date = formatDate(mapData.date);
-			mapData.vat = mapData.vat.toLocaleString();
-			mapData.amount = mapData.amount.toLocaleString();
+			mapData.vat = mapData.vat?.toLocaleString();
+			mapData.amount = mapData.amount?.toLocaleString();
 
 			if (await Book.exists({ company: mapData.company, record_id: mapData.excelRecID })) {
 				// if(mapData.excelRecID) {
@@ -220,21 +218,16 @@ exports.saveBulk = async (req, res) => {
 	}
 
 	try {
-		var workbook = XLSX.readFile(`uploads/${req.file.filename}`);
-		var sheet_name_list = workbook.SheetNames;
-		const data = transformCSVData(sheet_name_list, workbook);
-		console.log(data);
+		let data= await csv().fromFile(`uploads/${req.file.filename}`);
+		data = data.map(item => item.published === 'T' ? {...item,published: true} : {...item,published: false});
 		if (data) {
-			const filteredData = [].concat.apply([], data).filter((element) => element !== null);
-			if (filteredData && filteredData.length) {
-				const result = await Tutorial.insertMany(filteredData, {ordered: true});
-				unLinkFile(`uploads/${req.file.filename}`);
-				if (result) {
-					return res.send({
-						hasErrors: false,
-						message: "Data successfully Imported"
-					})
-				}
+			const result = await Tutorial.insertMany(data, {ordered: true});
+			unLinkFile(`uploads/${req.file.filename}`);
+			if (result) {
+				return res.send({
+					hasErrors: false,
+					message: "Data successfully Imported"
+				})
 			}
 		}
 
@@ -270,15 +263,4 @@ function getMappedItems(filteredData) {
 		}
 	});
 	return data;
-}
-
-function formatDate(date) {
-	const yyyy = date.getFullYear();
-	let mm = date.getMonth() + 1;
-	let dd = date.getDate();
-
-	if (dd < 10) dd = '0' + dd;
-	if (mm < 10) mm = '0' + mm;
-
-	return dd + '/' + mm + '/' + yyyy;
 }
