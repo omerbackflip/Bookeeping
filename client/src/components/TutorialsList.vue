@@ -64,30 +64,18 @@
             :single-expand="true"
             :expanded.sync="expanded"
           >
-          <template
-              v-if="start > 0"
-              v-slot:body.prepend
-            >
+          <template v-if="start > 0" v-slot:body.prepend>
               <tr>
-                <td
-                  :colspan="headers.length"
-                  :style="'padding-top:'+(startHeight-70)+'px'"
-                >
+                <td :colspan="headers.length" :style="'padding-top:'+(startHeight-70)+'px'">
                 </td>
               </tr>
-            </template>
-            <template
-              v-if="start + perPage < this.tutorials.length"
-              v-slot:body.append
-            >
-              <tr>
-                <td
-                  :colspan="headers.length"
-                  :style="'padding-top:'+endHeight+'px'"
-                >
-                </td>
-              </tr>
-            </template>
+          </template>
+          <template v-if="start + perPage < this.tutorials.length" v-slot:body.append>
+            <tr>
+              <td :colspan="headers.length" :style="'padding-top:'+endHeight+'px'">
+              </td>
+            </tr>
+          </template>
                       <!-- @item-expanded="onExpand"> -->
           <template v-slot:[`item.actions`]="{ item }"> 
             <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
@@ -113,7 +101,6 @@
           <template v-slot:[`item.published`]="{ item }"> 
             <v-checkbox v-model="item.published" @click="updateOne(item)"> </v-checkbox>
           </template>
-          
           <template v-slot:[`item.description`]="{ item }"> 
             <div v-if = "itemToEdit === item._id">
               <v-text-field v-model="item.description"
@@ -124,7 +111,6 @@
               <span> {{item.description}}</span>
             </div>
           </template>
-
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length">
               {{item.pratim}} - {{item.record_schum}} - {{item.cust_lname}}
@@ -214,59 +200,21 @@
 
       <!-- this section is the summary of the supplier -->
       <v-flex md2>
-        <!-- <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
-          <div class="col-md-12">
-            <div v-if="corrolatedBook[0]">
-              <h4 class="text-center"><strong><u>קליטה אצל רו"ח</u></strong></h4>
-              <div>
-                <label><strong>Company:</strong></label> {{ corrolatedBook[0].company }}
-              </div>
-              <div>
-                <label><strong>asmchta_date:</strong></label> {{ corrolatedBook[0].asmchta_date }}
-              </div>
-              <div>
-                <label><strong>record_id:</strong></label><strong class="red--text text--lighten-1"> {{ corrolatedBook[0].record_id }} </strong>
-              </div>
-              <div>
-                <label><strong>record_schum:</strong></label> {{ corrolatedBook[0].record_schum }}
-              </div>
-              <div>
-                <label><strong>pratim:</strong></label> {{ corrolatedBook[0].pratim }}
-              </div>
-              <div>
-                <label><strong>asmacta1:</strong></label> {{ corrolatedBook[0].asmacta1 }}
-              </div>
-              <div>
-                <label><strong>schum_hova:</strong></label> {{ corrolatedBook[0].schum_hova }}
-              </div>
-              <div>
-                <label><strong>schum_zchut:</strong></label> {{ corrolatedBook[0].schum_zchut }}
-              </div>
-              <div>
-                <label><strong>cust_lname:</strong></label> {{ corrolatedBook[0].cust_lname }}
-              </div>
-              <div>
-                <label><strong>cust_fname:</strong></label> {{ corrolatedBook[0].cust_fname }}
-              </div>
-              <div>
-                <label><strong>bs_item_name:</strong></label> {{ corrolatedBook[0].bs_item_name }}
-              </div>
-              <div>
-                <label><strong>bs_group_name:</strong></label> {{ corrolatedBook[0].bs_group_name }}
-              </div>
-              <a :href="'/books/' + corrolatedBook[0].id">
-                Edit the Invoice with excelRecID - {{corrolatedBook[0].record_id}}
-              </a>
-              {{corrolatedBook[0].id}}
-            </div>
-            <div v-else>
-              <br />
-              <p>Please click on an Invoice...</p>
-            </div>
-          </div>
-        </v-container> -->
         <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
-          <h5 style="text-align:center">{{currInvoice.supplier}}   -   {{this.supplierTotal.toLocaleString()}}</h5>
+          <export-excel 
+            :data="supplierFilter" 
+            :fields="xlsHeders"
+            type="xlsx"
+            :name=currInvoice.supplier
+            :title=currInvoice.supplier
+            :footer=this.supplierTotal.toLocaleString()
+            class="mt-3">
+            <h5 style="text-align:center">{{currInvoice.supplier}}   -   {{this.supplierTotal.toLocaleString()}}
+              <v-btn small class="btn btn-danger"> 
+                <v-icon>mdi-download</v-icon>
+              </v-btn>
+            </h5>
+          </export-excel>
           <v-data-table :headers="sideHeaders"
                         :items="supplierFilter" 
                         disable-pagination
@@ -280,7 +228,21 @@
           </v-data-table>
         </v-container>
         <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
-          <h5 style="text-align:center">{{currInvoice.project}}   -   {{this.projectTotal.toLocaleString()}}</h5>
+          <export-excel 
+            :data="projectFilter" 
+            :fields="xlsHeders"
+            type="xlsx"
+            :name=currInvoice.project
+            :title=currInvoice.project
+            :footer=this.projectTotal.toLocaleString()
+            class="mt-3">
+            <h5 style="text-align:center">{{currInvoice.project}}   -   {{this.projectTotal.toLocaleString()}}
+              <v-btn small class="btn btn-danger"> 
+                <v-icon>mdi-download</v-icon>
+              </v-btn>
+            </h5>
+          </export-excel>
+
           <v-data-table :headers="sideHeaders"
                         :items="projectFilter" 
                         disable-pagination
@@ -346,14 +308,14 @@ export default {
         { text: "Comp.", value: "company", class: 'success title', width: '4%'},
         { text: "Project", value: "project", class: 'success title' },
         { text: "Date", value: "date", class: 'success title', groupable: false  },
-        { text: "Description", value: "description", class: 'success title', groupable: false, width: '7%' },
+        { text: "Description", value: "description", class: 'success title', groupable: false, width: '20%' },
         { text: "Supplier", value: "supplier", class: 'success title' },
         { text: "Amount", value: "amount", class: 'success title', groupable: false, align:'right'  },
         { text: "Vat", value: "vat", class: 'success title', groupable: false, align:'right'  },
         { text: "Total", value: "total", class: 'success title', groupable: false, align:'right'  },
         { text: "Invoice ID", value: "invoiceId", class: 'success title', groupable: false  },
         { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false, width: '4%'  },
-        { text: "Remark", value: "remark", class: 'success title', groupable: false, width: '5%'  },
+        { text: "Remark", value: "remark", class: 'success title', groupable: false, width: '20%'  },
         { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
         { text: "P", value: "published", class: 'success title', groupable: false  },
         //{ text: "Year", value: "year", class: 'success title'},
@@ -395,7 +357,7 @@ export default {
       isLoading: true,
       itemToEdit: "",
       corrolatedBook: "",
-      yearList : [2020, 2021, 2022],
+      yearList : [2020, 2021, 2022, 'ALL'],
       selectedYear : 2022,
       start: 0,
       timeout: null,
@@ -473,7 +435,7 @@ export default {
     },
 
 
-    loadTable:function async (table_id) {
+    loadTable:function (table_id) {
       TableDataService.findByTableID(table_id)
         .then((response) => {
           return (response.data.map(code => code.description));

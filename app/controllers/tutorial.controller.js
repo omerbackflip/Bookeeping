@@ -53,11 +53,11 @@ exports.findAll = async (req, res) => {
 	// const search = req.query.description;
 	// var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};
 
-	if (req.query.description){
-		condition = { description: { $regex: new RegExp(req.query.description), $options: "i" } }
-	} else
-		if (req.query.year){
+	if (req.query.year && req.query.year != 'ALL'){
 			condition = { year: req.query.year }
+	} else
+		if (req.query.description){
+			condition = { description: { $regex: new RegExp(req.query.description), $options: "i" } }
 		} else
 			condition = {}
 
