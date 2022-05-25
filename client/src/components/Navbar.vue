@@ -6,7 +6,6 @@
                 Invoices
             </v-app-bar-title>
             <v-spacer></v-spacer>
-
             <v-menu offset-y>
                 <template v-slot:activator="{ on, attrs }">
                     <v-btn v-bind="attrs" v-on="on">
@@ -20,7 +19,6 @@
                     </v-list-item>
                 </v-list>
             </v-menu>
-            
             <v-btn color="gray">
                 <span>Sign Out</span>
                 <v-icon right>exit_to_app</v-icon>
@@ -58,7 +56,7 @@ export default {
                 {icon: 'folder', text: 'Load Csv Book', route: '/loadBookCsv'},
                 {icon: 'folder', text: 'כרטסת רו"ח', route: '/bookingList'},
                 {icon: 'folder', text: 'טבלת הטבלאות', route: '/tableList'},
-            ]
+            ],
         }
     }
     

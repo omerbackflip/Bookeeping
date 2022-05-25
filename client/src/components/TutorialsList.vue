@@ -36,6 +36,14 @@
                 Remove All
               </v-btn>
           </v-col>
+          <v-col cols="12" sm="6" md="3">
+              <v-select class="mt-3"
+                :items="yearList"
+                v-model="selectedYear"
+                dense
+                solo
+            ></v-select>
+          </v-col>
         </v-row>
         <v-data-table 
             :headers="headers"
@@ -387,6 +395,8 @@ export default {
       isLoading: true,
       itemToEdit: "",
       corrolatedBook: "",
+      yearList : [2020, 2021, 2022],
+      selectedYear : 2022,
       start: 0,
       timeout: null,
       rowHeight: 24,
@@ -397,17 +407,6 @@ export default {
   methods: {
     rowClicked(row) {
       this.currInvoice = row;
-      // this.corrolatedBook = '';
-      // if (row.excelRecID) {
-      //   BookDataService.findByRecord_id(row.excelRecID)
-      //     .then((response) => {
-      //       this.corrolatedBook = response.data;
-      //       // console.log(this.corrolatedBook[0].record_schum);
-      //     })
-      //     .catch((e) => {
-      //       console.log(e);
-      //     });
-      // }
       if(row.supplier){
         this.supplierFilter = this.tutorials.filter(supp => supp.supplier === row.supplier);
         //this.supplierTotal = this.supplierFilter.reduce(num1 => num1.total);
@@ -438,7 +437,7 @@ export default {
 
 
     retrieveTutorials() {
-      TutorialDataService.getAll()
+      TutorialDataService.findByYear(this.selectedYear)
         .then((response) => {
           this.tutorials = response.data;
         })
@@ -543,23 +542,6 @@ export default {
       this.$router.push({ name: "tutorial-details", params: { id: id } });
     },
 
-    editInvoice(item) {
-        this.updateMode = true,
-        this.invoice.company = item.company,
-        this.invoice.description = item.description,
-        this.invoice.amount = item.amount,
-        this.invoice.vat = item.vat,
-        this.invoice.total = item.total,
-        this.invoice.group = item.group,
-        this.invoice.date = item.date,
-        this.invoice.supplier = item.supplier,
-        this.invoice.invoiceId = item.invoiceId,
-        this.invoice.remark = item.remark,
-        this.invoice.excelRecID = item.excelRecID,
-        this.invoice.published = item.published,
-        this.invoice.project = item.project
-    },
-
     updateOne(item) {
       TutorialDataService.update(item._id, item)
         .then(response => {
@@ -583,9 +565,6 @@ export default {
 			return item.pratim ? 'bg-green' : '';
 		},
 
-    // onExpand() {
-    //   console.log(this.expanded);
-    // }
     onScroll(e) {
       // debounce if scrolling fast
       this.timeout && clearTimeout(this.timeout);
@@ -622,6 +601,11 @@ export default {
     // console.log(this.companyName)
     this.isLoading = false;
   },
+  watch : {
+      selectedYear () {
+        this.retrieveTutorials();
+      },
+  }
 };
 
 

@@ -50,8 +50,17 @@ exports.create = (req, res) => {
 //Eli Gadot - change the search from title to description 
 //also change in TutorialDataService from /tutorials?title to /tutorials?description)
 exports.findAll = async (req, res) => {
-	const search = req.query.description;
-	var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};
+	// const search = req.query.description;
+	// var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};
+
+	if (req.query.description){
+		condition = { description: { $regex: new RegExp(req.query.description), $options: "i" } }
+	} else
+		if (req.query.year){
+			condition = { year: req.query.year }
+		} else
+			condition = {}
+
 
 	const data = await Tutorial.find(condition).lean();
 	try {

@@ -173,8 +173,10 @@ exports.saveBulk = async (req, res) => {
 	}
 
 	try {
-    const data=await csv().fromFile(`uploads/${req.file.filename}`);
+    let data=await csv().fromFile(`uploads/${req.file.filename}`);
 		if (data) {
+      // filter out all items with no "asmchta_date"
+        data = data.filter((item) => item.asmchta_date!== '');
         const allData = await getMappedItems(data,req.body.company);
 				const result = await Book.insertMany(allData, {ordered: true});
         unLinkFile(`uploads/${req.file.filename}`);
@@ -196,11 +198,10 @@ exports.saveBulk = async (req, res) => {
 
 async function getMappedItems(filteredData,company) {
 	const data = await Promise.all(filteredData.map(async (item, i) => {
-
-    if (item.asmchta_date) { // if no date - probbaly is Yitra...
-      await updateExcelRecID(company , item.year, item.asmacta1 , item.record_id);
+  const {year , asmacta1, record_id } = item;
+    if (company && year && asmacta1) { // if no date - probbaly is Yitra...
+      await updateExcelRecID(company , year, asmacta1 , record_id);
     }
-  
 		return {
       company,
       asmchta_date: item.asmchta_date,
