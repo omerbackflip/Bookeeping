@@ -369,7 +369,7 @@ export default {
   methods: {
     rowClicked(row) {
       this.currInvoice = row;
-      if(row.supplier){
+      if(row.supplier || row.project){
         this.supplierFilter = this.tutorials.filter(supp => supp.supplier === row.supplier);
         //this.supplierTotal = this.supplierFilter.reduce(num1 => num1.total);
         this.supplierTotal = 0;
