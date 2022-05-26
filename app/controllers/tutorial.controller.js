@@ -52,15 +52,19 @@ exports.create = (req, res) => {
 exports.findAll = async (req, res) => {
 	// const search = req.query.description;
 	// var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};
-
-	if (req.query.year && req.query.year != 'ALL'){
-			condition = { year: req.query.year }
-	} else
-		if (req.query.description){
-			condition = { description: { $regex: new RegExp(req.query.description), $options: "i" } }
-		} else
-			condition = {}
-
+	let condition = {};
+	const {year,description} = req.query;	
+	
+	if (year && year != 'ALL') {
+		condition = {year};
+	} 
+	
+	if (description) {
+		condition = { 
+			...condition , 
+			description: { $regex: new RegExp(description), $options: "i" }
+		}
+	}
 
 	const data = await Tutorial.find(condition).lean();
 	try {

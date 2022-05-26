@@ -14,7 +14,6 @@
               append-icon="mdi-magnify"
               label="Search1"
               single-line
-              hide-details
             ></v-text-field>
           </v-col>
           <v-col cols="12" sm="6" md="3">
@@ -47,11 +46,9 @@
         </v-row>
         <v-data-table 
             :headers="headers"
-            :items="tutorialsLimited" 
+            :items="tutorials" 
             :search="search"
             @click:row="rowClicked"
-            @scroll.native="onScroll"
-            id="virtual-scroll-table"
             disable-pagination
             hide-default-footer
             fixed-header
@@ -64,18 +61,7 @@
             :single-expand="true"
             :expanded.sync="expanded"
           >
-          <template v-if="start > 0" v-slot:body.prepend>
-              <tr>
-                <td :colspan="headers.length" :style="'padding-top:'+(startHeight-70)+'px'">
-                </td>
-              </tr>
-          </template>
-          <template v-if="start + perPage < this.tutorials.length" v-slot:body.append>
-            <tr>
-              <td :colspan="headers.length" :style="'padding-top:'+endHeight+'px'">
-              </td>
-            </tr>
-          </template>
+
                       <!-- @item-expanded="onExpand"> -->
           <template v-slot:[`item.actions`]="{ item }"> 
             <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
@@ -526,39 +512,11 @@ export default {
 		itemRowBackground(item) {
 			return item.pratim ? 'bg-green' : '';
 		},
-
-    onScroll(e) {
-      // debounce if scrolling fast
-      this.timeout && clearTimeout(this.timeout);
- 
-      this.timeout = setTimeout(() => {
-        const { scrollTop } = e.target;
-        const rows = Math.ceil(scrollTop / this.rowHeight);
-
-        this.start = rows + this.perPage > this.tutorials.length ?
-          this.tutorials.length - this.perPage: rows;
-
-        this.$nextTick(() => {
-          e.target.scrollTop = scrollTop;
-        });
-      }, 20);
-    },
-  },
-  computed: {
-    tutorialsLimited() {
-      return this.tutorials.slice(this.start, this.perPage+this.start);
-    },
-    startHeight() {
-      return this.start * this.rowHeight - 32;
-    },
-    endHeight() {
-      return this.rowHeight * (this.tutorials.length - this.start);
-    },
   },
   mounted() {
+    console.log("here")
     this.retrieveTutorials();
     this.loadRefTables();
-    document.getElementById('virtual-scroll-table').addEventListener('wheel', this.onScroll);
     // this.companyName = this.loadTable(1);
     // console.log(this.companyName)
     this.isLoading = false;
@@ -568,7 +526,7 @@ export default {
         this.retrieveTutorials();
       },
   }
-};
+}
 
 
 
@@ -584,9 +542,5 @@ export default {
 .bg-green{
 	background-color: lightgreen !important;
 }
-#virtual-scroll-table {
-  max-height: 75vh;
-  height: 75vh;
-  overflow: auto;
-}
+
 </style>
