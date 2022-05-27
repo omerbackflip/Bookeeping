@@ -52,6 +52,7 @@
             disable-pagination
             hide-default-footer
             fixed-header
+            height="75vh"
             class="elevation-3"
             :item-class="itemRowBackground"
             loading = "isLoading"
@@ -294,14 +295,14 @@ export default {
         { text: "Comp.", value: "company", class: 'success title', width: '4%'},
         { text: "Project", value: "project", class: 'success title' },
         { text: "Date", value: "date", class: 'success title', groupable: false  },
-        { text: "Description", value: "description", class: 'success title', groupable: false, width: '20%' },
-        { text: "Supplier", value: "supplier", class: 'success title' },
+        { text: "Description", value: "description", class: 'success title', groupable: false, width: '20%', align:'right' },
+        { text: "Supplier", value: "supplier", class: 'success title', align:'right' },
         { text: "Amount", value: "amount", class: 'success title', groupable: false, align:'right'  },
         { text: "Vat", value: "vat", class: 'success title', groupable: false, align:'right'  },
         { text: "Total", value: "total", class: 'success title', groupable: false, align:'right'  },
-        { text: "Invoice ID", value: "invoiceId", class: 'success title', groupable: false  },
+        { text: "Invoice ID", value: "invoiceId", class: 'success title', groupable: false, align:'right'  },
         { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false, width: '4%'  },
-        { text: "Remark", value: "remark", class: 'success title', groupable: false, width: '20%'  },
+        { text: "Remark", value: "remark", class: 'success title', groupable: false, width: '20%', align:'right'  },
         { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
         { text: "P", value: "published", class: 'success title', groupable: false  },
         //{ text: "Year", value: "year", class: 'success title'},
@@ -383,7 +384,6 @@ export default {
       }
     },
 
-
     retrieveTutorials() {
       TutorialDataService.findByYear(this.selectedYear)
         .then((response) => {
@@ -394,41 +394,15 @@ export default {
         });
     },
 
-    loadRefTables() {
-      TableDataService.findByTableID(1) // Retrive company array
-        .then((response) => {
-          this.companyName = response.data.map(company => company.description);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-
-      TableDataService.findByTableID(2) // Retrive project array
-        .then((response) => {
-          this.projectName = response.data.map(project => project.description);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-
-      TableDataService.findByTableID(3) // Retrive supplier array
-        .then((response) => {
-          this.supplierName = response.data.map(project => project.description);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-
-
-    loadTable:function (table_id) {
-      TableDataService.findByTableID(table_id)
-        .then((response) => {
-          return (response.data.map(code => code.description));
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+    loadTable:async function (table_id,key) {
+      try {
+        const response = await TableDataService.findByTableID(table_id);
+        if(response) {
+          this[key] = response.data.map(code => code.description);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     },
 
     refreshList() {
@@ -513,12 +487,11 @@ export default {
 			return item.pratim ? 'bg-green' : '';
 		},
   },
-  mounted() {
-    console.log("here")
+  async mounted() {
     this.retrieveTutorials();
-    this.loadRefTables();
-    // this.companyName = this.loadTable(1);
-    // console.log(this.companyName)
+    await this.loadTable(1,'companyName');
+    await this.loadTable(2,'supplierName');
+    await this.loadTable(3,'projectName');
     this.isLoading = false;
   },
   watch : {
