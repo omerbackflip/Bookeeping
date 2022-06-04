@@ -14,9 +14,10 @@
               append-icon="mdi-magnify"
               label="Search1"
               single-line
+              :class="isMobile() ? 'mobile-search' : ''"
             ></v-text-field>
           </v-col>
-          <v-col cols="12" sm="6" md="3">
+          <v-col cols="6" sm="6" md="3">
             <export-excel 
               :data="tutorials" 
               :fields="xlsHeders"
@@ -24,14 +25,14 @@
               name="export"
               title="This is Title"
               footer="This is footer"
-              class="mt-3">
-              <v-btn class="btn btn-danger"> 
+              >
+              <v-btn :class="isMobile() ? 'font-size-mobile' : ''" class="btn btn-danger"> 
                 <v-icon>mdi-download</v-icon>Download To Excel
               </v-btn>
             </export-excel>
           </v-col>
-          <v-col cols="12" sm="6" md="3">
-              <v-btn class="mt-3 btn btn-danger" @click="removeAllTutorials">
+          <v-col cols="6" sm="6" md="3">
+              <v-btn :class="isMobile() ? 'margin-button font-size-mobile' : ''" class="btn btn-danger" @click="removeAllTutorials">
                 Remove All
               </v-btn>
           </v-col>
@@ -45,13 +46,14 @@
           </v-col>
         </v-row>
         <v-data-table 
-            :headers="headers"
+            :headers="getHeaders()"
             :items="tutorials" 
             :search="search"
             @click:row="rowClicked"
             disable-pagination
             hide-default-footer
             fixed-header
+            mobile-breakpoint="0"
             height="75vh"
             class="elevation-3"
             :item-class="itemRowBackground"
@@ -289,25 +291,7 @@ export default {
       projectFilter: [],
       //searchStr: "",
       search: '',
-      headers:[
-        { text: "^", value: "data-table-expand", class: 'success title', groupable: false },
-        { text: "G", value: "group", class: 'success title' },
-        { text: "Comp.", value: "company", class: 'success title', width: '4%'},
-        { text: "Project", value: "project", class: 'success title' },
-        { text: "Date", value: "date", class: 'success title', groupable: false  },
-        { text: "Description", value: "description", class: 'success title', groupable: false, width: '20%', align:'right' },
-        { text: "Supplier", value: "supplier", class: 'success title', align:'right' },
-        { text: "Amount", value: "amount", class: 'success title', groupable: false, align:'right'  },
-        { text: "Vat", value: "vat", class: 'success title', groupable: false, align:'right'  },
-        { text: "Total", value: "total", class: 'success title', groupable: false, align:'right'  },
-        { text: "Invoice ID", value: "invoiceId", class: 'success title', groupable: false, align:'right'  },
-        { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false, width: '4%'  },
-        { text: "Remark", value: "remark", class: 'success title', groupable: false, width: '20%', align:'right'  },
-        { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
-        { text: "P", value: "published", class: 'success title', groupable: false  },
-        //{ text: "Year", value: "year", class: 'success title'},
-        //{ text: "Pratim", value: "pratim", sortable: false, class: 'success title', groupable: false  },
-      ],
+      headers:[],
       xlsHeders:{
         "חברה"        :"company", 
         "פרויקט"      :"project", 
@@ -354,6 +338,37 @@ export default {
   },
 
   methods: {
+    getHeaders() {
+      if(this.isMobile()) {
+        return [
+          { text: "^", value: "data-table-expand", class: 'success mobile-headers expantion-button', groupable: false },
+          { text: "Date", value: "date", class: 'success mobile-headers', groupable: false  },
+          { text: "Description", value: "description", class: 'success mobile-headers', groupable: false, width: '20%', align:'right' },
+          { text: "Amount", value: "amount", class: 'success mobile-headers', groupable: false, align:'right'  },
+          { text: "Act.", value: "actions", sortable: false, class: 'success mobile-headers', groupable: false  },
+        ]
+      } else {
+        return [
+          { text: "^", value: "data-table-expand", class: 'success title', groupable: false },
+          { text: "G", value: "group", class: 'success title' },
+          { text: "Comp.", value: "company", class: 'success title', width: '4%'},
+          { text: "Project", value: "project", class: 'success title' },
+          { text: "Date", value: "date", class: 'success title', groupable: false  },
+          { text: "Description", value: "description", class: 'success title', groupable: false, width: '20%', align:'right' },
+          { text: "Supplier", value: "supplier", class: 'success title', align:'right' },
+          { text: "Amount", value: "amount", class: 'success title', groupable: false, align:'right'  },
+          { text: "Vat", value: "vat", class: 'success title', groupable: false, align:'right'  },
+          { text: "Total", value: "total", class: 'success title', groupable: false, align:'right'  },
+          { text: "Invoice ID", value: "invoiceId", class: 'success title', groupable: false, align:'right'  },
+          { text: "Excel Rec ID", value: "excelRecID", class: 'success title', groupable: false, width: '4%'  },
+          { text: "Remark", value: "remark", class: 'success title', groupable: false, width: '20%', align:'right'  },
+          { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
+          { text: "P", value: "published", class: 'success title', groupable: false  },
+          //{ text: "Year", value: "year", class: 'success title'},
+          //{ text: "Pratim", value: "pratim", sortable: false, class: 'success title', groupable: false  },
+        ]
+      }
+    },
     rowClicked(row) {
       this.currInvoice = row;
       if(row.supplier || row.project){
@@ -370,7 +385,13 @@ export default {
         }
       }
     },
-
+    isMobile() {
+      if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        return true
+      } else {
+        return false
+      }
+    },
     deleteOne(id) {
       if (window.confirm('Are you sure you want to delete one item ?')){
         TutorialDataService.delete(id)
@@ -484,7 +505,11 @@ export default {
 
 		//Background of row if added to Book table
 		itemRowBackground(item) {
-			return item.pratim ? 'bg-green' : '';
+      let classes = item.pratim ? 'bg-green' : '';
+      if(this.isMobile()) {
+        classes = `${classes} mobile-items`;
+      }
+      return classes;
 		},
   },
   async mounted() {
@@ -514,6 +539,28 @@ export default {
 
 .bg-green{
 	background-color: lightgreen !important;
+}
+
+.mobile-headers{
+  font-size: 12px !important;
+  padding: 0 !important;
+}
+
+.mobile-items > td {
+  font-size: 12px !important;
+}
+
+.expantion-button{
+  padding-left: 22px !important;
+}
+
+.font-size-mobile{
+  font-size: 10px !important;
+}
+
+.mobile-search{
+  margin-top: 20px !important;
+  width: 296px !important;
 }
 
 </style>
