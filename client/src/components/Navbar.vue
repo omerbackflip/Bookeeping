@@ -11,7 +11,7 @@
 
                 <v-col v-show="isTutorials">
                     <v-btn @click="setAddNewRow" class="plus-button">
-                        +
+                        + 
                     </v-btn>
                 </v-col>
                 
@@ -46,7 +46,7 @@
                                 :key="index"
                             >
 
-                            <v-list-item-title @click="onMenuItemClick(index)">
+                            <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
                                 {{item.title}}
                             </v-list-item-title>
 
@@ -120,7 +120,11 @@ export default {
             this.$root.$emit('yearChange',event);
         },
         onMenuItemClick(index) {
-            console.log(index)
+            if(!index) {
+                this.$root.$emit('removeAllItems',false);
+            } else {
+                this.$root.$emit('downloadExcel',false);
+            }
         },
     },
     computed: {
@@ -150,6 +154,9 @@ export default {
     }
     .year-input:nth-child(1){
         height: 42px !important;
+    }
+    .cursor-pointer{
+        cursor: pointer ;
     }
 </style>
 

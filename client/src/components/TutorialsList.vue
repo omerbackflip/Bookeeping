@@ -1,14 +1,7 @@
-
-
 <template>
   <div class="list row">
-    <!-- <div class="input-group mb-3 mt-3">
-      <input type="text" class="form-control" placeholder="Search in description field" v-model="searchStr"/>
-      <v-btn @click="searchSTR" class="ml-2 mr-2"> Search </v-btn>
-    </div>  -->
-    <!-- <AddInvoice></AddInvoice> -->
     <v-layout>
-      <v-flex xs12 md10>
+      <v-flex >
         <v-row>
           <v-col v-if="!isMobile()"  :cols="12" sm="6" md="3">
             <v-text-field
@@ -19,83 +12,6 @@
               :class="isMobile() ? 'mobile-search' : ''"
             ></v-text-field>
           </v-col>
-
-          <!-- <v-col class="mt-2" cols="4" sm="4" md="3">
-              <v-select :class="isMobile() ? '' : 'mt-3'"
-                :items="yearList"
-                v-model="selectedYear"
-                dense
-                solo
-            ></v-select>
-          </v-col>
-
-          <v-col v-show="isMobile()" col="2">
-            <template>
-              <div class="mt-2 text-center">
-                <v-menu offset-y>
-                  <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    icon
-                    v-bind="attrs"
-                    v-on="on"
-                  >
-                    <v-icon>mdi-dots-vertical</v-icon>
-                  </v-btn>
-                  </template>
-                  <v-list>
-                    <v-list-item
-                      v-for="(item, index) in items"
-                      :key="index"
-                    >
-                      <template v-if="item.newRow">
-                          <v-list-item-title  @click="dialog=true">
-                            Add new row
-                          </v-list-item-title>
-                      </template>
-
-                      <v-list-item-title v-else-if="(item.remove)" @click="item.onClick && item.onClick" >{{ item.title }}</v-list-item-title>
-                          <export-excel 
-                            v-else-if="item.excel"
-                            :data="tutorials" 
-                            :fields="xlsHeders"
-                            type="xlsx"
-                            name="export"
-                            title="This is Title"
-                            footer="This is footer"
-                            >
-                              <v-list-item-title >
-                                {{item.title}}
-                              </v-list-item-title>
-                          </export-excel>
-
-                    </v-list-item>
-                  </v-list>
-                </v-menu>
-              </div>
-            </template>
-          </v-col> -->
-
-          <span v-show="!(isMobile())">
-            <v-col cols="4" sm="4" md="3">
-              <export-excel 
-                :data="tutorials" 
-                :fields="xlsHeders"
-                type="xlsx"
-                name="export"
-                title="This is Title"
-                footer="This is footer"
-                >
-                <v-btn :class="isMobile() ? 'font-size-mobile' : 'mt-4'" class="btn btn-danger"> 
-                  <v-icon>mdi-download</v-icon>Download To Excel
-                </v-btn>
-              </export-excel>
-            </v-col>
-            <v-col cols="3" sm="4" md="3">
-                <v-btn :class="isMobile() ? 'font-size-mobile ml-4' : 'mt-4'" class="btn btn-danger" @click="removeAllTutorials">
-                  Remove All
-                </v-btn>
-            </v-col>
-          </span>
 
         </v-row>
         <v-data-table 
@@ -108,7 +24,8 @@
             fixed-header
             mobile-breakpoint="0"
             height="90vh"
-            class="elevation-3 table-margin"
+            class="elevation-3"
+            :class="isMobile() ? 'table-margin' : ''"
             :item-class="itemRowBackground"
             loading = "isLoading"
             loading-text="Loading... Please wait"
@@ -154,8 +71,22 @@
             </div>
           </template>
           <template v-slot:expanded-item="{ headers, item }">
-            <td :colspan="headers.length">
-              {{item.pratim}} - {{item.record_schum}} - {{item.cust_lname}}
+            <td v-if="isMobile()" :colspan="headers.length">
+                <ul>
+                  <li>group: {{item.group}}</li>
+                  <li>company: {{item.company}}</li>
+                  <li>project: {{item.project}}</li>
+                  <li>supplier: {{item.supplier}}</li>
+                  <li>vat: {{item.vat}}</li>
+                  <li>total: {{item.total}}</li>
+                  <li>Invoice Id: {{item.invoiceId}}</li>
+                  <li>Excel record ID: {{item.excelRecID}}</li>
+                  <li>remark: {{item.remark}}</li>
+                  <li>published: {{item.published ? 'Yes' : 'No'}}</li>
+                </ul>              
+            </td>
+            <td v-else :colspan="headers.length">
+                {{item.pratim}} - {{item.record_schum}} - {{item.cust_lname}}
             </td>
           </template>
         </v-data-table>
@@ -171,7 +102,7 @@
             >
               <v-card>
                 <v-card-title>
-                  <span class="text-h5">Add New</span>
+                  <span class="text-h5">{{updateInvoice ?  'Update' : 'Add New'}}</span>
                 </v-card-title>
                 <v-card-text>
                   <v-container>
@@ -243,7 +174,7 @@
                         ></v-combobox>
                       </v-col>
                       <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.invoiceId" label="Invouce Id"></v-text-field>
+                        <v-text-field v-model="invoice.invoiceId" label="Invoice Id"></v-text-field>
                       </v-col>
                       <v-col  cols="12" sm="6" md="4">
                         <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
@@ -258,8 +189,8 @@
                 </v-card-text>
                 <v-card-actions>
                   <v-spacer></v-spacer>
-                  <v-btn @click="saveInvoice"> -Add- </v-btn>
-                <v-btn class="mx-3" @click="clearForm">Clear</v-btn>
+                  <v-btn @click="updateInvoice ? editInvoice() : saveInvoice()"> {{updateInvoice ? '-Update-' : '-Add-'}} </v-btn>
+                  <v-btn v-show="!updateInvoice" class="mx-3" @click="clearForm">Clear</v-btn>
                 </v-card-actions>
               </v-card>
             </v-dialog>
@@ -338,6 +269,15 @@
   </v-card>
   </v-dialog>
     </v-layout>
+
+    <export-excel 
+    :data="tutorials"
+    v-if="exportExcel" 
+    id="excel-export"
+    :fields="xlsHeders"
+    type="xlsx"
+    >
+  </export-excel>
     
   </div>
 </template>
@@ -371,6 +311,7 @@ export default {
       projectName   : [],
       supplierName  : [],
       expanded: [],
+      updateInvoice: 0,
       dialog: false,
       detailDialog: false,
       supplierTotal : 0,
@@ -382,6 +323,7 @@ export default {
       projectTotal : 0,
       projectFilter: [],
       //searchStr: "",
+      exportExcel: false,
       search: '',
       headers:[],
       xlsHeders:{
@@ -480,7 +422,9 @@ export default {
         for (let i=0; i< this.projectFilter.length ;i++ ){
           this.projectTotal += this.projectFilter[i].total;
         }
-        this.detailDialog = true;
+        if(!(this.dialog)) {
+          this.detailDialog = true;
+        }
       }
     },
     isMobile() {
@@ -549,9 +493,6 @@ export default {
           });
       }
     },
-    addNewRow() {
-      
-    },
     searchSTR() {
       TutorialDataService.findByTitle(this.searchStr)
         .then((response) => {
@@ -574,6 +515,7 @@ export default {
             this.invoice.id = response.data.id;
             this.refreshList();
             this.clearForm();
+            this.dialog = false;
         }        
       } catch (error) {
         this.msg = JSON.stringify(error.message);
@@ -582,15 +524,40 @@ export default {
         }, 3000);
         console.log(error);
       }
+    },
 
+    async editInvoice() {
+      try {
+        const response = await TutorialDataService.update(this.updateInvoice ,this.invoice);
+        if(response) {
+            this.refreshList();
+            this.clearForm();
+            this.updateInvoice = 0;
+            this.dialog = false;
+        }        
+      } catch (error) {
+        this.msg = JSON.stringify(error.message);
+        setTimeout(() => {
+          this.msg = '';
+        }, 3000);
+        console.log(error);
+      }
     },
 
     clearForm (){
       this.$refs.form.reset()
     },
 
-    editOne(id) { // this is example how to call to different page using router
-      this.$router.push({ name: "tutorial-details", params: { id: id } });
+    async editOne(id) { // this is example how to call to different page using router
+      // this.$router.push({ name: "tutorial-details", params: { id: id } });
+      this.dialog = true;
+      this.updateInvoice = id;
+      if(id) {
+        const response = await TutorialDataService.get(id);
+        if(response && response.data) {
+          this.invoice = response.data;
+        }
+      }
     },
 
     updateOne(item) {
@@ -627,9 +594,24 @@ export default {
     await this.loadTable(3,'projectName');
     this.$root.$on('addNewRow',() => {
       this.dialog = true;
+      this.updateInvoice = 0;
+      this.invoice = {};
     });
     this.$root.$on('yearChange',(year) => {
       this.selectedYear = year;
+    });
+    this.$root.$on('removeAllItems',() => {
+      this.removeAllTutorials();
+    });
+    this.$root.$on('downloadExcel',() => {
+      const excel = document.getElementById('excel-export');
+      this.exportExcel = true;
+      if(excel) {
+        excel.click();
+        setTimeout(() => {
+          this.exportExcel = false;
+        }, 1000);
+      }
     });
     this.isLoading = false;
   },
