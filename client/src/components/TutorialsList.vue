@@ -1,3 +1,5 @@
+
+
 <template>
   <div class="list row">
     <!-- <div class="input-group mb-3 mt-3">
@@ -5,10 +7,10 @@
       <v-btn @click="searchSTR" class="ml-2 mr-2"> Search </v-btn>
     </div>  -->
     <!-- <AddInvoice></AddInvoice> -->
-    <v-layout row wrap>
+    <v-layout>
       <v-flex xs12 md10>
         <v-row>
-          <v-col cols="12" sm="6" md="3">
+          <v-col v-if="!isMobile()"  :cols="12" sm="6" md="3">
             <v-text-field
               v-model="search"
               append-icon="mdi-magnify"
@@ -17,33 +19,84 @@
               :class="isMobile() ? 'mobile-search' : ''"
             ></v-text-field>
           </v-col>
-          <v-col cols="6" sm="6" md="3">
-            <export-excel 
-              :data="tutorials" 
-              :fields="xlsHeders"
-              type="xlsx"
-              name="export"
-              title="This is Title"
-              footer="This is footer"
-              >
-              <v-btn :class="isMobile() ? 'font-size-mobile' : ''" class="btn btn-danger"> 
-                <v-icon>mdi-download</v-icon>Download To Excel
-              </v-btn>
-            </export-excel>
-          </v-col>
-          <v-col cols="6" sm="6" md="3">
-              <v-btn :class="isMobile() ? 'margin-button font-size-mobile' : ''" class="btn btn-danger" @click="removeAllTutorials">
-                Remove All
-              </v-btn>
-          </v-col>
-          <v-col cols="12" sm="6" md="3">
-              <v-select class="mt-3"
+
+          <!-- <v-col class="mt-2" cols="4" sm="4" md="3">
+              <v-select :class="isMobile() ? '' : 'mt-3'"
                 :items="yearList"
                 v-model="selectedYear"
                 dense
                 solo
             ></v-select>
           </v-col>
+
+          <v-col v-show="isMobile()" col="2">
+            <template>
+              <div class="mt-2 text-center">
+                <v-menu offset-y>
+                  <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    icon
+                    v-bind="attrs"
+                    v-on="on"
+                  >
+                    <v-icon>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                  </template>
+                  <v-list>
+                    <v-list-item
+                      v-for="(item, index) in items"
+                      :key="index"
+                    >
+                      <template v-if="item.newRow">
+                          <v-list-item-title  @click="dialog=true">
+                            Add new row
+                          </v-list-item-title>
+                      </template>
+
+                      <v-list-item-title v-else-if="(item.remove)" @click="item.onClick && item.onClick" >{{ item.title }}</v-list-item-title>
+                          <export-excel 
+                            v-else-if="item.excel"
+                            :data="tutorials" 
+                            :fields="xlsHeders"
+                            type="xlsx"
+                            name="export"
+                            title="This is Title"
+                            footer="This is footer"
+                            >
+                              <v-list-item-title >
+                                {{item.title}}
+                              </v-list-item-title>
+                          </export-excel>
+
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </div>
+            </template>
+          </v-col> -->
+
+          <span v-show="!(isMobile())">
+            <v-col cols="4" sm="4" md="3">
+              <export-excel 
+                :data="tutorials" 
+                :fields="xlsHeders"
+                type="xlsx"
+                name="export"
+                title="This is Title"
+                footer="This is footer"
+                >
+                <v-btn :class="isMobile() ? 'font-size-mobile' : 'mt-4'" class="btn btn-danger"> 
+                  <v-icon>mdi-download</v-icon>Download To Excel
+                </v-btn>
+              </export-excel>
+            </v-col>
+            <v-col cols="3" sm="4" md="3">
+                <v-btn :class="isMobile() ? 'font-size-mobile ml-4' : 'mt-4'" class="btn btn-danger" @click="removeAllTutorials">
+                  Remove All
+                </v-btn>
+            </v-col>
+          </span>
+
         </v-row>
         <v-data-table 
             :headers="getHeaders()"
@@ -54,8 +107,8 @@
             hide-default-footer
             fixed-header
             mobile-breakpoint="0"
-            height="75vh"
-            class="elevation-3"
+            height="90vh"
+            class="elevation-3 table-margin"
             :item-class="itemRowBackground"
             loading = "isLoading"
             loading-text="Loading... Please wait"
@@ -106,89 +159,124 @@
             </td>
           </template>
         </v-data-table>
-        <v-footer color="primary lighten-1" align="center" elevation="10">
-          <v-form ref="form" >
-            <v-row>
-              <v-col >
-                <v-combobox
-                  v-model="invoice.company"
-                  :items="companyName"
-                  label="Company"
-                  dense
-                ></v-combobox>
-              </v-col>
-              <v-col >
-                <v-combobox
-                  v-model="invoice.project"
-                  :items="projectName"
-                  label="Project"
-                  dense
-                ></v-combobox>
-              </v-col>
-              <v-col >
-                <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
-              </v-col>
-              <v-col >
-                <v-text-field v-model="invoice.amount" label="Amount" required></v-text-field>
-              </v-col>
-              <v-col >
-                <v-text-field v-model="invoice.vat" label="Vat"></v-text-field>
-              </v-col>
-              <v-col >
-                <v-text-field v-model="invoice.year" label="Year"></v-text-field>
-              </v-col>
-              <v-col >
-                <v-text-field v-model="invoice.total" label="Total" required></v-text-field>
-              </v-col>              
-              <v-col >
-                <v-text-field v-model="invoice.group" label="Group" required></v-text-field>
-              </v-col>
-              <v-col >
-                <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
-                  <template v-slot:activator="{ on, attrs }">
-                    <v-text-field 
-                      v-model="invoice.date"
-                      label="Date"
-                      prepend-icon="mdi-calendar"
-                      readonly
-                      v-bind="attrs"
-                      v-on="on" 
-                      required>
-                    </v-text-field>
-                  </template> 
-                  <v-date-picker v-model="invoice.date" scrollable>
-                    <v-spacer></v-spacer>
-                    <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
-                    <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
-                  </v-date-picker>
-                </v-dialog>
-              </v-col>
-              <v-col >
-                <v-combobox
-                  v-model="invoice.supplier"
-                  :items="supplierName"
-                  label="Supplier"
-                  dense
-                ></v-combobox>
-              </v-col>
-              <v-col >
-                <v-text-field v-model="invoice.invoiceId" label="Invouce Id"></v-text-field>
-              </v-col>
-              <v-col >
-                <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
-              </v-col>
-              <v-col >
-                <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
-              </v-col> 
-            </v-row>
-            <v-btn @click="saveInvoice"> -Add- </v-btn>
-            <v-btn class="mx-3" @click="clearForm">Clear</v-btn>
-          </v-form>
-        </v-footer>
       </v-flex>
 
+
+      <!-- New row dialog -->
+
+
+            <v-dialog
+              v-model="dialog"
+              max-width="600px"
+            >
+              <v-card>
+                <v-card-title>
+                  <span class="text-h5">Add New</span>
+                </v-card-title>
+                <v-card-text>
+                  <v-container>
+                  <p v-show="msg">
+                    {{msg}}
+                  </p>
+                  <v-form ref="form">
+                   <v-row>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-combobox
+                          v-model="invoice.company"
+                          :items="companyName"
+                          label="Company"
+                          dense
+                        ></v-combobox>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-combobox
+                          v-model="invoice.project"
+                          :items="projectName"
+                          label="Project"
+                          dense
+                        ></v-combobox>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.amount" type="number" label="Amount" required></v-text-field>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.vat" type="number" label="Vat"></v-text-field>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.year" type="number" label="Year"></v-text-field>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.total" type="number" label="Total" required></v-text-field>
+                      </v-col>              
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.group" type="number" label="Group" required></v-text-field>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
+                          <template v-slot:activator="{ on, attrs }">
+                            <v-text-field 
+                              v-model="invoice.date"
+                              label="Date"
+                              prepend-icon="mdi-calendar"
+                              readonly
+                              v-bind="attrs"
+                              v-on="on" 
+                              required>
+                            </v-text-field>
+                          </template> 
+                          <v-date-picker v-model="invoice.date" scrollable>
+                            <v-spacer></v-spacer>
+                            <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
+                            <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
+                          </v-date-picker>
+                        </v-dialog>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-combobox
+                          v-model="invoice.supplier"
+                          :items="supplierName"
+                          label="Supplier"
+                          dense
+                        ></v-combobox>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.invoiceId" label="Invouce Id"></v-text-field>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
+                      </v-col>
+                      <v-col  cols="12" sm="6" md="4">
+                        <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
+                      </v-col> 
+                    </v-row>
+                    </v-form>
+                  </v-container>
+                  <small>*indicates required field</small>
+                </v-card-text>
+                <v-card-actions>
+                  <v-spacer></v-spacer>
+                  <v-btn @click="saveInvoice"> -Add- </v-btn>
+                <v-btn class="mx-3" @click="clearForm">Clear</v-btn>
+                </v-card-actions>
+              </v-card>
+            </v-dialog>
+
+    <!-- ----------------------- -->
+
       <!-- this section is the summary of the supplier -->
-      <v-flex md2>
+  <v-dialog
+    v-model="detailDialog"
+    max-width="600px"
+  >
+  <v-card>
+    <v-card-title>
+      <span class="text-h5">Summary</span>
+    </v-card-title>
+    <v-card-text :class="isMobile() ? 'margin-card' : ''">
+      <v-flex>
         <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
           <export-excel 
             :data="supplierFilter" 
@@ -245,6 +333,10 @@
           </v-data-table>
         </v-container>
       </v-flex>
+
+    </v-card-text>
+  </v-card>
+  </v-dialog>
     </v-layout>
     
   </div>
@@ -254,9 +346,7 @@
 
 <script>
 import TutorialDataService from "../services/TutorialDataService";
-// import BookDataService from "../services/BookDataService";
 import TableDataService from "../services/TableDataService";
-// import AddInvoice from "./AddInvoice.vue"
 import Vue from 'vue'
 import moment from 'moment'
 import excel from 'vue-excel-export'
@@ -281,6 +371,8 @@ export default {
       projectName   : [],
       supplierName  : [],
       expanded: [],
+      dialog: false,
+      detailDialog: false,
       supplierTotal : 0,
       supplierFilter: [],
       sideHeaders: [
@@ -324,11 +416,16 @@ export default {
         excelRecID:   null,
         year:         null,
       },  
+      msg: '',
       fldRules: [v => !!v || 'Field is required'],
       isLoading: true,
       itemToEdit: "",
+      items: [
+        { title: 'Add new row', onClick:  this.addNewRow, newRow: true },
+        { title: 'Remove all items', onClick:  this.removeAllTutorials, remove:true},
+        { title: 'Download to excel', onClick: undefined, excel: true },
+      ],
       corrolatedBook: "",
-      yearList : [2020, 2021, 2022, 'ALL'],
       selectedYear : 2022,
       start: 0,
       timeout: null,
@@ -383,6 +480,7 @@ export default {
         for (let i=0; i< this.projectFilter.length ;i++ ){
           this.projectTotal += this.projectFilter[i].total;
         }
+        this.detailDialog = true;
       }
     },
     isMobile() {
@@ -406,9 +504,11 @@ export default {
     },
 
     retrieveTutorials() {
+      this.isLoading = true;
       TutorialDataService.findByYear(this.selectedYear)
         .then((response) => {
           this.tutorials = response.data;
+          this.isLoading = false;
         })
         .catch((e) => {
           console.log(e);
@@ -449,7 +549,9 @@ export default {
           });
       }
     },
-
+    addNewRow() {
+      
+    },
     searchSTR() {
       TutorialDataService.findByTitle(this.searchStr)
         .then((response) => {
@@ -465,16 +567,22 @@ export default {
       this.tutorial.splice(index, 1);
     },
 
-    saveInvoice() {
-      TutorialDataService.create(this.invoice)
-        .then(response => {
-          this.invoice.id = response.data.id;
-          this.refreshList();
-          this.clearForm();
-        })
-        .catch(e => {
-          console.log(e);
-        });
+    saveInvoice: async function() {
+      try {
+        const response = await TutorialDataService.create(this.invoice);
+        if(response) {
+            this.invoice.id = response.data.id;
+            this.refreshList();
+            this.clearForm();
+        }        
+      } catch (error) {
+        this.msg = JSON.stringify(error.message);
+        setTimeout(() => {
+          this.msg = '';
+        }, 3000);
+        console.log(error);
+      }
+
     },
 
     clearForm (){
@@ -517,6 +625,12 @@ export default {
     await this.loadTable(1,'companyName');
     await this.loadTable(2,'supplierName');
     await this.loadTable(3,'projectName');
+    this.$root.$on('addNewRow',() => {
+      this.dialog = true;
+    });
+    this.$root.$on('yearChange',(year) => {
+      this.selectedYear = year;
+    });
     this.isLoading = false;
   },
   watch : {
@@ -542,12 +656,12 @@ export default {
 }
 
 .mobile-headers{
-  font-size: 12px !important;
+  font-size: 11px !important;
   padding: 0 !important;
 }
 
 .mobile-items > td {
-  font-size: 12px !important;
+  font-size: 10px !important;
 }
 
 .expantion-button{
@@ -555,12 +669,24 @@ export default {
 }
 
 .font-size-mobile{
-  font-size: 10px !important;
+  font-size: 8px !important;
+  padding: 1px 3px 1px 3px !important;
 }
 
 .mobile-search{
-  margin-top: 20px !important;
-  width: 296px !important;
+  margin-top: 5px !important;
+  margin-bottom: -30px;
 }
 
+.mt-4{
+  margin-top: 15px !important;
+}
+
+.table-margin{
+  margin-top: 29px;
+}
+
+.margin-card{
+  margin: -25px;
+}
 </style>
