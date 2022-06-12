@@ -18,7 +18,7 @@
             :headers="getHeaders()"
             :items="tutorials" 
             :search="search"
-            @click:row="rowClicked"
+
             disable-pagination
             hide-default-footer
             fixed-header
@@ -34,14 +34,13 @@
             :single-expand="true"
             :expanded.sync="expanded"
           >
-
-                      <!-- @item-expanded="onExpand"> -->
           <template v-slot:[`item.actions`]="{ item }"> 
             <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
             <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
           </template>
           <template v-slot:[`item.date`]="{ item }"> 
             <span> {{item.date | formatDate}}</span>
+            <span @click="projectSummary(item.project)" v-if="isMobile()"> {{item.project}}</span>
           </template>
           <template v-slot:[`item.total`]="{ item }"> 
             <v-tooltip bottom>
@@ -56,19 +55,16 @@
           </template>
           <template v-slot:[`item.amount`]="{ item }"> 
             <span> {{item.amount ? item.amount.toLocaleString() : ''}}</span>
+            <span @click="supplierSummary(item.supplier)" v-if="isMobile()"> {{item.supplier}}</span>
           </template>
+          <template v-slot:[`item.supplier`]="{ item }">
+            <span @click="supplierSummary(item.supplier)"> {{item.supplier}}</span>
+          </template>
+          <template v-slot:[`item.project`]="{ item }">
+            <span @click="projectSummary(item.project)"> {{item.project}}</span>
+          </template>          
           <template v-slot:[`item.published`]="{ item }"> 
             <v-checkbox v-model="item.published" @click="updateOne(item)"> </v-checkbox>
-          </template>
-          <template v-slot:[`item.description`]="{ item }"> 
-            <div v-if = "itemToEdit === item._id">
-              <v-text-field v-model="item.description"
-                            :id="`itemEdit-${item._id}`"
-                            @blur="updateOne(item)"/>
-            </div>
-            <div v-else @click="setEdit(item)">
-              <span> {{item.description}}</span>
-            </div>
           </template>
           <template v-slot:expanded-item="{ headers, item }">
             <td v-if="isMobile()" :colspan="headers.length">
@@ -92,193 +88,189 @@
         </v-data-table>
       </v-flex>
 
-
       <!-- New row dialog -->
-
-
-            <v-dialog
-              v-model="dialog"
-              max-width="600px"
-            >
-              <v-card>
-                <v-card-title>
-                  <span class="text-h5">{{updateInvoice ?  'Update' : 'Add New'}}</span>
-                </v-card-title>
-                <v-card-text>
-                  <v-container>
-                  <p v-show="msg">
-                    {{msg}}
-                  </p>
-                  <v-form ref="form">
-                   <v-row>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-combobox
-                          v-model="invoice.company"
-                          :items="companyName"
-                          label="Company"
-                          dense
-                        ></v-combobox>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-combobox
-                          v-model="invoice.project"
-                          :items="projectName"
-                          label="Project"
-                          dense
-                        ></v-combobox>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.amount" type="number" label="Amount" required></v-text-field>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.vat" type="number" label="Vat"></v-text-field>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.year" type="number" label="Year"></v-text-field>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.total" type="number" label="Total" required></v-text-field>
-                      </v-col>              
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.group" type="number" label="Group" required></v-text-field>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
-                          <template v-slot:activator="{ on, attrs }">
-                            <v-text-field 
-                              v-model="invoice.date"
-                              label="Date"
-                              prepend-icon="mdi-calendar"
-                              readonly
-                              v-bind="attrs"
-                              v-on="on" 
-                              required>
-                            </v-text-field>
-                          </template> 
-                          <v-date-picker v-model="invoice.date" scrollable>
-                            <v-spacer></v-spacer>
-                            <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
-                            <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
-                          </v-date-picker>
-                        </v-dialog>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-combobox
-                          v-model="invoice.supplier"
-                          :items="supplierName"
-                          label="Supplier"
-                          dense
-                        ></v-combobox>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.invoiceId" label="Invoice Id"></v-text-field>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
-                      </v-col>
-                      <v-col  cols="12" sm="6" md="4">
-                        <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
-                      </v-col> 
-                    </v-row>
-                    </v-form>
-                  </v-container>
-                  <small>*indicates required field</small>
-                </v-card-text>
-                <v-card-actions>
-                  <v-spacer></v-spacer>
-                  <v-btn @click="updateInvoice ? editInvoice() : saveInvoice()"> {{updateInvoice ? '-Update-' : '-Add-'}} </v-btn>
-                  <v-btn v-show="!updateInvoice" class="mx-3" @click="clearForm">Clear</v-btn>
-                </v-card-actions>
-              </v-card>
-            </v-dialog>
-
-    <!-- ----------------------- -->
+      <v-dialog v-model="dialog" max-width="600px">
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">{{updateInvoice ?  'Update' : 'Add New'}}</span>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+            <p v-show="msg">
+              {{msg}}
+            </p>
+            <v-form ref="form">
+              <v-row>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-combobox
+                    v-model="invoice.company"
+                    :items="companyName"
+                    label="Company"
+                    dense
+                  ></v-combobox>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-combobox
+                    v-model="invoice.project"
+                    :items="projectName"
+                    label="Project"
+                    dense
+                  ></v-combobox>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.amount" type="number" label="Amount" required></v-text-field>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.vat" type="number" label="Vat"></v-text-field>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.year" type="number" label="Year"></v-text-field>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.total" type="number" label="Total" required></v-text-field>
+                </v-col>              
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.group" type="number" label="Group" required></v-text-field>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-text-field 
+                        v-model="invoice.date"
+                        label="Date"
+                        prepend-icon="mdi-calendar"
+                        readonly
+                        v-bind="attrs"
+                        v-on="on" 
+                        required>
+                      </v-text-field>
+                    </template> 
+                    <v-date-picker v-model="invoice.date" scrollable>
+                      <v-spacer></v-spacer>
+                      <v-btn text color="primary" @click="dialog=false">Cancel</v-btn>
+                      <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)">OK</v-btn>
+                    </v-date-picker>
+                  </v-dialog>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-combobox
+                    v-model="invoice.supplier"
+                    :items="supplierName"
+                    label="Supplier"
+                    dense
+                  ></v-combobox>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.invoiceId" label="Invoice Id"></v-text-field>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
+                </v-col>
+                <v-col  cols="12" sm="6" md="4">
+                  <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
+                </v-col> 
+              </v-row>
+              </v-form>
+            </v-container>
+            <small>*indicates required field</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="updateInvoice ? editInvoice() : saveInvoice()"> {{updateInvoice ? '-Update-' : '-Add-'}} </v-btn>
+            <v-btn v-show="!updateInvoice" class="mx-3" @click="clearForm">Clear</v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <!-- ----------------------- -->
 
       <!-- this section is the summary of the supplier -->
-  <v-dialog
-    v-model="detailDialog"
-    max-width="600px"
-  >
-  <v-card>
-    <v-card-title>
-      <span class="text-h5">Summary</span>
-    </v-card-title>
-    <v-card-text :class="isMobile() ? 'margin-card' : ''">
-      <v-flex>
-        <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
-          <export-excel 
-            :data="supplierFilter" 
-            :fields="xlsHeders"
-            type="xlsx"
-            :name=currInvoice.supplier
-            :title=currInvoice.supplier
-            :footer=this.supplierTotal.toLocaleString()
-            class="mt-3">
-            <h5 style="text-align:center">{{currInvoice.supplier}}   -   {{this.supplierTotal.toLocaleString()}}
-              <v-btn small class="btn btn-danger"> 
-                <v-icon>mdi-download</v-icon>
-              </v-btn>
-            </h5>
-          </export-excel>
-          <v-data-table :headers="sideHeaders"
-                        :items="supplierFilter" 
-                        disable-pagination
-                        hide-default-footer
-                        fixed-header
-                        class="elevation-3"
-                        dense>
-            <template v-slot:[`item.total`]="{ item }"> 
-              <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
-            </template>
-          </v-data-table>
-        </v-container>
-        <v-container v-if = "currInvoice" class="grey lighten-2 mx-5 mt-5 elevation-3" >
-          <export-excel 
-            :data="projectFilter" 
-            :fields="xlsHeders"
-            type="xlsx"
-            :name=currInvoice.project
-            :title=currInvoice.project
-            :footer=this.projectTotal.toLocaleString()
-            class="mt-3">
-            <h5 style="text-align:center">{{currInvoice.project}}   -   {{this.projectTotal.toLocaleString()}}
-              <v-btn small class="btn btn-danger"> 
-                <v-icon>mdi-download</v-icon>
-              </v-btn>
-            </h5>
-          </export-excel>
+      <v-dialog v-model="supplierDialog" max-width="600px">
+        <v-card>
+          <v-card-text class="margin-card">
+            <v-flex>
+              <v-container class="grey lighten-2 elevation-3">
+                <export-excel 
+                  :data="supplierFilter" 
+                  :fields="xlsHeders"
+                  type="xlsx"
+                  :name=suppName
+                  :title=suppName
+                  :footer=this.supplierTotal.toLocaleString()
+                  class="mt-3">
+                  <h5 style="text-align:center">{{suppName}}   -   {{this.supplierTotal.toLocaleString()}}
+                    <v-btn small class="btn btn-danger"> 
+                      <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                  </h5>
+                </export-excel>
+                <v-data-table :headers="sideHeaders"
+                              :items="supplierFilter" 
+                              disable-pagination
+                              hide-default-footer
+                              fixed-header
+                              class="elevation-3"
+                              dense>
+                  <template v-slot:[`item.total`]="{ item }"> 
+                    <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
+                  </template>
+                </v-data-table>
+              </v-container>
+            </v-flex>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
 
-          <v-data-table :headers="sideHeaders"
-                        :items="projectFilter" 
-                        disable-pagination
-                        hide-default-footer
-                        fixed-header
-                        class="elevation-3"
-                        dense>
-            <template v-slot:[`item.total`]="{ item }"> 
-              <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
-            </template>
-          </v-data-table>
-        </v-container>
-      </v-flex>
-
-    </v-card-text>
-  </v-card>
-  </v-dialog>
+      <v-dialog v-model="projectDialog" max-width="600px">
+        <v-card>
+          <v-card-text class="margin-card">
+            <v-flex>
+              <v-container class="grey lighten-2 elevation-3">
+                <export-excel 
+                  :data="projectFilter" 
+                  :fields="xlsHeders"
+                  type="xlsx"
+                  :name=projName
+                  :title=projName
+                  :footer=this.projectTotal.toLocaleString()
+                  class="mt-3">
+                  <h5 style="text-align:center">{{projName}}   -   {{this.projectTotal.toLocaleString()}}
+                    <v-btn small class="btn btn-danger"> 
+                      <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                  </h5>
+                </export-excel>
+                <v-data-table :headers="sideHeaders"
+                              :items="projectFilter" 
+                              disable-pagination
+                              hide-default-footer
+                              fixed-header
+                              class="elevation-3"
+                              dense>
+                  <template v-slot:[`item.total`]="{ item }"> 
+                    <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
+                  </template>
+                </v-data-table>
+              </v-container>
+            </v-flex>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+      <!--------------------------------->
     </v-layout>
-
     <export-excel 
-    :data="tutorials"
-    v-if="exportExcel" 
-    id="excel-export"
-    :fields="xlsHeders"
-    type="xlsx"
-    >
-  </export-excel>
-    
+      :data="tutorials"
+      v-if="exportExcel" 
+      id="excel-export"
+      :fields="xlsHeders"
+      type="xlsx"
+      name="all-data"
+      title="ALL-DATA"
+      footer="This is footer"
+      >
+    </export-excel>
   </div>
 </template>
 
@@ -313,15 +305,19 @@ export default {
       expanded: [],
       updateInvoice: 0,
       dialog: false,
-      detailDialog: false,
+      supplierDialog: false,
+      projectDialog: false,
       supplierTotal : 0,
       supplierFilter: [],
+      suppName: "",
+      projectTotal : 0,
+      projectFilter: [],
+      projName: "",
       sideHeaders: [
         { text: "Total", value: "total", align:'right'},
         { text: "Description", value: "description", align:'right'},
+        { text: "Project", value: "project", align:'right' },
       ],
-      projectTotal : 0,
-      projectFilter: [],
       //searchStr: "",
       exportExcel: false,
       search: '',
@@ -362,12 +358,11 @@ export default {
       fldRules: [v => !!v || 'Field is required'],
       isLoading: true,
       itemToEdit: "",
-      items: [
-        { title: 'Add new row', onClick:  this.addNewRow, newRow: true },
-        { title: 'Remove all items', onClick:  this.removeAllTutorials, remove:true},
-        { title: 'Download to excel', onClick: undefined, excel: true },
-      ],
-      corrolatedBook: "",
+      // items: [
+      //   { title: 'Add new row', onClick:  this.addNewRow, newRow: true },
+      //   { title: 'Remove all items', onClick:  this.removeAllTutorials, remove:true},
+      //   { title: 'Download to excel', onClick: undefined, excel: true },
+      // ],
       selectedYear : 2022,
       start: 0,
       timeout: null,
@@ -380,10 +375,10 @@ export default {
     getHeaders() {
       if(this.isMobile()) {
         return [
-          { text: "^", value: "data-table-expand", class: 'success mobile-headers expantion-button', groupable: false },
-          { text: "Date", value: "date", class: 'success mobile-headers', groupable: false  },
-          { text: "Description", value: "description", class: 'success mobile-headers', groupable: false, width: '20%', align:'right' },
-          { text: "Amount", value: "amount", class: 'success mobile-headers', groupable: false, align:'right'  },
+          { text: "^", value: "data-table-expand", class: 'success mobile-headers expantion-button', groupable: false, width: '1%' },
+          { text: "Date", value: "date", class: 'success mobile-headers',width: '10%', groupable: false  },
+          { text: "Description", value: "description", class: 'success mobile-headers', groupable: false,  align:'right' },
+          { text: "Amount", value: "amount", class: 'success mobile-headers', groupable: false, width: '10%', align:'right'  },
           { text: "Act.", value: "actions", sortable: false, class: 'success mobile-headers', groupable: false  },
         ]
       } else {
@@ -408,25 +403,31 @@ export default {
         ]
       }
     },
-    rowClicked(row) {
-      this.currInvoice = row;
-      if(row.supplier || row.project){
-        this.supplierFilter = this.tutorials.filter(supp => supp.supplier === row.supplier);
-        //this.supplierTotal = this.supplierFilter.reduce(num1 => num1.total);
-        this.supplierTotal = 0;
-        for (let i=0; i< this.supplierFilter.length ;i++ ){
-          this.supplierTotal += this.supplierFilter[i].total;
-        }
-        this.projectFilter = this.tutorials.filter(supp => supp.project === row.project);
-        this.projectTotal = 0;
-        for (let i=0; i< this.projectFilter.length ;i++ ){
-          this.projectTotal += this.projectFilter[i].total;
-        }
-        if(!(this.dialog)) {
-          this.detailDialog = true;
-        }
+
+    supplierSummary(supplier){
+      this.suppName = supplier;
+      this.supplierFilter = this.tutorials.filter(supp => supp.supplier === supplier);
+      this.supplierTotal = 0;
+      for (let i=0; i< this.supplierFilter.length ;i++ ){
+        this.supplierTotal += this.supplierFilter[i].total;
+      }
+      if(!(this.dialog)) {
+        this.supplierDialog = true;
       }
     },
+
+    projectSummary(project){
+      this.projName = project;
+      this.projectFilter = this.tutorials.filter(supp => supp.project === project);
+      this.projectTotal = 0;
+      for (let i=0; i< this.projectFilter.length ;i++ ){
+        this.projectTotal += this.projectFilter[i].total;
+      }
+      if(!(this.dialog)) {
+        this.projectDialog = true;
+      }
+    },
+
     isMobile() {
       if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         return true
@@ -590,8 +591,8 @@ export default {
   async mounted() {
     this.retrieveTutorials();
     await this.loadTable(1,'companyName');
-    await this.loadTable(2,'supplierName');
-    await this.loadTable(3,'projectName');
+    await this.loadTable(2,'projectName');
+    await this.loadTable(3,'supplierName');
     this.$root.$on('addNewRow',() => {
       this.dialog = true;
       this.updateInvoice = 0;
@@ -639,11 +640,11 @@ export default {
 
 .mobile-headers{
   font-size: 11px !important;
-  padding: 0 !important;
 }
 
 .mobile-items > td {
   font-size: 10px !important;
+  padding : 0px !important;
 }
 
 .expantion-button{
@@ -669,6 +670,7 @@ export default {
 }
 
 .margin-card{
-  margin: -25px;
+  /* margin: -25px; */
+  padding-top: 20px !important;
 }
 </style>

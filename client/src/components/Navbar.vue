@@ -2,21 +2,15 @@
     <nav>
         <v-app-bar app dark>
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-            <v-app-bar-title>
-                Invoices
-            </v-app-bar-title>
             <v-spacer></v-spacer>
-
             <v-row >
-
                 <v-col v-show="isTutorials">
-                    <v-btn @click="setAddNewRow" class="plus-button">
-                        + 
+                    <v-btn small @click="setAddNewRow" class="plus-button">
+                        <v-icon>mdi-plus</v-icon>
                     </v-btn>
                 </v-col>
-                
                 <v-col class="mt-2" cols="4" sm="4" md="3" v-show="isTutorials">
-                    <v-select class="year-input"
+                    <v-select class="year-input" 
                         :items="[2020, 2021, 2022, 'ALL']"
                         @change="onYearChange"
                         :value="2022"
@@ -24,47 +18,35 @@
                         solo
                     ></v-select>
                 </v-col>
-
                 <v-col col="2">
                     <template>
                     <div class="mt-2 text-center">
                         <v-menu offset-y>
                         <template v-slot:activator="{ on, attrs }">
-                        <v-btn
-                            icon
-                            v-bind="attrs"
-                            v-on="on"
-                            class="float-right"
-                        >
-                            <v-icon>mdi-dots-vertical</v-icon>
-                        </v-btn>
+                            <v-btn icon v-bind="attrs" v-on="on" class="float-right">
+                                <v-icon>mdi-dots-vertical</v-icon>
+                            </v-btn>
                         </template>
-
                         <v-list v-show="isTutorials">
-                            <v-list-item
-                                v-for="(item, index) in items"
-                                :key="index"
-                            >
-
-                            <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
-                                {{item.title}}
-                            </v-list-item-title>
-
+                            <v-list-item v-for="(item, index) in items" :key="index">
+                                <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
+                                    {{item.title}}
+                                </v-list-item-title>
                             </v-list-item>
                         </v-list>
-                        <v-list>
+                        <!-- <v-list>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-btn v-bind="attrs" v-on="on">
                                     <v-icon left>expand_more</v-icon>
                                     <span>Menu1</span>
                                 </v-btn>
-                            </template>
+                            </template> -->
                             <v-list>
                                 <v-list-item v-for="link in links" :key="link.text" router :to="link.route">
                                     <v-list-item-title>{{link.text}}</v-list-item-title>
                                 </v-list-item>
                             </v-list>
-                        </v-list>
+                        <!-- </v-list> -->
 
                         </v-menu>
                     </div>
@@ -109,6 +91,8 @@ export default {
             items: [
                 { title: 'Remove all items', onClick:  this.onMenuItemClick },
                 { title: 'Download to excel', onClick: this.onMenuItemClick },
+                { title: 'Sammary A', onClick: this.onMenuItemClick },
+                { title: 'Sammary B', onClick: this.onMenuItemClick },
             ],
         }
     },
@@ -120,12 +104,13 @@ export default {
             this.$root.$emit('yearChange',event);
         },
         onMenuItemClick(index) {
-            if(!index) {
-                this.$root.$emit('removeAllItems',false);
-            } else {
-                this.$root.$emit('downloadExcel',false);
+            switch (index) {
+                case 0 : this.$root.$emit('removeAllItems',false);  break;
+                case 1 : this.$root.$emit('downloadExcel',false);   break; 
+                case 2 : console.log('Summary A');   break; 
+                case 3 : console.log('Summary B');   break; 
             }
-        },
+        },  
     },
     computed: {
         isTutorials() {
