@@ -18,13 +18,13 @@
             :headers="getHeaders()"
             :items="tutorials" 
             :search="search"
-
             disable-pagination
             hide-default-footer
             fixed-header
             mobile-breakpoint="0"
             height="90vh"
             class="elevation-3"
+            bordered
             :class="isMobile() ? 'table-margin' : ''"
             :item-class="itemRowBackground"
             loading = "isLoading"
@@ -34,9 +34,11 @@
             :single-expand="true"
             :expanded.sync="expanded"
           >
-          <template v-slot:[`item.actions`]="{ item }"> 
-            <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
-            <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
+          <template  v-slot:[`item.actions`]="{ item }"> 
+            <div :class="isMobile() ? 'd-grid' : ''">
+              <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
+              <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
+            </div>
           </template>
           <template v-slot:[`item.date`]="{ item }"> 
             <span> {{item.date | formatDate}}</span>
@@ -53,9 +55,16 @@
           <template v-slot:[`item.vat`]="{ item }"> 
             <span> {{item.vat ? item.vat.toLocaleString() : ''}}</span>
           </template>
+          <template v-slot:[`item.description`]="{ item }"> 
+            <div class="description-width">
+              <span> {{item.description}}</span>
+            </div>
+          </template>
           <template v-slot:[`item.amount`]="{ item }"> 
-            <span> {{item.amount ? item.amount.toLocaleString() : ''}}</span>
-            <span @click="supplierSummary(item.supplier)" v-if="isMobile()"> {{item.supplier}}</span>
+            <div class="amount-width">
+              <span> {{item.amount ? item.amount.toLocaleString() : ''}}</span>
+              <span @click="supplierSummary(item.supplier)" v-if="isMobile()"> {{item.supplier}}</span>
+            </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
             <span @click="supplierSummary(item.supplier)"> {{item.supplier}}</span>
@@ -375,10 +384,10 @@ export default {
     getHeaders() {
       if(this.isMobile()) {
         return [
-          { text: "^", value: "data-table-expand", class: 'success mobile-headers expantion-button', groupable: false, width: '1%' },
-          { text: "Date", value: "date", class: 'success mobile-headers',width: '10%', groupable: false  },
+          { text: "^", value: "data-table-expand", class: 'success mobile-headers expantion-button', groupable: false },
+          { text: "Date", value: "date", class: 'success mobile-headers',groupable: false  },
           { text: "Description", value: "description", class: 'success mobile-headers', groupable: false,  align:'right' },
-          { text: "Amount", value: "amount", class: 'success mobile-headers', groupable: false, width: '10%', align:'right'  },
+          { text: "Amount", value: "amount", class: 'success mobile-headers', groupable: false, align:'right'  },
           { text: "Act.", value: "actions", sortable: false, class: 'success mobile-headers', groupable: false  },
         ]
       } else {
@@ -672,5 +681,23 @@ export default {
 .margin-card{
   /* margin: -25px; */
   padding-top: 20px !important;
+}
+th > i{
+  display:none !important;
+}
+
+.d-grid{
+  display: grid;
+}
+
+.amount-width{
+  width: 100% !important;
+}
+.description-width{
+  width: 110% !important;
+}
+
+.text-start > .v-data-table__expand-icon{
+  width: 100% !important;
 }
 </style>
