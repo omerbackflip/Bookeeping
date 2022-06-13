@@ -9,7 +9,7 @@
                         <v-icon>mdi-plus</v-icon>
                     </v-btn>
                 </v-col>
-                <v-col class="mt-2" cols="4" sm="4" md="3" v-show="isTutorials">
+                <v-col class="mt-2" cols="4" sm="4" md="3" v-show="this.$route.name === 'tutorials' || this.$route.name === 'bookingList'">
                     <v-select class="year-input" 
                         :items="[2020, 2021, 2022, 'ALL']"
                         @change="onYearChange"

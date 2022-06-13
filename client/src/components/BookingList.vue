@@ -3,8 +3,8 @@
     <!-- <div class="input-group mb-3 mt-3">
       <input type="text" class="form-control" placeholder="Search..." v-model="searchStr"/>
       <v-btn @click="searchSTR" class="ml-2 mr-2"> Search </v-btn>
-    </div>  -->
-    <AddInvoice/>
+    </div>  
+    <AddInvoice/> -->
     <v-layout row wrap>
       <v-flex xs12 md10>
         <v-text-field
@@ -87,7 +87,7 @@
 <script>
 import BookDataService from "../services/BookDataService";
 //import TutorialDataService from "../services/TutorialDataService";
-import AddInvoice from "./AddInvoice.vue"
+// import AddInvoice from "./AddInvoice.vue"
 
 import Vue from 'vue'
 import moment from 'moment'
@@ -101,7 +101,7 @@ Vue.filter('formatDate', function(value) {
 });
 
 export default {
-  components: {AddInvoice},
+  // components: {AddInvoice},
   name: "booking-list",
   data() {
     return {
@@ -142,6 +142,7 @@ export default {
       },  
       fldRules: [v => !!v || 'Field is required'],
       isLoading: true,
+      selectedYear : 2022,
     };
   },
 
@@ -166,10 +167,11 @@ export default {
 
 
     retrieveBooks() {
-      BookDataService.getAll()
+      // BookDataService.getAll()
+      BookDataService.findByYear(this.selectedYear)
         .then((response) => {
           this.books = response.data;
-          //console.log(response.data);
+          window.alert(response.data.length + " were loaded to the table")
         })
         .catch((e) => {
           console.log(e);
@@ -214,7 +216,16 @@ export default {
   mounted() {
     this.retrieveBooks();
     this.isLoading = false;
+    this.$root.$on('yearChange',(year) => {
+      this.selectedYear = year;
+    });
   },
+
+  watch : {
+    selectedYear () {
+      this.retrieveBooks();
+    },
+  }
 };
 
 

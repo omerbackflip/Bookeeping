@@ -34,6 +34,10 @@ class BookDataService {
     return http.get(`/books?record_id=${title}`);
   }
   
+  findByYear(year) {
+    return http.get(`/books?year=${year}`);
+  }
+
   async saveBulk(bulk,company) {
     var formData = new FormData();
     formData.append("file", bulk);

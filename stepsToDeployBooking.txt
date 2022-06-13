@@ -1,0 +1,22 @@
+1. Open putty with IP 185.28.152.24
+2. Enter username root and password EliGadot3719123
+3. Commands to run the project to production
+
+	pm2 list (list all running proceses)  //this is only to list and see that no current running
+	pm2 kill (kill all existing processes) //this to kill all.
+
+
+	FRONTEND
+	- cd ../home/bookeeping
+	- git pull origin master 		// (ignore this if you have latest code)
+	- cd client
+	- ls     				// to check if there are which files in the folder
+	- rm -rf ./dist 			// this is to remove dist folder (only in case it exsist)
+	- npm run build:production	
+	- pm2 kill 			// kill all existing processes
+	- pm2 serve ./dist 		// to serve the frontend new build
+
+	BACKEND
+	cd ../				// go to backend
+	pm2 start server.js
+ 

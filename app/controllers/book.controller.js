@@ -49,8 +49,8 @@ exports.create = (req, res) => {
 //Eli Gadot - change the search from title to description 
 //also change in TutorialDataService from /books?title to /books?description)
 exports.findAll = (req, res) => {
-  const search = req.query.record_id;
-  var condition = search ? { record_id:  search  } : {};
+  const search = req.query.year;
+  var condition = search!='ALL' ? { year:  search  } : {};
   Book.find(condition)
     .then(data => {
       res.send(data);
