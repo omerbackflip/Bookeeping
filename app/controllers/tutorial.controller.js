@@ -69,9 +69,6 @@ exports.findAll = async (req, res) => {
 	const data = await Tutorial.find(condition).lean();
 	try {
 		const allData = await Promise.all(data.map(async (mapData) => {
-			mapData.vat = mapData.vat?.toLocaleString();
-			mapData.amount = mapData.amount?.toLocaleString();
-
 			if (await Book.exists({ company: mapData.company, record_id: mapData.excelRecID })) {
 				// if(mapData.excelRecID) {
 				const item = await Book.findOne({ company: mapData.company, record_id: mapData.excelRecID });
@@ -131,7 +128,7 @@ exports.update = (req, res) => {
 		})
 		.catch(err => {
 			res.status(500).send({
-				message: "Error updating Invoice with id=" + id
+				message: "Error updating Invoice with id=" + err
 			});
 		});
 };

@@ -12,7 +12,6 @@
               :class="isMobile() ? 'mobile-search' : ''"
             ></v-text-field>
           </v-col>
-
         </v-row>
         <v-data-table 
             :headers="getHeaders()"
@@ -27,13 +26,12 @@
             bordered
             :class="isMobile() ? 'table-margin' : ''"
             :item-class="itemRowBackground"
-            loading = "isLoading"
+            :loading = "isLoading"
             loading-text="Loading... Please wait"
             item-key="_id"
             :show-expand="true"
-            :single-expand="true"
-            :expanded.sync="expanded"
-          >
+            :single-expand="true">
+            <!-- :expanded.sync="expanded" -->
           <template  v-slot:[`item.actions`]="{ item }"> 
             <div :class="isMobile() ? 'd-grid' : ''">
               <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
@@ -61,7 +59,7 @@
             </div>
           </template>
           <template v-slot:[`item.amount`]="{ item }"> 
-            <div class="amount-width">
+            <div class="amount-width d-grid">
               <span> {{item.amount ? item.amount.toLocaleString() : ''}}</span>
               <span @click="supplierSummary(item.supplier)" v-if="isMobile()"> {{item.supplier}}</span>
             </div>
@@ -71,6 +69,9 @@
           </template>
           <template v-slot:[`item.project`]="{ item }">
             <span @click="projectSummary(item.project)"> {{item.project}}</span>
+          </template>
+          <template v-slot:[`item.group`]="{ item }">
+            <span @click="groupSummary(item.group)"> {{item.group}}</span>
           </template>          
           <template v-slot:[`item.published`]="{ item }"> 
             <v-checkbox v-model="item.published" @click="updateOne(item)"> </v-checkbox>
@@ -219,6 +220,8 @@
                               :items="supplierFilter" 
                               disable-pagination
                               hide-default-footer
+                              :item-class="itemRowBackground"
+                              mobile-breakpoint = 350
                               fixed-header
                               class="elevation-3"
                               dense>
@@ -255,6 +258,46 @@
                               :items="projectFilter" 
                               disable-pagination
                               hide-default-footer
+                              :item-class="itemRowBackground"
+                              mobile-breakpoint = 350
+                              fixed-header
+                              class="elevation-3"
+                              dense>
+                  <template v-slot:[`item.total`]="{ item }"> 
+                    <span> {{item.total ? item.total.toLocaleString() : ''}}</span>
+                  </template>
+                </v-data-table>
+              </v-container>
+            </v-flex>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="groupDialog" max-width="600px">
+        <v-card>
+          <v-card-text class="margin-card">
+            <v-flex>
+              <v-container class="grey lighten-2 elevation-3">
+                <export-excel 
+                  :data="groupFilter" 
+                  :fields="xlsHeders"
+                  type="xlsx"
+                  :name=groupName
+                  :title=groupName
+                  :footer=this.groupTotal.toLocaleString()
+                  class="mt-3">
+                  <h5 style="text-align:center">{{groupName}}   -   {{this.groupTotal.toLocaleString()}}
+                    <v-btn small class="btn btn-danger"> 
+                      <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                  </h5>
+                </export-excel>
+                <v-data-table :headers="sideHeaders"
+                              :items="groupFilter" 
+                              disable-pagination
+                              hide-default-footer
+                              :item-class="itemRowBackground"
+                              mobile-breakpoint = 350
                               fixed-header
                               class="elevation-3"
                               dense>
@@ -311,17 +354,21 @@ export default {
       companyName   : [],
       projectName   : [],
       supplierName  : [],
-      expanded: [],
+      // expanded: [],
       updateInvoice: 0,
       dialog: false,
       supplierDialog: false,
       projectDialog: false,
+      groupDialog: false,
       supplierTotal : 0,
       supplierFilter: [],
       suppName: "",
       projectTotal : 0,
       projectFilter: [],
       projName: "",
+      groupTotal : 0,
+      groupFilter: [],
+      groupName: "",
       sideHeaders: [
         { text: "Total", value: "total", align:'right'},
         { text: "Description", value: "description", align:'right'},
@@ -367,11 +414,6 @@ export default {
       fldRules: [v => !!v || 'Field is required'],
       isLoading: true,
       itemToEdit: "",
-      // items: [
-      //   { title: 'Add new row', onClick:  this.addNewRow, newRow: true },
-      //   { title: 'Remove all items', onClick:  this.removeAllTutorials, remove:true},
-      //   { title: 'Download to excel', onClick: undefined, excel: true },
-      // ],
       selectedYear : 2022,
       start: 0,
       timeout: null,
@@ -384,7 +426,7 @@ export default {
     getHeaders() {
       if(this.isMobile()) {
         return [
-          { text: "^", value: "data-table-expand", class: 'success mobile-headers expantion-button', groupable: false },
+          { text: "G", value: "data-table-expand", class: 'success mobile-headers expantion-button', groupable: false },
           { text: "Date", value: "date", class: 'success mobile-headers',groupable: false  },
           { text: "Description", value: "description", class: 'success mobile-headers', groupable: false,  align:'right' },
           { text: "Amount", value: "amount", class: 'success mobile-headers', groupable: false, align:'right'  },
@@ -437,6 +479,18 @@ export default {
       }
     },
 
+    groupSummary(group){
+      this.groupName = group;
+      this.groupFilter = this.tutorials.filter(supp => supp.group === group);
+      this.groupTotal = 0;
+      for (let i=0; i< this.groupFilter.length ;i++ ){
+        this.groupTotal += this.groupFilter[i].total;
+      }
+      if(!(this.dialog)) {
+        this.groupDialog = true;
+      }
+    },
+
     isMobile() {
       if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         return true
@@ -445,7 +499,7 @@ export default {
       }
     },
     deleteOne(id) {
-      if (window.confirm('Are you sure you want to delete one item ?')){
+      if (window.confirm(`Are you sure you want to delete  item ? ` + id)){
         TutorialDataService.delete(id)
           .then((response) => {
             console.log(response.data);
@@ -513,11 +567,6 @@ export default {
         });
     },
 
-    deleteItem(id) { //this function doesnt work.... check why 28.09.21
-      const index = this.tutorial.indexOf((x) => x.id === id);
-      this.tutorial.splice(index, 1);
-    },
-
     saveInvoice: async function() {
       try {
         const response = await TutorialDataService.create(this.invoice);
@@ -536,7 +585,7 @@ export default {
       }
     },
 
-    async editInvoice() {
+    async editInvoice() {  // this is called from the update dialog
       try {
         const response = await TutorialDataService.update(this.updateInvoice ,this.invoice);
         if(response) {
@@ -558,15 +607,15 @@ export default {
       this.$refs.form.reset()
     },
 
-    async editOne(id) { // this is example how to call to different page using router
+    async editOne(id) { // this is called from the edit button on the table
       // this.$router.push({ name: "tutorial-details", params: { id: id } });
-      this.dialog = true;
-      this.updateInvoice = id;
       if(id) {
+        this.updateInvoice = id;
         const response = await TutorialDataService.get(id);
         if(response && response.data) {
           this.invoice = response.data;
         }
+        this.dialog = true;
       }
     },
 

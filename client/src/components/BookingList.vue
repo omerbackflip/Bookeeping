@@ -1,19 +1,23 @@
 <template>
   <div class="list row">
-    <!-- <div class="input-group mb-3 mt-3">
-      <input type="text" class="form-control" placeholder="Search..." v-model="searchStr"/>
-      <v-btn @click="searchSTR" class="ml-2 mr-2"> Search </v-btn>
-    </div>  
-    <AddInvoice/> -->
     <v-layout row wrap>
-      <v-flex xs12 md10>
-        <v-text-field
-          v-model="search"
-          append-icon="mdi-magnify"
-          label="This is Boooking search........."
-          single-line
-          hide-details
-        ></v-text-field>
+      <v-flex>
+        <v-row>
+          <v-col>
+            <v-text-field
+              v-model="search"
+              append-icon="mdi-magnify"
+              label="This is Boooking search........."
+              single-line
+              hide-details
+            ></v-text-field>
+          </v-col>
+          <v-col>
+            <v-btn class="m-3 btn btn-sm btn-danger" @click="removeAllBooks">
+              Remove All books
+            </v-btn>
+          </v-col>
+        </v-row>
         <v-data-table :headers="headers" 
                       :items="books" 
                       :search="search"
@@ -43,39 +47,6 @@
             <span> {{ item.schum_zchut ? item.schum_zchut.toLocaleString() : '' }}</span>
           </template>        
         </v-data-table>
-
-      </v-flex>
-
-      <!-- this section is the detailes of an invoice -->
-      <v-flex md2>
-        <v-container class="grey lighten-2 mx-5 mt-5 elevation-3" >
-          <div class="col-md-12">
-            <div v-if="currInvoice">
-              <h4>פרטים</h4>
-              <div>
-                <label><strong>Company:</strong></label> {{ currInvoice.company }}
-              </div>
-              <div>
-                <label><strong>Description:</strong></label>
-                {{ currInvoice.description }}
-              </div>
-              <div>
-                <label><strong>Status:</strong></label>
-                {{ currInvoice.published ? "Published" : "Pending" }}
-              </div>
-              <a :href="'/books/' + currInvoice.id">
-                Edit the Invoice ID - {{currInvoice.invoiceId}}
-              </a>
-            </div>
-            <div v-else>
-              <br />
-              <p>Please click on an Invoice...</p>
-            </div>
-          </div>
-        </v-container>
-        <v-btn class="m-3 btn btn-sm btn-danger" @click="removeAllBooks">
-          Remove All books
-        </v-btn>
       </v-flex>
     </v-layout>
 
@@ -86,8 +57,6 @@
 
 <script>
 import BookDataService from "../services/BookDataService";
-//import TutorialDataService from "../services/TutorialDataService";
-// import AddInvoice from "./AddInvoice.vue"
 
 import Vue from 'vue'
 import moment from 'moment'
@@ -101,20 +70,18 @@ Vue.filter('formatDate', function(value) {
 });
 
 export default {
-  // components: {AddInvoice},
   name: "booking-list",
   data() {
     return {
       books: [],
       currInvoice: null,
       currentIndex: -1,
-      //searchStr: "",
       search: '',
       headers:[
         { text: "company", value: "company", class: 'primary title' },
         { text: "asmchta_date", value: "asmchta_date", class: 'primary title' },
         { text: "record_id", value: "record_id", class: 'primary title'},
-        { text: "year", value: "year", class: 'primary title'},
+        { text: "year", value: "year", class: 'success title'},
         { text: "record_schum", value: "record_schum", class: 'primary title' },
         { text: "pratim", value: "pratim", class: 'primary title' },
         { text: "asmacta1", value: "asmacta1", class: 'primary title' },
@@ -184,11 +151,6 @@ export default {
       this.currentIndex = -1;
     },
 
-    setActiveTutorial(tutorial, index) {
-      this.currInvoice = tutorial;
-      this.currentIndex = index;
-    },
-
     removeAllBooks() {
       if (window.confirm('Are you sure you want to delete all items ?')){
         BookDataService.deleteAll()
@@ -200,11 +162,6 @@ export default {
             console.log(e);
           });
       }
-    },
-
-
-    clearForm (){
-      this.$refs.form.reset()
     },
 
     editOne(id) {
