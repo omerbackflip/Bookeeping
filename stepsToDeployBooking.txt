@@ -1,6 +1,7 @@
 1. Open putty with IP 185.28.152.24
-2. Enter username root and password EliGadot3719123
-3. Commands to run the project to production
+2. Enter username root
+3. Enter password EliGadot3719123
+4cd . Commands to run the project to production
 
 	pm2 list (list all running proceses)  //this is only to list and see that no current running
 	pm2 kill (kill all existing processes) //this to kill all.

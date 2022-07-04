@@ -2,5 +2,5 @@
 // with db.config.js file like this:
 
 module.exports = {
-  url: "mongodb://localhost:27017/bezkoder_db"
+  url: "mongodb://localhost:27018/bezkoder_db"
 };

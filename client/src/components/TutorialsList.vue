@@ -65,13 +65,13 @@
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
-            <span @click="supplierSummary(item.supplier)"> {{item.supplier}}</span>
+            <span @click="supplierSummary(item.supplier)" class="summary"> {{item.supplier}}</span>
           </template>
           <template v-slot:[`item.project`]="{ item }">
-            <span @click="projectSummary(item.project)"> {{item.project}}</span>
+            <span @click="projectSummary(item.project)" class="summary"> {{item.project}}</span>
           </template>
           <template v-slot:[`item.group`]="{ item }">
-            <span @click="groupSummary(item.group)"> {{item.group}}</span>
+            <span @click="groupSummary(item.group)" class="summary"> {{item.group}}</span>
           </template>          
           <template v-slot:[`item.published`]="{ item }"> 
             <v-checkbox v-model="item.published" @click="updateOne(item)"> </v-checkbox>
@@ -98,7 +98,7 @@
         </v-data-table>
       </v-flex>
 
-      <!-- New row dialog -->
+      <!-- Add New/Update row dialog -->
       <v-dialog v-model="dialog" max-width="600px">
         <v-card>
           <v-card-title>
@@ -196,7 +196,7 @@
       </v-dialog>
       <!-- ----------------------- -->
 
-      <!-- this section is the summary of the supplier -->
+      <!-- Summary dialog for supplier/Project/Group -->
       <v-dialog v-model="supplierDialog" max-width="600px">
         <v-card>
           <v-card-text class="margin-card">
@@ -216,7 +216,7 @@
                     </v-btn>
                   </h5>
                 </export-excel>
-                <v-data-table :headers="sideHeaders"
+                <v-data-table :headers="summaryHeaders"
                               :items="supplierFilter" 
                               disable-pagination
                               hide-default-footer
@@ -254,7 +254,7 @@
                     </v-btn>
                   </h5>
                 </export-excel>
-                <v-data-table :headers="sideHeaders"
+                <v-data-table :headers="summaryHeaders"
                               :items="projectFilter" 
                               disable-pagination
                               hide-default-footer
@@ -282,7 +282,7 @@
                   :data="groupFilter" 
                   :fields="xlsHeders"
                   type="xlsx"
-                  :name=groupName
+                  :name=groupName.toLocaleString()
                   :title=groupName
                   :footer=this.groupTotal.toLocaleString()
                   class="mt-3">
@@ -292,7 +292,7 @@
                     </v-btn>
                   </h5>
                 </export-excel>
-                <v-data-table :headers="sideHeaders"
+                <v-data-table :headers="summaryHeaders"
                               :items="groupFilter" 
                               disable-pagination
                               hide-default-footer
@@ -369,7 +369,7 @@ export default {
       groupTotal : 0,
       groupFilter: [],
       groupName: "",
-      sideHeaders: [
+      summaryHeaders: [
         { text: "Total", value: "total", align:'right'},
         { text: "Description", value: "description", align:'right'},
         { text: "Project", value: "project", align:'right' },
@@ -749,4 +749,11 @@ th > i{
 .text-start > .v-data-table__expand-icon{
   width: 100% !important;
 }
+
+.summary {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+}
+
 </style>
