@@ -72,7 +72,7 @@
 </template>
 
 <script>
-import TutorialDataService from "../services/TutorialDataService";
+import InvoiceDataService from "../services/InvoiceDataService";
   export default {
     data () {
       return {
@@ -112,7 +112,7 @@ import TutorialDataService from "../services/TutorialDataService";
           excelRecID:   this.invoice.excelRecID,
         };
         //console.log(data);
-        TutorialDataService.create(data)
+        InvoiceDataService.create(data)
           .then(response => {
             this.invoice.id = response.data.id;
             //console.log(response.data);

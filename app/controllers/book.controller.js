@@ -47,7 +47,7 @@ exports.create = (req, res) => {
 //Retrieve all Books/ find by title from the database:
 //We use req.query.title to get query string from the Request and consider it as condition for findAll() method.
 //Eli Gadot - change the search from title to description 
-//also change in TutorialDataService from /books?title to /books?description)
+//also change in InvoiceDataService from /books?title to /books?description)
 exports.findAll = (req, res) => {
   const search = req.query.year;
   var condition = search!='ALL' ? { year:  search  } : {};

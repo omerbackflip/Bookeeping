@@ -48,7 +48,7 @@ exports.create = (req, res) => {
 //Retrieve all Tutorials/ find by title from the database:
 //We use req.query.title to get query string from the Request and consider it as condition for findAll() method.
 //Eli Gadot - change the search from title to description 
-//also change in TutorialDataService from /tutorials?title to /tutorials?description)
+//also change in InvoiceDataService from /tutorials?title to /tutorials?description)
 exports.findAll = async (req, res) => {
 	// const search = req.query.description;
 	// var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};

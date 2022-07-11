@@ -138,7 +138,7 @@ export default {
       BookDataService.findByYear(this.selectedYear)
         .then((response) => {
           this.books = response.data;
-          window.alert(response.data.length + " were loaded to the table")
+          window.alert(response.data.length + " records were retrieved from db")
         })
         .catch((e) => {
           console.log(e);

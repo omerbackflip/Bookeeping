@@ -15,7 +15,7 @@
         </v-row>
         <v-data-table 
             :headers="getHeaders()"
-            :items="tutorials" 
+            :items="Invoices" 
             :search="search"
             disable-pagination
             hide-default-footer
@@ -313,7 +313,7 @@
       <!--------------------------------->
     </v-layout>
     <export-excel 
-      :data="tutorials"
+      :data="Invoices"
       v-if="exportExcel" 
       id="excel-export"
       :fields="xlsHeders"
@@ -329,7 +329,7 @@
 
 
 <script>
-import TutorialDataService from "../services/TutorialDataService";
+import InvoiceDataService from "../services/InvoiceDataService";
 import TableDataService from "../services/TableDataService";
 import Vue from 'vue'
 import moment from 'moment'
@@ -345,10 +345,10 @@ Vue.filter('formatDate', function(value) {
 
 export default {
   // components: {AddInvoice},
-  name: "tutorials-list",
+  // name: "tutorials-list",
   data() {
     return {
-      tutorials: [],
+      Invoices: [],
       currInvoice: null,
       currentIndex: -1,
       companyName   : [],
@@ -457,7 +457,7 @@ export default {
 
     supplierSummary(supplier){
       this.suppName = supplier;
-      this.supplierFilter = this.tutorials.filter(supp => supp.supplier === supplier);
+      this.supplierFilter = this.Invoices.filter(supp => supp.supplier === supplier);
       this.supplierTotal = 0;
       for (let i=0; i< this.supplierFilter.length ;i++ ){
         this.supplierTotal += this.supplierFilter[i].total;
@@ -469,7 +469,7 @@ export default {
 
     projectSummary(project){
       this.projName = project;
-      this.projectFilter = this.tutorials.filter(supp => supp.project === project);
+      this.projectFilter = this.Invoices.filter(supp => supp.project === project);
       this.projectTotal = 0;
       for (let i=0; i< this.projectFilter.length ;i++ ){
         this.projectTotal += this.projectFilter[i].total;
@@ -481,7 +481,7 @@ export default {
 
     groupSummary(group){
       this.groupName = group;
-      this.groupFilter = this.tutorials.filter(supp => supp.group === group);
+      this.groupFilter = this.Invoices.filter(supp => supp.group === group);
       this.groupTotal = 0;
       for (let i=0; i< this.groupFilter.length ;i++ ){
         this.groupTotal += this.groupFilter[i].total;
@@ -500,7 +500,7 @@ export default {
     },
     deleteOne(id) {
       if (window.confirm(`Are you sure you want to delete  item ? ` + id)){
-        TutorialDataService.delete(id)
+        InvoiceDataService.delete(id)
           .then((response) => {
             console.log(response.data);
             this.refreshList();
@@ -511,11 +511,11 @@ export default {
       }
     },
 
-    retrieveTutorials() {
+    retrieveInvoices() {
       this.isLoading = true;
-      TutorialDataService.findByYear(this.selectedYear)
+      InvoiceDataService.findByYear(this.selectedYear)
         .then((response) => {
-          this.tutorials = response.data;
+          this.Invoices = response.data;
           this.isLoading = false;
         })
         .catch((e) => {
@@ -535,19 +535,14 @@ export default {
     },
 
     refreshList() {
-      this.retrieveTutorials();
-      this.currInvoice = this.tutorials[0];
+      this.retrieveInvoices();
+      this.currInvoice = this.Invoices[0];
       this.currentIndex = -1;
     },
 
-    setActiveTutorial(tutorial, index) {
-      this.currInvoice = tutorial;
-      this.currentIndex = index;
-    },
-
-    removeAllTutorials() {
+    removeAllInvoices() {
       if (window.confirm('Are you sure you want to delete all items ?')){
-        TutorialDataService.deleteAll()
+        InvoiceDataService.deleteAll()
           .then((response) => {
             console.log(response.data);
             this.refreshList();
@@ -558,9 +553,9 @@ export default {
       }
     },
     searchSTR() {
-      TutorialDataService.findByTitle(this.searchStr)
+      InvoiceDataService.findByTitle(this.searchStr)
         .then((response) => {
-          this.tutorials = response.data;
+          this.Invoices = response.data;
         })
         .catch((e) => {
           console.log(e);
@@ -569,7 +564,7 @@ export default {
 
     saveInvoice: async function() {
       try {
-        const response = await TutorialDataService.create(this.invoice);
+        const response = await InvoiceDataService.create(this.invoice);
         if(response) {
             this.invoice.id = response.data.id;
             this.refreshList();
@@ -587,7 +582,7 @@ export default {
 
     async editInvoice() {  // this is called from the update dialog
       try {
-        const response = await TutorialDataService.update(this.updateInvoice ,this.invoice);
+        const response = await InvoiceDataService.update(this.updateInvoice ,this.invoice);
         if(response) {
             this.refreshList();
             this.clearForm();
@@ -611,7 +606,7 @@ export default {
       // this.$router.push({ name: "tutorial-details", params: { id: id } });
       if(id) {
         this.updateInvoice = id;
-        const response = await TutorialDataService.get(id);
+        const response = await InvoiceDataService.get(id);
         if(response && response.data) {
           this.invoice = response.data;
         }
@@ -620,7 +615,7 @@ export default {
     },
 
     updateOne(item) {
-      TutorialDataService.update(item._id, item)
+      InvoiceDataService.update(item._id, item)
         .then(response => {
           console.log(response.data);
         })
@@ -647,7 +642,7 @@ export default {
 		},
   },
   async mounted() {
-    this.retrieveTutorials();
+    this.retrieveInvoices();
     await this.loadTable(1,'companyName');
     await this.loadTable(2,'projectName');
     await this.loadTable(3,'supplierName');
@@ -660,7 +655,7 @@ export default {
       this.selectedYear = year;
     });
     this.$root.$on('removeAllItems',() => {
-      this.removeAllTutorials();
+      this.removeAllInvoices();
     });
     this.$root.$on('downloadExcel',() => {
       const excel = document.getElementById('excel-export');
@@ -676,7 +671,7 @@ export default {
   },
   watch : {
       selectedYear () {
-        this.retrieveTutorials();
+        this.retrieveInvoices();
       },
   }
 }

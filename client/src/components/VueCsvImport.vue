@@ -87,7 +87,7 @@ import {drop, every, forEach, get, isArray, map, set} from "lodash";
 import axios from "axios";
 import Papa from "papaparse";
 import mimeTypes from "mime-types";
-import TutorialDataService from "../services/TutorialDataService";
+import InvoiceDataService from "../services/InvoiceDataService";
 
 
 
@@ -336,7 +336,7 @@ export default {
                         project:      this.form.csv[i].Project,
                         year:      this.form.csv[i].Year,
                     };
-                    TutorialDataService.create(data)
+                    InvoiceDataService.create(data)
                     .then(response => {
                         console.log(response.data);
                     })
@@ -355,7 +355,7 @@ export default {
         async importTutorialRecords() {
             try {
                 if (window.confirm(`Confirm Importing records into Tutorial table...`)){
-                    await TutorialDataService.saveBulk(this.form.csv)
+                    await InvoiceDataService.saveBulk(this.form.csv)
                     window.alert(`Records were processed and saved`)
                 }                
             } catch (error) {

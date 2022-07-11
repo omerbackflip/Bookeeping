@@ -121,7 +121,7 @@ import axios from "axios";
 import Papa from "papaparse";
 import mimeTypes from "mime-types";
 import BookDataService from "../services/BookDataService";
-import TutorialDataService from "../services/TutorialDataService";
+import InvoiceDataService from "../services/InvoiceDataService";
 
 
 
@@ -376,7 +376,7 @@ export default {
                             BookDataService.create(data)
                             .then(async response => {
                                 //update Excel_rec_id in invoices 
-                                const res = await TutorialDataService.findByInvoiceAndUpdate(response.data.company, 
+                                const res = await InvoiceDataService.findByInvoiceAndUpdate(response.data.company, 
                                                                                              response.data.year,
                                                                                              response.data.asmacta1,
                                                                                              response.data.record_id)

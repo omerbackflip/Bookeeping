@@ -45,7 +45,7 @@
 </template>
 
 <script>
-import TutorialDataService from "../services/TutorialDataService";
+import InvoiceDataService from "../services/InvoiceDataService";
 
 export default {
   name: "add-tutorial",
@@ -69,7 +69,7 @@ export default {
         amount: this.tutorial.amount
       };
 
-      TutorialDataService.create(data)
+      InvoiceDataService.create(data)
         .then(response => {
           this.tutorial.id = response.data.id;
           console.log(response.data);

@@ -1,7 +1,7 @@
 import http from "../http-common";
 import axios from "axios";
 const baseUrl = process.env.VUE_APP_API_URL;
-class TutorialDataService {
+class InvoiceDataService {
   getAll() {
     return http.get("/tutorials");
   }
@@ -55,4 +55,4 @@ class TutorialDataService {
 
 }
 
-export default new TutorialDataService();
+export default new InvoiceDataService();
