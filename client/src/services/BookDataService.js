@@ -22,6 +22,10 @@ class BookDataService {
     return http.delete(`/books/${id}`);
   }
 
+  deleteByYear(company, year){
+    return http.delete(`/books?company=${company}&year=${year}`)
+  }
+
   deleteAll() {
     return http.delete(`/books`);
   }

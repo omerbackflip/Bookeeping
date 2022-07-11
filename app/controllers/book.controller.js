@@ -132,9 +132,13 @@ exports.delete = (req, res) => {
 };
 
 
-//Delete all Books from the database:
+//Delete all records with specified year - if year not specified - delete all Books from the database:
 exports.deleteAll = (req, res) => {
-  Book.deleteMany({})
+  console.log(req.query)
+  const company = req.query.company;
+  const year = req.query.year;
+  var condition = year ? {year: year, company: company} : {};
+  Book.deleteMany(condition)
     .then(data => {
       res.send({
         message: `${data.deletedCount} Books were deleted successfully!`

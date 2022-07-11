@@ -27,6 +27,22 @@
                         ></v-radio>
                     </v-radio-group>
                 </div>
+                <div class="radioBtn">
+                    <v-radio-group v-model="importYear">
+                        <v-radio
+                            label="2020"
+                            value="2020"
+                        ></v-radio>
+                        <v-radio
+                            label="2021"
+                            value="2021"
+                        ></v-radio>
+                        <v-radio
+                            label="2022"
+                            value="2022"
+                        ></v-radio>
+                    </v-radio-group>
+                </div>
                 <div class="form-group csv-import-file">
                     <input
                         ref="csv"
@@ -91,7 +107,7 @@
                         </slot>
                     </div> -->
                 <!-- </div> -->
-                <v-btn class="ma-2" :loading="loading" :disabled="loading" @click="importBookRecords">save</v-btn>
+                <v-btn class="ma-2" :loading="loading" :disabled="!fileSelected || !company" @click="importBookRecords">save</v-btn>
                 <v-btn class="ma-2" @click="deleteAll">Delete All</v-btn>
             </div>
             <!-- {{ form.csv }} -->
@@ -223,6 +239,7 @@ export default {
         //obj: '',
         loading: false,
         company:  '',
+        importYear: "2022",
     }),
 
     created() {
@@ -387,7 +404,8 @@ export default {
         },
         async importBookRecords() {
             try {
-                if (window.confirm(`Confirm Importing records into Book table...`)){
+                if (window.confirm(`Note: all records with year = ${this.importYear} will be deleted`)){
+                    await BookDataService.deleteByYear(this.company, this.importYear)
                     await BookDataService.saveBulk(this.form.csv,this.company)
                     window.alert(`Records were processed and saved`)
                 }                
