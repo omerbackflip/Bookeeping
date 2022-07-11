@@ -345,7 +345,7 @@ Vue.filter('formatDate', function(value) {
 
 export default {
   // components: {AddInvoice},
-  // name: "tutorials-list",
+  // name: "invoices-list",
   data() {
     return {
       Invoices: [],
@@ -603,7 +603,7 @@ export default {
     },
 
     async editOne(id) { // this is called from the edit button on the table
-      // this.$router.push({ name: "tutorial-details", params: { id: id } });
+      // this.$router.push({ name: "invoice-details", params: { id: id } });
       if(id) {
         this.updateInvoice = id;
         const response = await InvoiceDataService.get(id);

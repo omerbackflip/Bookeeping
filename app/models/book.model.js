@@ -7,7 +7,7 @@ module.exports = mongoose => {
       year: Number,
       record_schum: Number,
       pratim: String,
-      asmacta1: Number,
+      asmacta1: String,
       schum_hova: Number,
       schum_zchut: Number,
       cust_lname: String,

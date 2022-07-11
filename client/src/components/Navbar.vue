@@ -4,12 +4,12 @@
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
             <v-spacer></v-spacer>
             <v-row >
-                <v-col v-show="isTutorials">
+                <v-col v-show="isInvoices">
                     <v-btn small @click="setAddNewRow" class="plus-button">
                         <v-icon>mdi-plus</v-icon>
                     </v-btn>
                 </v-col>
-                <v-col class="mt-2" cols="4" sm="4" md="3" v-show="this.$route.name === 'tutorials' || this.$route.name === 'bookingList'">
+                <v-col class="mt-2" cols="4" sm="4" md="3" v-show="this.$route.name === 'invoices' || this.$route.name === 'bookingList'">
                     <v-select class="year-input" 
                         :items="[2020, 2021, 2022, 'ALL']"
                         @change="onYearChange"
@@ -27,7 +27,7 @@
                                 <v-icon>mdi-dots-vertical</v-icon>
                             </v-btn>
                         </template>
-                        <v-list v-show="isTutorials">
+                        <v-list v-show="isInvoices">
                             <v-list-item v-for="(item, index) in items" :key="index">
                                 <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
                                     {{item.title}}
@@ -113,8 +113,8 @@ export default {
         },  
     },
     computed: {
-        isTutorials() {
-            return this.$route.name === 'tutorials';
+        isInvoices() {
+            return this.$route.name === 'invoices';
         }
     }
 }

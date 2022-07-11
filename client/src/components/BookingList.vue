@@ -165,7 +165,7 @@ export default {
     },
 
     editOne(id) {
-      this.$router.push({ name: "tutorial-details", params: { id: id } });
+      this.$router.push({ name: "invoice-details", params: { id: id } });
     },
 
   },

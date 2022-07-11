@@ -75,7 +75,7 @@
                         </slot>
                     </div>
                 </div> -->
-                <v-btn @click="importTutorialRecords">save</v-btn>
+                <v-btn @click="importInvoiceRecords">save</v-btn>
             </div>
             <!-- {{ form.csv }} -->
         </div>
@@ -318,7 +318,7 @@ export default {
             return `${id}${this._uid}`;
         },
         saveInvoice() {
-            if (window.confirm(`Confirm importing records into Tutorial table...`)){
+            if (window.confirm(`Confirm importing records into Invoice table...`)){
                 for (let i = 1; i < this.form.csv.length; i++) { 
                     var data = {
                         company:      this.form.csv[i].Company && this.form.csv[i].Company.replace(/\s+/g, '') ,
@@ -341,7 +341,7 @@ export default {
                         console.log(response.data);
                     })
                     .catch(e => {
-                        console.log("error while insert new Tutorial " + e);
+                        console.log("error while insert new Invoice " + e);
                     });
                 }
                 window.alert(`${this.form.csv.length} records were processed`)
@@ -352,9 +352,9 @@ export default {
                 this.form.csv = event.target.files[0];
             }
         },
-        async importTutorialRecords() {
+        async importInvoiceRecords() {
             try {
-                if (window.confirm(`Confirm Importing records into Tutorial table...`)){
+                if (window.confirm(`Confirm Importing records into Invoice table...`)){
                     await InvoiceDataService.saveBulk(this.form.csv)
                     window.alert(`Records were processed and saved`)
                 }                

@@ -3,39 +3,39 @@ import axios from "axios";
 const baseUrl = process.env.VUE_APP_API_URL;
 class InvoiceDataService {
   getAll() {
-    return http.get("/tutorials");
+    return http.get("/invoices");
   }
 
   get(id) {
-    return http.get(`/tutorials/${id}`);
+    return http.get(`/invoices/${id}`);
   }
 
   create(data) {
-    return http.post("/tutorials", data);
+    return http.post("/invoices", data);
   }
 
   update(id, data) {
-    return http.put(`/tutorials/${id}`, data);
+    return http.put(`/invoices/${id}`, data);
   }
 
   delete(id) {
-    return http.delete(`/tutorials/${id}`);
+    return http.delete(`/invoices/${id}`);
   }
 
   deleteAll() {
-    return http.delete(`/tutorials`);
+    return http.delete(`/invoices`);
   }
 
   findByTitle(title) {
-    return http.get(`/tutorials?description=${title}`);
+    return http.get(`/invoices?description=${title}`);
   }
 
   findByYear(year) {
-    return http.get(`/tutorials?year=${year}`);
+    return http.get(`/invoices?year=${year}`);
   }
 
   findByInvoiceAndUpdate(company, year, invoiceId, excelRecID) {
-    return http.put(`/tutorials/update-records`, {
+    return http.put(`/invoices/update-records`, {
       company,
       year,
       invoiceId,
@@ -46,7 +46,7 @@ class InvoiceDataService {
   async saveBulk(bulk) {
     var formData = new FormData();
     formData.append("file", bulk);
-    return await axios.post(`${baseUrl}/tutorials/save-bulk`, formData, {
+    return await axios.post(`${baseUrl}/invoices/save-bulk`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       }

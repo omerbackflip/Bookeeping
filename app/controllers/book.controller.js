@@ -1,6 +1,6 @@
 const db = require("../models");
 const Book = db.books;
-const Tutorial = db.tutorials;
+const Invoice = db.invoices;
 var fs = require('fs');
 const csv=require('csvtojson')
 
@@ -229,7 +229,7 @@ function unLinkFile(path) {
 }
 
 async function updateExcelRecID(company, year,invoiceId,excelRecID) {
-  return await Tutorial.findOneAndUpdate({
+  return await Invoice.findOneAndUpdate({
 		company,
 		year,
 		invoiceId

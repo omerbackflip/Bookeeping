@@ -1,10 +1,10 @@
 const db = require("../models");
-const Tutorial = db.tutorials;
+const Invoice = db.invoices;
 const Book = db.books;
 const csv=require('csvtojson')
 var fs = require('fs');
 
-//Create and Save a new Tutorial:
+//Create and Save a new Invoice:
 exports.create = (req, res) => {
 	// Validate request
 	if (!req.body.company) {
@@ -12,8 +12,8 @@ exports.create = (req, res) => {
 		return;
 	}
 
-	// Create a Tutorial
-	const tutorial = new Tutorial({
+	// Create a Invoice
+	const invoice = new Invoice({
 		company: req.body.company,
 		project: req.body.project,
 		description: req.body.description,
@@ -30,25 +30,25 @@ exports.create = (req, res) => {
 		year: req.body.year,
 	});
 
-	// Save Tutorial in the database
-	tutorial
-		.save(tutorial)
+	// Save Invoice in the database
+	invoice
+		.save(invoice)
 		.then(data => {
 			res.send(data);
 		})
 		.catch(err => {
 			res.status(500).send({
 				message:
-					err.message || "Some error occurred while creating the Tutorial."
+					err.message || "Some error occurred while creating the Invoice."
 			});
 		});
 };
 
 
-//Retrieve all Tutorials/ find by title from the database:
+//Retrieve all Invoices/ find by title from the database:
 //We use req.query.title to get query string from the Request and consider it as condition for findAll() method.
 //Eli Gadot - change the search from title to description 
-//also change in InvoiceDataService from /tutorials?title to /tutorials?description)
+//also change in InvoiceDataService from /invoices?title to /invoices?description)
 exports.findAll = async (req, res) => {
 	// const search = req.query.description;
 	// var condition = search ? { description: { $regex: new RegExp(search), $options: "i" } } : {};
@@ -66,7 +66,7 @@ exports.findAll = async (req, res) => {
 		}
 	}
 
-	const data = await Tutorial.find(condition).lean();
+	const data = await Invoice.find(condition).lean();
 	try {
 		const allData = await Promise.all(data.map(async (mapData) => {
 			if (await Book.exists({ company: mapData.company, record_id: mapData.excelRecID })) {
@@ -85,30 +85,30 @@ exports.findAll = async (req, res) => {
 		}))
 		res.send(allData);
 	} catch (err) {
-		res.status(500).send({ message: err.message || "Some error occurred while retrieving tutorials." });
+		res.status(500).send({ message: err.message || "Some error occurred while retrieving invoices." });
 	};
 };
 
 
-//Find a single Tutorial with an id:
+//Find a single Invoice with an id:
 exports.findOne = (req, res) => {
 	const id = req.params.id;
 
-	Tutorial.findById(id)
+	Invoice.findById(id)
 		.then(data => {
 			if (!data)
-				res.status(404).send({ message: "Not found Tutorial with id " + id });
+				res.status(404).send({ message: "Not found Invoice with id " + id });
 			else res.send(data);
 		})
 		.catch(err => {
 			res
 				.status(500)
-				.send({ message: "Error retrieving Tutorial with id=" + id });
+				.send({ message: "Error retrieving Invoice with id=" + id });
 		});
 };
 
 
-//Update a Tutorial identified by the id in the request:
+//Update a Invoice identified by the id in the request:
 exports.update = (req, res) => {
 	if (!req.body) {
 		return res.status(400).send({
@@ -118,7 +118,7 @@ exports.update = (req, res) => {
 
 	const id = req.params.id;
 
-	Tutorial.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
+	Invoice.findByIdAndUpdate(id, req.body, { useFindAndModify: false })
 		.then(data => {
 			if (!data) {
 				res.status(404).send({
@@ -141,7 +141,7 @@ exports.updateExcelRecID = (req, res) => {
 			message: "Data to update can not be empty!"
 		});
 	}
-	Tutorial.findOneAndUpdate({
+	Invoice.findOneAndUpdate({
 		company: req.body.company,
 		year: req.body.year,
 		invoiceId: req.body.invoiceId
@@ -162,57 +162,57 @@ exports.updateExcelRecID = (req, res) => {
 };
 
 
-//Delete a Tutorial with the specified id:
+//Delete a Invoice with the specified id:
 exports.delete = (req, res) => {
 	const id = req.params.id;
 
-	Tutorial.findByIdAndRemove(id)
+	Invoice.findByIdAndRemove(id)
 		.then(data => {
 			if (!data) {
 				res.status(404).send({
-					message: `Cannot delete Tutorial with id=${id}. Maybe Tutorial was not found!`
+					message: `Cannot delete Invoice with id=${id}. Maybe Invoice was not found!`
 				});
 			} else {
 				res.send({
-					message: "Tutorial was deleted successfully!"
+					message: "Invoice was deleted successfully!"
 				});
 			}
 		})
 		.catch(err => {
 			res.status(500).send({
-				message: "Could not delete Tutorial with id=" + id
+				message: "Could not delete Invoice with id=" + id
 			});
 		});
 };
 
 
-//Delete all Tutorials from the database:
+//Delete all Invoices from the database:
 exports.deleteAll = (req, res) => {
-	Tutorial.deleteMany({})
+	Invoice.deleteMany({})
 		.then(data => {
 			res.send({
-				message: `${data.deletedCount} Tutorials were deleted successfully!`
+				message: `${data.deletedCount} Invoices were deleted successfully!`
 			});
 		})
 		.catch(err => {
 			res.status(500).send({
 				message:
-					err.message || "Some error occurred while removing all tutorials."
+					err.message || "Some error occurred while removing all invoices."
 			});
 		});
 };
 
 
-//Find all Tutorials with published = true:
+//Find all Invoices with published = true:
 exports.findAllPublished = (req, res) => {
-	Tutorial.find({ published: true })
+	Invoice.find({ published: true })
 		.then(data => {
 			res.send(data);
 		})
 		.catch(err => {
 			res.status(500).send({
 				message:
-					err.message || "Some error occurred while retrieving tutorials."
+					err.message || "Some error occurred while retrieving invoices."
 			});
 		});
 };
@@ -231,7 +231,7 @@ exports.saveBulk = async (req, res) => {
 		let data= await csv().fromFile(`uploads/${req.file.filename}`);
 		data = data.map(item => item.published === 'T' ? {...item,published: true} : {...item,published: false});
 		if (data) {
-			const result = await Tutorial.insertMany(data, {ordered: true});
+			const result = await Invoice.insertMany(data, {ordered: true});
 			unLinkFile(`uploads/${req.file.filename}`);
 			if (result) {
 				return res.send({

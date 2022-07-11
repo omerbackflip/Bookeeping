@@ -8,19 +8,19 @@ export default new Router({
   routes: [
     {
       path: "/",
-      alias: "/tutorials",
-      name: "tutorials",
-      component: () => import("./components/TutorialsList")
+      alias: "/invoices",
+      name: "invoices",
+      component: () => import("./components/InvoicesList")
     },
     {
-      path: "/tutorials/:id",
-      name: "tutorial-details",
-      component: () => import("./components/Tutorial")
+      path: "/invoices/:id",
+      name: "invoice-details",
+      component: () => import("./components/Invoice")
     },
     {
       path: "/add",
       name: "add",
-      component: () => import("./components/AddTutorial")
+      component: () => import("./components/AddInvoice")
     },
     {
       path: "/loadCsv",
