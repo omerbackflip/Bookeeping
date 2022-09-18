@@ -120,10 +120,9 @@ import {drop, every, forEach, get, isArray, map, set} from "lodash";
 import axios from "axios";
 import Papa from "papaparse";
 import mimeTypes from "mime-types";
-import BookDataService from "../services/BookDataService";
-import InvoiceDataService from "../services/InvoiceDataService";
-
-
+import specificServiceEndPoints from "../services/specificServiceEndPoints";
+import { BOOKS_MODEL  } from '../constants/constants';
+import apiService from '../services/apiService';
 
 export default {
     props: {
@@ -352,51 +351,6 @@ export default {
         makeId(id) {
             return `${id}${this._uid}`;
         },
-        saveBook() {
-            if (window.confirm(`Confirm Saveing ${this.form.csv.length} records into Book table...`)){
-                this.loading = true;                    
-                    for (let i = 1; i < this.form.csv.length; i++) { // first row [0] is the title row
-                        if (this.form.csv[i].asmchta_date) { // if no date - probbaly is Yitra...
-                        console.log(this.form.csv[i])
-                            var data = {
-                                company:        this.company,
-                                asmchta_date:   this.form.csv[i].asmchta_date,
-                                record_id:      parseInt(this.form.csv[i].record_id),
-                                year:           parseInt(this.form.csv[i].year),
-                                record_schum:   parseInt(this.form.csv[i].record_schum),
-                                pratim:         this.form.csv[i].pratim,
-                                asmacta1:       parseInt(this.form.csv[i].asmacta1),
-                                schum_hova:     parseInt(this.form.csv[i].schum_hova),
-                                schum_zchut:    parseInt(this.form.csv[i].schum_zchut),
-                                cust_lname:     this.form.csv[i].cust_lname,
-                                cust_fname:     this.form.csv[i].cust_fname,
-                                bs_item_name:   this.form.csv[i].bs_item_name,
-                                bs_group_name:  this.form.csv[i].bs_group_name,                
-                            };
-                            BookDataService.create(data)
-                            .then(async response => {
-                                //update Excel_rec_id in invoices 
-                                const res = await InvoiceDataService.findByInvoiceAndUpdate(response.data.company, 
-                                                                                             response.data.year,
-                                                                                             response.data.asmacta1,
-                                                                                             response.data.record_id)
-                                .then (res1 =>{
-                                    console.log(res1);
-                                    console.log(res);
-                                })
-                                .catch(e => {
-                                    console.log("error while trying to update record_id " + e);
-                                });
-                            })
-                            .catch(e => {
-                                console.log("error while insert new Book " + e);
-                            });
-                        }
-                    }
-                this.loading = false;
-                window.alert(`${this.form.csv.length} records were processed`)
-            }
-        },
         setCsvFile(event){
             if(event && event.target && event.target.files[0]) {
                 this.form.csv = event.target.files[0];
@@ -404,18 +358,17 @@ export default {
         },
         async importBookRecords() {
             try {
-                if (window.confirm(`Note: all records with year = ${this.importYear} will be deleted`)){
-                    await BookDataService.deleteByYear(this.company, this.importYear)
-                    await BookDataService.saveBulk(this.form.csv,this.company)
-                    window.alert(`Records were processed and saved`)
+                if (window.confirm(`Note: All records with year = ${this.importYear} will be imported`)){
+                    await specificServiceEndPoints.saveBooksBulk(this.form.csv,this.company)
+                    window.alert(`Records were processed and saved`);
                 }                
             } catch (error) {
                 console.log("error while saing bulk " + error);                
             }
         },
-        deleteAll() {
+        async deleteAll() {
             if (window.confirm('Confirm Delete all Book table...')){
-                BookDataService.deleteAll()
+                await apiService.deleteAll({model: BOOKS_MODEL})
             }
         }
     },

@@ -27,8 +27,8 @@
                       fixed-header
                       height="75vh"
                       class="elevation-3"
-                      loading = "isLoading"
-                      loading-text="Loading... Please wait">
+                      no-data-text = "No data available for current selected year!"
+                    >
           <template v-slot:[`item.actions`]="{ item }"> 
             <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
             <v-icon small @click="deleteOne(item.id)">mdi-delete</v-icon>
@@ -56,10 +56,10 @@
 
 
 <script>
-import BookDataService from "../services/BookDataService";
-
 import Vue from 'vue'
 import moment from 'moment'
+import { BOOKS_MODEL } from '../constants/constants';
+import apiService from '../services/apiService';
 
 
 Vue.filter('formatDate', function(value) {
@@ -119,30 +119,23 @@ export default {
       //this.currentIndex = index;
     },
 
-    deleteOne(id) {
+    async deleteOne(id) {
       if (window.confirm('Are you sure you want to delete one item ?')){
-        BookDataService.delete(id)
-          .then((response) => {
-            console.log(response.data);
-            this.refreshList();
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+        const response = await apiService.deleteOne({model: BOOKS_MODEL , id});
+        if(response){
+          this.refreshList();
+        }
       }
     },
 
 
-    retrieveBooks() {
-      // BookDataService.getAll()
-      BookDataService.findByYear(this.selectedYear)
-        .then((response) => {
+    async retrieveBooks() {
+      this.isLoading = true;
+      const response = await apiService.get({model: BOOKS_MODEL, year: this.selectedYear });
+      if(response && response.data) {
           this.books = response.data;
-          window.alert(response.data.length + " records were retrieved from db")
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      }
+      this.isLoading = false;
     },
 
     refreshList() {
@@ -152,10 +145,9 @@ export default {
     },
 
     removeAllBooks() {
-      if (window.confirm('Are you sure you want to delete all items ?')){
-        BookDataService.deleteAll()
-          .then((response) => {
-            console.log(response.data);
+      if (window.confirm(`Are you sure you want to delete all items of ${this.selectedYear} ?`)){
+        apiService.deleteAll({model: BOOKS_MODEL, year: this.selectedYear})
+          .then(() => {
             this.refreshList();
           })
           .catch((e) => {

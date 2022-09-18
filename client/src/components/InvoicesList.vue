@@ -28,14 +28,14 @@
             :item-class="itemRowBackground"
             :loading = "isLoading"
             loading-text="Loading... Please wait"
-            item-key="_id"
+            item-key="id"
             :show-expand="true"
             :single-expand="true">
             <!-- :expanded.sync="expanded" -->
           <template  v-slot:[`item.actions`]="{ item }"> 
             <div :class="isMobile() ? 'd-grid' : ''">
-              <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon>
-              <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
+              <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
+              <v-icon small @click="deleteOne(item.id,item.description)">mdi-delete</v-icon>
             </div>
           </template>
           <template v-slot:[`item.date`]="{ item }"> 
@@ -329,11 +329,13 @@
 
 
 <script>
-import InvoiceDataService from "../services/InvoiceDataService";
-import TableDataService from "../services/TableDataService";
+
 import Vue from 'vue'
 import moment from 'moment'
 import excel from 'vue-excel-export'
+import apiService from "../services/apiService";
+import { INVOICE_MODEL, TABLE_MODEL } from '../constants/constants';
+
 Vue.use(excel)
 
 Vue.filter('formatDate', function(value) {
@@ -374,7 +376,6 @@ export default {
         { text: "Description", value: "description", align:'right'},
         { text: "Project", value: "project", align:'right' },
       ],
-      //searchStr: "",
       exportExcel: false,
       search: '',
       headers:[],
@@ -498,34 +499,27 @@ export default {
         return false
       }
     },
-    deleteOne(id) {
-      if (window.confirm(`Are you sure you want to delete  item ? ` + id)){
-        InvoiceDataService.delete(id)
-          .then((response) => {
-            console.log(response.data);
-            this.refreshList();
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+    async deleteOne(id,description) {
+      if (window.confirm(`Are you sure you want to delete this item ? ` + description)){
+        const response = await apiService.deleteOne({model: INVOICE_MODEL , id});
+        if(response) {
+          this.refreshList();
+        }
       }
     },
 
-    retrieveInvoices() {
+    async retrieveInvoices() {
       this.isLoading = true;
-      InvoiceDataService.findByYear(this.selectedYear)
-        .then((response) => {
+      const response = await apiService.get({model: INVOICE_MODEL, year: this.selectedYear });
+      if(response && response.data) {
           this.Invoices = response.data;
           this.isLoading = false;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      }
     },
 
     loadTable:async function (table_id,key) {
       try {
-        const response = await TableDataService.findByTableID(table_id);
+        const response = await apiService.get({table_id,model: TABLE_MODEL});
         if(response) {
           this[key] = response.data.map(code => code.description);
         }
@@ -540,31 +534,17 @@ export default {
       this.currentIndex = -1;
     },
 
-    removeAllInvoices() {
-      if (window.confirm('Are you sure you want to delete all items ?')){
-        InvoiceDataService.deleteAll()
-          .then((response) => {
-            console.log(response.data);
-            this.refreshList();
-          })
-          .catch((e) => {
-            console.log(e);
-          });
+    async removeAllInvoices() {
+      if (window.confirm(`Are you sure you want to delete all items of year ${this.selectedYear} ?`)){
+        const response = await apiService.deleteAll({model: INVOICE_MODEL , year: Number(this.selectedYear)});
+        if(response) {
+          this.refreshList();
+        }
       }
     },
-    searchSTR() {
-      InvoiceDataService.findByTitle(this.searchStr)
-        .then((response) => {
-          this.Invoices = response.data;
-        })
-        .catch((e) => {
-          console.log(e);
-        });
-    },
-
     saveInvoice: async function() {
       try {
-        const response = await InvoiceDataService.create(this.invoice);
+        const response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
         if(response) {
             this.invoice.id = response.data.id;
             this.refreshList();
@@ -582,7 +562,7 @@ export default {
 
     async editInvoice() {  // this is called from the update dialog
       try {
-        const response = await InvoiceDataService.update(this.updateInvoice ,this.invoice);
+        const response = await apiService.update(this.updateInvoice ,this.invoice , {model: INVOICE_MODEL});
         if(response) {
             this.refreshList();
             this.clearForm();
@@ -606,7 +586,7 @@ export default {
       // this.$router.push({ name: "invoice-details", params: { id: id } });
       if(id) {
         this.updateInvoice = id;
-        const response = await InvoiceDataService.get(id);
+        const response = await apiService.getById(id, {model: INVOICE_MODEL});
         if(response && response.data) {
           this.invoice = response.data;
         }
@@ -614,15 +594,9 @@ export default {
       }
     },
 
-    updateOne(item) {
-      InvoiceDataService.update(item._id, item)
-        .then(response => {
-          console.log(response.data);
-        })
-        .catch(e => {
-          console.log(e);
-        });
-        this.itemToEdit = '';
+    async updateOne(item) {
+      await apiService.update(item.id,{published: item.published}, {model: INVOICE_MODEL});
+      this.itemToEdit = '';
     },
 
     setEdit(item) {
@@ -655,6 +629,7 @@ export default {
       this.selectedYear = year;
     });
     this.$root.$on('removeAllItems',() => {
+      setTimeout(100);
       this.removeAllInvoices();
     });
     this.$root.$on('downloadExcel',() => {

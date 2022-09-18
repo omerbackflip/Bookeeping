@@ -72,7 +72,8 @@
 </template>
 
 <script>
-import InvoiceDataService from "../services/InvoiceDataService";
+import { INVOICE_MODEL } from '../constants/constants';
+import apiService from "../services/apiService";
   export default {
     data () {
       return {
@@ -112,7 +113,7 @@ import InvoiceDataService from "../services/InvoiceDataService";
           excelRecID:   this.invoice.excelRecID,
         };
         //console.log(data);
-        InvoiceDataService.create(data)
+        apiService.create(data,{ model: INVOICE_MODEL})
           .then(response => {
             this.invoice.id = response.data.id;
             //console.log(response.data);
