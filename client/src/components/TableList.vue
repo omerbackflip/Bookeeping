@@ -145,7 +145,8 @@
 
 
 <script>
-import TableDataService from "../services/TableDataService";
+import { TABLE_MODEL } from '../constants/constants';
+import apiService from '../services/apiService';
 
 export default {
   name: "table-list",
@@ -178,7 +179,7 @@ export default {
   methods: {
     deleteOne(id) {
       if (window.confirm('Are you sure you want to delete one item ?')){
-        TableDataService.delete(id)
+        apiService.deleteOne({model: TABLE_MODEL ,id})
           .then((response) => {
             console.log(response.data);
             this.refreshList();
@@ -190,7 +191,7 @@ export default {
     },
 
     retrieveTables() {
-      TableDataService.getAll()
+      apiService.get({model: TABLE_MODEL})
         .then((response) => {
           this.tables = response.data;
           this.tableID = response.data.filter(item => item.table_id === 99);
@@ -215,7 +216,7 @@ export default {
     },
 
     updateOne(item) {
-      TableDataService.update(item.id, item)
+      apiService.update(item.id, item, {model: TABLE_MODEL})
         .then(response => {
           console.log(response.data);
           this.message = 'The updateOne() updated successfully!';
@@ -239,7 +240,7 @@ export default {
         table_code:   this.tblFields.code,
         description:  this.tblFields.description,
       };
-      TableDataService.create(data)
+      apiService.create(data,{ model: TABLE_MODEL})
         .then(response => {
           this.tblFields.id = response.data.id;
           this.refreshList();

@@ -42,7 +42,8 @@
 </template>
 
 <script>
-import InvoiceDataService from "../services/InvoiceDataService";
+import { INVOICE_MODEL } from '../constants/constants';
+import apiService from '../services/apiService';
 
 export default {
   name: "invoice",
@@ -54,7 +55,7 @@ export default {
   },
   methods: {
     getInvoice(id) {
-      InvoiceDataService.get(id)
+      apiService.getById({model: INVOICE_MODEL,id})
         .then(response => {
           this.currentInvoice = response.data;
           console.log(response.data);
@@ -72,7 +73,7 @@ export default {
         published: status
       };
 
-      InvoiceDataService.update(this.currentInvoice.id, data)
+      apiService.update(this.currentInvoice.id, data,{model: INVOICE_MODEL})
         .then(response => {
           this.currentInvoice.published = status;
           console.log(response.data);
@@ -83,7 +84,7 @@ export default {
     },
 
     updateInvoice() {
-      InvoiceDataService.update(this.currentInvoice.id, this.currentInvoice)
+      apiService.update(this.currentInvoice.id, this.currentInvoice, {model: INVOICE_MODEL})
         .then(response => {
           console.log(response.data);
           this.message = 'The invoice was updated successfully!';
@@ -94,7 +95,7 @@ export default {
     },
 
     deleteInvoice() {
-      InvoiceDataService.delete(this.currentInvoice.id)
+      apiService.delete({id:this.currentInvoice.id, model: INVOICE_MODEL})
         .then(response => {
           console.log(response.data);
           this.$router.push({ name: "invoices" });

@@ -1,8 +1,8 @@
 <template>
-  <div class="text-center">
+  <div class="text-center mt-2">
     <v-dialog v-model="dialog" width="600">
       <template v-slot:activator="{ on, attrs }">
-        <v-btn color="success" v-bind="attrs" v-on="on">Add</v-btn>
+        <v-btn color="success" v-bind="attrs" v-on="on">Add new invoice</v-btn>
       </template>
       <v-card>
         <v-card-title class="text-h5 grey lighten-2">Add New Invoice</v-card-title>
@@ -72,7 +72,8 @@
 </template>
 
 <script>
-import InvoiceDataService from "../services/InvoiceDataService";
+import { INVOICE_MODEL } from '../constants/constants';
+import apiService from "../services/apiService";
   export default {
     data () {
       return {
@@ -112,7 +113,7 @@ import InvoiceDataService from "../services/InvoiceDataService";
           excelRecID:   this.invoice.excelRecID,
         };
         //console.log(data);
-        InvoiceDataService.create(data)
+        apiService.create(data,{ model: INVOICE_MODEL})
           .then(response => {
             this.invoice.id = response.data.id;
             //console.log(response.data);

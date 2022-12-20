@@ -28,11 +28,6 @@ export default new Router({
       component: () => import("./components/VueCsvImport")
     },
     {
-      path: "/addInv",
-      name: "addInv",
-      component: () => import("./components/AddInvoice")
-    },
-    {
       path: "/loadBookCsv",
       name: "loadBookCsv",
       component: () => import("./components/ImportCsvBook")

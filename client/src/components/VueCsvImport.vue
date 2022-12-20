@@ -1,29 +1,30 @@
 <template>
-    <div class="vue-csv-uploader">
+    <div  :class="isMobile() ? 'margin-mobile' : ''" class="vue-csv-uploader">
         <div class="form">
             <div class="vue-csv-uploader-part-one">
-                <div class="form-check form-group csv-import-checkbox" v-if="headers === null">
-                    <slot name="hasHeaders" :headers="hasHeaders" :toggle="toggleHasHeaders">
-                        <input
-                            :class="checkboxClass" type="checkbox"
-                            :id="makeId('hasHeaders')"
-                            :value="hasHeaders"
-                            @change="toggleHasHeaders"
-                        />
-                        <label class="form-check-label" :for="makeId('hasHeaders')">
-                            File Has Headers
-                        </label>
-                    </slot>
-                </div>
                 <div class="form-group csv-import-file">
                     <input
                         ref="csv"
                         type="file"
-                        @change="setCsvFile"
                         @change.prevent="validFileMimeType"
                         :class="inputClass"
                         name="csv"
                     />
+                    <div class="form-check form-group csv-import-checkbox" v-if="headers === null">
+                        <slot name="hasHeaders" :headers="hasHeaders" :toggle="toggleHasHeaders">
+                            <input
+                                :class="checkboxClass" type="checkbox"
+                                :id="makeId('hasHeaders')"
+                                :value="hasHeaders"
+                                class="checkbox-headers"
+                                @change="toggleHasHeaders"
+                            />
+                            <label class="form-check-label" :for="makeId('hasHeaders')">
+                                File Has Headers
+                            </label>
+                        </slot>
+                    </div>
+
                     <slot name="error" v-if="showErrorMessage">
                         <div class="invalid-feedback d-block">
                             File type is invalid
@@ -87,9 +88,7 @@ import {drop, every, forEach, get, isArray, map, set} from "lodash";
 import axios from "axios";
 import Papa from "papaparse";
 import mimeTypes from "mime-types";
-import InvoiceDataService from "../services/InvoiceDataService";
-
-
+import specificServiceEndPoints from '../services/specificServiceEndPoints';
 
 export default {
     props: {
@@ -311,41 +310,18 @@ export default {
                 };
             }
         },
+        isMobile() {
+			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+				return true;
+			} else {
+				return false;
+			}
+		},
         toggleHasHeaders() {
             this.hasHeaders = !this.hasHeaders;
         },
         makeId(id) {
             return `${id}${this._uid}`;
-        },
-        saveInvoice() {
-            if (window.confirm(`Confirm importing records into Invoice table...`)){
-                for (let i = 1; i < this.form.csv.length; i++) { 
-                    var data = {
-                        company:      this.form.csv[i].Company && this.form.csv[i].Company.replace(/\s+/g, '') ,
-                        description:  this.form.csv[i].Description,
-                        amount:       parseInt(this.form.csv[i].Amount),
-                        vat:          parseInt(this.form.csv[i].Vat),
-                        total:        parseInt(this.form.csv[i].Total),
-                        group:        parseInt(this.form.csv[i].GroupID),
-                        date:         this.form.csv[i].InvDate,
-                        supplier:     this.form.csv[i].supplier,
-                        invoiceId:    this.form.csv[i].invoiceID,
-                        remark:       this.form.csv[i].Remark,
-                        excelRecID:   parseInt(this.form.csv[i].ExcelRecordID),
-                        published:    this.form.csv[i].published.trim() === 'T' ? true : false,
-                        project:      this.form.csv[i].Project,
-                        year:      this.form.csv[i].Year,
-                    };
-                    InvoiceDataService.create(data)
-                    .then(response => {
-                        console.log(response.data);
-                    })
-                    .catch(e => {
-                        console.log("error while insert new Invoice " + e);
-                    });
-                }
-                window.alert(`${this.form.csv.length} records were processed`)
-            }
         },
         setCsvFile(event){
             if(event && event.target && event.target.files[0]) {
@@ -355,7 +331,7 @@ export default {
         async importInvoiceRecords() {
             try {
                 if (window.confirm(`Confirm Importing records into Invoice table...`)){
-                    await InvoiceDataService.saveBulk(this.form.csv)
+                    await specificServiceEndPoints.saveInvoicesBulk(this.form.csv)
                     window.alert(`Records were processed and saved`)
                 }                
             } catch (error) {
@@ -406,7 +382,9 @@ export default {
         
         mapFields() {
             this.initializeFromProps();
-        }
+        },
+
+
     },
     
     computed: {
@@ -422,3 +400,29 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+    input{
+        float: none !important;
+        margin-right: 10px;
+        margin-bottom: 12px;
+    }
+
+    .form-control-file{
+        text-align-last: center;
+        margin-top: 20px;
+        margin-bottom: 12px;
+    }
+    .checkbox-headers{
+        cursor: pointer;
+    }
+    .margin-mobile{
+        margin: 20px !important;
+    }
+    .vue-csv-uploader{
+        border: 7px solid #1371ce;
+        border-radius: 6px;
+        margin: 20px 200px 0 200px;
+        padding: 16px 0 20px 0;
+    }
+</style>
