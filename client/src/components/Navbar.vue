@@ -2,25 +2,56 @@
     <nav>
         <v-app-bar app dark>
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+            <div v-show="isInvoices" :class="isMobile() ? 'mobile-search' : ''" class="search-wrapper">
+                <v-text-field
+                append-icon="mdi-magnify"
+                @change="onSearch"
+                label="Search..."
+                single-line                
+                ></v-text-field>
+            </div>
+
+            <div :class="isMobile() ? 'search-wrapper-mobile' : ''" v-show="isBookingList" class="search-wrapper">
+                <v-row>
+                    <v-col>
+                        <v-text-field
+                        @change="onSearchBooking"
+                        append-icon="mdi-magnify"
+                        :class="isMobile() ? 'mobile-search' : 'mt-4'"
+                        label="Search booking..."
+                        single-line
+                        ></v-text-field>
+
+                    </v-col>
+                    <v-col>
+                        <v-btn :class="isMobile() ? 'mobile-button' : ''" class="m-3 btn btn-sm btn-danger" @click="removeAllBooks">
+                            Remove All books
+                        </v-btn>
+                    </v-col>
+                </v-row>
+            </div>
+            
             <v-spacer></v-spacer>
-            <v-row >
-                <v-col v-show="isInvoices">
-                    <v-btn small @click="setAddNewRow" class="plus-button">
-                        <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                </v-col>
-                <v-col class="mt-2" cols="4" sm="4" md="3" v-show="this.$route.name === 'invoices' || this.$route.name === 'bookingList'">
-                    <v-select class="year-input" 
-                        :items="[2020, 2021, 2022, 'ALL']"
-                        @change="onYearChange"
-                        :value="2022"
-                        dense
-                        solo
-                    ></v-select>
-                </v-col>
-                <v-col col="2">
-                    <template>
-                    <div class="mt-2 text-center">
+
+            <!-- <v-row >
+                <v-col col="2"> -->
+                <template>
+                    <div class="mt-2 text-center d-flex">
+                    
+                    <span class="d-content" v-show="isInvoices">
+                        <v-btn small @click="setAddNewRow" class="plus-button">
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                        <v-select class="year-input" 
+                            :items="[2020, 2021, 2022, 'ALL']"
+                            @change="onYearChange"
+                            :value="2022"
+                            dense
+                            solo
+                        ></v-select>
+
+                    </span>
+
                         <v-menu offset-y>
                         <template v-slot:activator="{ on, attrs }">
                             <v-btn icon v-bind="attrs" v-on="on" class="float-right">
@@ -51,8 +82,8 @@
                         </v-menu>
                     </div>
                     </template>
-                </v-col>
-            </v-row>
+                <!-- </v-col>
+            </v-row> -->
 
         </v-app-bar>
 
@@ -83,7 +114,6 @@ export default {
                 {icon: 'dashboard', text: 'כרטסת ראשית', route: '/'},
                 {icon: 'person', text: 'הוסף רשומה (קוד מקורי)', route: '/add'},
                 {icon: 'folder', text: 'Load Scv', route: '/loadCsv'},
-                {icon: 'folder', text: 'הוסף חשבונית', route: '/addInv'},
                 {icon: 'folder', text: 'Load Csv Book', route: '/loadBookCsv'},
                 {icon: 'folder', text: 'כרטסת רו"ח', route: '/bookingList'},
                 {icon: 'folder', text: 'טבלת הטבלאות', route: '/tableList'},
@@ -103,6 +133,15 @@ export default {
         onYearChange(event) {
             this.$root.$emit('yearChange',event);
         },
+        onSearch(event) {
+            this.$root.$emit('onSearch',event);
+        },
+        onSearchBooking(event) {
+            this.$root.$emit('onSearchBooking',event);
+        },
+        removeAllBooks(event) {
+            this.$root.$emit('removeAll',event);
+        },
         onMenuItemClick(index) {
             switch (index) {
                 case 0 : this.$root.$emit('removeAllItems',false);  break;
@@ -111,10 +150,21 @@ export default {
                 case 3 : console.log('Summary B');   break; 
             }
         },  
+        isMobile() {
+            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+
     },
     computed: {
         isInvoices() {
             return this.$route.name === 'invoices';
+        },
+        isBookingList() {
+            return this.$route.name === 'bookingList';
         }
     }
 }
@@ -125,23 +175,50 @@ export default {
         font-size: 29px !important;
         padding-top: 0px;
         padding-left: 15px;
-        border: 1px solid;
-        margin-top: 8px;
-        margin-left: 15px;
+        border: 1px solid #ffffff;
+        margin-top: 0;
+        margin-left: 0;
         height: 42px !important;
+        margin-right: 12px;
     }
     .year-input{
         padding: 0;
-        border: 1px solid;
         margin-top: 7px;
+        width: -webkit-min-content;
+        width: -moz-min-content;
+        /* width: min-content; */
         color: white;
         font-size: 12px;
+        border: 1px solid white;
+        height: 42px;
+        box-shadow: none;
     }
-    .year-input:nth-child(1){
-        height: 42px !important;
+    .search-wrapper{
+        margin: 10px 0 0 44px;
+    }
+    .search-wrapper-mobile{
+        margin: auto !important;
     }
     .cursor-pointer{
         cursor: pointer ;
+    }
+    .d-flex{
+        display: flex;
+    }
+    .mt-4{
+        margin-top: 15px;
+    }
+    .d-content{
+        display: contents;
+    }
+    .mobile-search{
+        margin: 8px 0 4px 3px !important; 
+    }
+
+    .mobile-button{
+        width: 103px !important;
+        font-size: 8px !important;
+        margin: 8px 0 !important;
     }
 </style>
 

@@ -1,29 +1,30 @@
 <template>
-    <div class="vue-csv-uploader">
+    <div  :class="isMobile() ? 'margin-mobile' : ''" class="vue-csv-uploader">
         <div class="form">
             <div class="vue-csv-uploader-part-one">
-                <div class="form-check form-group csv-import-checkbox" v-if="headers === null">
-                    <slot name="hasHeaders" :headers="hasHeaders" :toggle="toggleHasHeaders">
-                        <input
-                            :class="checkboxClass" type="checkbox"
-                            :id="makeId('hasHeaders')"
-                            :value="hasHeaders"
-                            @change="toggleHasHeaders"
-                        />
-                        <label class="form-check-label" :for="makeId('hasHeaders')">
-                            File Has Headers
-                        </label>
-                    </slot>
-                </div>
                 <div class="form-group csv-import-file">
                     <input
                         ref="csv"
                         type="file"
-                        @change="setCsvFile"
                         @change.prevent="validFileMimeType"
                         :class="inputClass"
                         name="csv"
                     />
+                    <div class="form-check form-group csv-import-checkbox" v-if="headers === null">
+                        <slot name="hasHeaders" :headers="hasHeaders" :toggle="toggleHasHeaders">
+                            <input
+                                :class="checkboxClass" type="checkbox"
+                                :id="makeId('hasHeaders')"
+                                :value="hasHeaders"
+                                class="checkbox-headers"
+                                @change="toggleHasHeaders"
+                            />
+                            <label class="form-check-label" :for="makeId('hasHeaders')">
+                                File Has Headers
+                            </label>
+                        </slot>
+                    </div>
+
                     <slot name="error" v-if="showErrorMessage">
                         <div class="invalid-feedback d-block">
                             File type is invalid
@@ -309,6 +310,13 @@ export default {
                 };
             }
         },
+        isMobile() {
+			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+				return true;
+			} else {
+				return false;
+			}
+		},
         toggleHasHeaders() {
             this.hasHeaders = !this.hasHeaders;
         },
@@ -374,7 +382,9 @@ export default {
         
         mapFields() {
             this.initializeFromProps();
-        }
+        },
+
+
     },
     
     computed: {
@@ -390,3 +400,29 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+    input{
+        float: none !important;
+        margin-right: 10px;
+        margin-bottom: 12px;
+    }
+
+    .form-control-file{
+        text-align-last: center;
+        margin-top: 20px;
+        margin-bottom: 12px;
+    }
+    .checkbox-headers{
+        cursor: pointer;
+    }
+    .margin-mobile{
+        margin: 20px !important;
+    }
+    .vue-csv-uploader{
+        border: 7px solid #1371ce;
+        border-radius: 6px;
+        margin: 20px 200px 0 200px;
+        padding: 16px 0 20px 0;
+    }
+</style>

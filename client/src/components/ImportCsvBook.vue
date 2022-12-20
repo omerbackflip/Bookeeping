@@ -1,22 +1,10 @@
 <template>
     <div class="vue-csv-uploader">
         <div class="form">
-            <div class="vue-csv-uploader-part-one">
-                <div class="form-check form-group csv-import-checkbox" v-if="headers === null">
-                    <slot name="hasHeaders" :headers="hasHeaders" :toggle="toggleHasHeaders">
-                        <input
-                            :class="checkboxClass" type="checkbox"
-                            :id="makeId('hasHeaders')"
-                            :value="hasHeaders"
-                            @change="toggleHasHeaders"
-                        />
-                        <label class="form-check-label" :for="makeId('hasHeaders')">
-                            File Has Headers  -  Book !!!!!
-                        </label>
-                    </slot>
-                </div>
+            <div :class="isMobile() ? 'margin-mobile' : ''" class="vue-book-uploader vue-book-uploader-part-one">
                 <div class="radioBtn">
-                    <v-radio-group v-model="company">
+                    <p>Company</p>
+                    <v-radio-group row class="d-inline-table" v-model="company">
                         <v-radio
                             label="ביצועים"
                             value="ביצועים"
@@ -28,7 +16,8 @@
                     </v-radio-group>
                 </div>
                 <div class="radioBtn">
-                    <v-radio-group v-model="importYear">
+                    <p>Year</p>
+                    <v-radio-group row class="d-inline-table" v-model="importYear">
                         <v-radio
                             label="2020"
                             value="2020"
@@ -42,6 +31,20 @@
                             value="2022"
                         ></v-radio>
                     </v-radio-group>
+                </div>
+                <div class="form-check form-group csv-import-checkbox" v-if="headers === null">
+                    <slot name="hasHeaders" :headers="hasHeaders" :toggle="toggleHasHeaders">
+                        <input
+                            :class="checkboxClass" type="checkbox"
+                            :id="makeId('hasHeaders')"
+                            :value="hasHeaders"
+                            @change="toggleHasHeaders"
+                            class="checkbox-headers"
+                        />
+                        <label class="form-check-label" :for="makeId('hasHeaders')">
+                            File Has Headers  -  Book !!!!!
+                        </label>
+                    </slot>
                 </div>
                 <div class="form-group csv-import-file">
                     <input
@@ -309,6 +312,13 @@ export default {
                 return newRow;
             });
         },
+        isMobile() {
+			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+				return true;
+			} else {
+				return false;
+			}
+		},
         validFileMimeType() {
             let file = this.$refs.csv.files[0];
             const mimeType = file.type === "" ? mimeTypes.lookup(file.name) : file.type;
@@ -431,3 +441,34 @@ export default {
     },
 };
 </script>
+
+<style scoped>
+    input{
+        float: none !important;
+        margin-right: 10px;
+        margin-bottom: 12px;
+    }
+
+    .form-control-file{
+        text-align-last: center;
+        margin-top: 20px;
+        margin-bottom: 12px;
+    }
+    .checkbox-headers{
+        cursor: pointer;
+    }
+    .vue-book-uploader{
+        border: 7px solid #1371ce;
+        border-radius: 6px;
+        margin: 20px 200px 0 200px;
+        padding: 16px 0 20px 0;
+    }
+    .margin-mobile{
+        margin: 20px !important;
+    }
+    .d-inline-table{
+        display: inline-table;
+        padding: 0;
+        margin: 0;
+    }
+</style>
