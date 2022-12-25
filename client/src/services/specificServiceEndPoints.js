@@ -12,10 +12,11 @@ class SpecificServiceEndPoints {
     });
   }
 
-  async saveBooksBulk(bulk,company) {
+  async saveBooksBulk(bulk,company,year) {
     var formData = new FormData();
     formData.append("file", bulk);
     formData.append("company", company);
+    formData.append("year", year);
     return await axios.post(`${baseUrl}/specific/save-books-bulk`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data'

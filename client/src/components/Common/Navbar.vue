@@ -43,7 +43,7 @@
                             <v-icon>mdi-plus</v-icon>
                         </v-btn>
                         <v-select class="year-input" 
-                            :items="[2020, 2021, 2022, 'ALL']"
+                            :items="[2019, 2020, 2021, 2022]"
                             @change="onYearChange"
                             :value="2022"
                             dense
@@ -89,7 +89,8 @@
 
         <v-navigation-drawer app v-model="drawer" class="primary">
             <v-list>
-                <v-list-item v-for="link in links" :key="link.text" router :to="link.route">
+                <!-- <v-list-item v-for="link in links" :key="link.text" router :to="link.route"> -->
+                <v-list-item v-for="link in links" :key="link.text" router @click="navigate(link)">
                     <v-list-item-action>
                         <v-icon class="white--text">{{link.icon}}</v-icon>
                     </v-list-item-action>
@@ -99,6 +100,9 @@
                 </v-list-item>
             </v-list>
         </v-navigation-drawer>
+        <template v-if="openImportModal">
+            <ImportCSV :openImportModal="openImportModal" :setImportModal="toggleModal" :importData="importData"/>
+        </template>
     </nav>
     
 </template>
@@ -106,15 +110,21 @@
 
 
 <script>
+import ImportCSV from '../ImportCSV.vue';
+
 export default {
+    components: { ImportCSV},
     data() {
         return {
             drawer: false,
+            openImportModal: false,
+            importData: [], // InvoicesCsvData or BooksCsvData
             links: [
                 {icon: 'dashboard', text: 'כרטסת ראשית', route: '/'},
                 {icon: 'person', text: 'הוסף רשומה (קוד מקורי)', route: '/add'},
-                {icon: 'folder', text: 'Load Scv', route: '/loadCsv'},
-                {icon: 'folder', text: 'Load Csv Book', route: '/loadBookCsv'},
+                // {icon: 'folder', text: 'Load Scv', route: '/loadCsv'},
+                {icon: 'folder', text: 'Import INVOICEs', route: null , onClick: this.toggleModal},
+                {icon: 'folder', text: 'Import BOOKs', route: null , onClick: this.toggleBook},
                 {icon: 'folder', text: 'כרטסת רו"ח', route: '/bookingList'},
                 {icon: 'folder', text: 'טבלת הטבלאות', route: '/tableList'},
             ],
@@ -133,6 +143,14 @@ export default {
         onYearChange(event) {
             this.$root.$emit('yearChange',event);
         },
+        toggleModal() {
+            this.importData = "INVOICES";
+            this.openImportModal = !this.openImportModal;
+        },
+        toggleBook() {
+            this.importData = "BOOKS";
+            this.openImportModal = !this.openImportModal;
+        },
         onSearch(event) {
             this.$root.$emit('onSearch',event);
         },
@@ -140,7 +158,7 @@ export default {
             this.$root.$emit('onSearchBooking',event);
         },
         removeAllBooks(event) {
-            this.$root.$emit('removeAll',event);
+            this.$root.$emit('removeAllBooksItems',event);
         },
         onMenuItemClick(index) {
             switch (index) {
@@ -149,7 +167,16 @@ export default {
                 case 2 : console.log('Summary A');   break; 
                 case 3 : console.log('Summary B');   break; 
             }
-        },  
+        }, 
+        navigate(link) {
+            if(link && link.route) {
+                if (this.$router.history.current.fullPath != link.route) {
+                    this.$router.push({ path: link.route });
+                }
+            } else {
+                link.onClick();
+            }
+        }, 
         isMobile() {
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                 return true;

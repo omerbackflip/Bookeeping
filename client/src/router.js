@@ -23,16 +23,6 @@ export default new Router({
       component: () => import("./components/AddInvoice")
     },
     {
-      path: "/loadCsv",
-      name: "loadCsv",
-      component: () => import("./components/VueCsvImport")
-    },
-    {
-      path: "/loadBookCsv",
-      name: "loadBookCsv",
-      component: () => import("./components/ImportCsvBook")
-    },
-    {
       path: "/bookingList",
       name: "bookingList",
       component: () => import("./components/BookingList")

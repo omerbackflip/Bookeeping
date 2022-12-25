@@ -184,7 +184,7 @@ export default {
 		this.$root.$on("onSearchBooking", (search) => {
 			this.search = search;
 		});
-		this.$root.$on("removeAllItems", () => {
+		this.$root.$on("removeAllBooksItems", () => {
 			this.removeAllBooks();
 		});
 	},

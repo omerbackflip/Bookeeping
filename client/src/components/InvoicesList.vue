@@ -17,43 +17,32 @@
           :loading="isLoading"
           loading-text="Loading... Please wait"
           item-key="id"
-          :show-expand="true"
+          :show-expand="isMobile()"
           :single-expand="true"
         >
 
-		<template v-slot:top>
-			<v-toolbar flat>
-				<v-toolbar-title>All Invoices</v-toolbar-title>
-				<v-spacer></v-spacer>
-			</v-toolbar>
-		</template>
-          <!-- :expanded.sync="expanded" -->
+          <template v-slot:top>
+            <v-toolbar flat>
+              <v-toolbar-title>All Invoices YEAR = {{selectedYear}} </v-toolbar-title>
+              <v-spacer></v-spacer>
+            </v-toolbar>
+          </template>
           <template v-slot:[`item.actions`]="{ item }">
             <div :class="isMobile() ? 'd-grid' : ''">
               <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
-              <v-icon small @click="deleteOne(item.id, item.description)"
-                >mdi-delete</v-icon
-              >
+              <v-icon small @click="deleteOne(item.id, item.description)">mdi-delete</v-icon>
             </div>
           </template>
           <template v-slot:[`item.date`]="{ item }">
             <span> {{ item.date | formatDate }}</span>
-            <span @click="projectSummary(item.project)" v-if="isMobile()">
-              {{ item.project }}</span
-            >
+            <span @click="projectSummary(item.project)" v-if="isMobile()">{{ item.project }}</span>
           </template>
           <template v-slot:[`item.total`]="{ item }">
             <v-tooltip bottom>
               <template v-slot:activator="{ on }">
-                <span v-on="on">
-                  {{ item.total ? item.total.toLocaleString() : "" }}</span
-                >
+                <span v-on="on">{{ item.total ? item.total.toLocaleString() : "" }}</span>
               </template>
-              <span
-                >{{ item.pratim }} -
-                {{ Number(item.record_schum).toLocaleString() }} -
-                {{ item.cust_lname }}</span
-              >
+              <span>{{ item.pratim }}-{{ Number(item.record_schum).toLocaleString() }}-{{ item.cust_lname }}</span>
             </v-tooltip>
           </template>
           <template v-slot:[`item.vat`]="{ item }">
@@ -66,28 +55,24 @@
           </template>
           <template v-slot:[`item.amount`]="{ item }">
             <div class="amount-width d-grid">
-              <span>
-                {{ item.amount ? item.amount.toLocaleString() : "" }}</span
-              >
-              <span @click="supplierSummary(item.supplier)" v-if="isMobile()">
-                {{ item.supplier }}</span
-              >
+              <span>{{ item.amount ? item.amount.toLocaleString() : "" }}</span>
+              <span @click="supplierSummary(item.supplier)" v-if="isMobile()">{{ item.supplier }}</span>
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
-            <span @click="supplierSummary(item.supplier)" class="summary">
-              {{ item.supplier }}</span
-            >
+            <!-- <span @click="supplierSummary(item.supplier)" class="summary">{{ item.supplier }}</span> -->
+            <span @click="getSummary('supplier', item.supplier)" class="summary">{{ item.supplier }}</span>
+          </template>
+          <template v-slot:[`item.excelRecID`]="{ item }">
+            <span @click="retriveBookData(item)" class="summary">{{ item.excelRecID }}</span>
           </template>
           <template v-slot:[`item.project`]="{ item }">
-            <span @click="projectSummary(item.project)" class="summary">
-              {{ item.project }}</span
-            >
+            <!-- <span @click="projectSummary(item.project)" class="summary">{{ item.project }}</span> -->
+            <span @click="getSummary('project', item.project)" class="summary">{{ item.project }}</span>
           </template>
           <template v-slot:[`item.group`]="{ item }">
-            <span @click="groupSummary(item.group)" class="summary">
-              {{ item.group }}</span
-            >
+            <!-- <span @click="groupSummary(item.group)" class="summary">{{ item.group }}</span> -->
+            <span @click="getSummary('group', item.group)" class="summary">{{ item.group }}</span>
           </template>
           <template v-slot:[`item.published`]="{ item }">
             <v-checkbox v-model="item.published" @click="updateOne(item)">
@@ -107,10 +92,6 @@
                 <li>remark: {{ item.remark }}</li>
                 <li>published: {{ item.published ? "Yes" : "No" }}</li>
               </ul>
-            </td>
-            <td v-else :colspan="headers.length">
-              {{ item.pratim }} - {{ item.record_schum }} -
-              {{ item.cust_lname }}
             </td>
           </template>
         </v-data-table>
@@ -270,22 +251,22 @@
       <!-- ----------------------- -->
 
       <!-- Summary dialog for supplier/Project/Group -->
-      <v-dialog v-model="supplierDialog" max-width="600px">
+      <v-dialog v-model="summaryDialog" max-width="600px">
         <v-card>
           <v-card-text class="margin-card">
             <v-flex>
               <v-container class="grey lighten-2 elevation-3">
                 <export-excel
-                  :data="supplierFilter"
+                  :data="summaryFilter"
                   :fields="xlsHeders"
                   type="xlsx"
-                  :name="suppName"
-                  :title="suppName"
-                  :footer="this.supplierTotal.toLocaleString()"
+                  :name="summaryName.toLocaleString()"
+                  :title="summaryName"
+                  :footer="summaryTotal.toLocaleString()"
                   class="mt-3"
                 >
                   <h5 style="text-align: center">
-                    {{ suppName }} - {{ this.supplierTotal.toLocaleString() }}
+                    {{ summaryName }} - {{ this.summaryTotal.toLocaleString() }}
                     <v-btn small class="btn btn-danger">
                       <v-icon>mdi-download</v-icon>
                     </v-btn>
@@ -293,7 +274,7 @@
                 </export-excel>
                 <v-data-table
                   :headers="summaryHeaders"
-                  :items="supplierFilter"
+                  :items="summaryFilter"
                   disable-pagination
                   hide-default-footer
                   :item-class="itemRowBackground"
@@ -314,87 +295,21 @@
         </v-card>
       </v-dialog>
 
-      <v-dialog v-model="projectDialog" max-width="600px">
+      <v-dialog v-model="bookDialog" max-width="600px">
         <v-card>
           <v-card-text class="margin-card">
             <v-flex>
               <v-container class="grey lighten-2 elevation-3">
-                <export-excel
-                  :data="projectFilter"
-                  :fields="xlsHeders"
-                  type="xlsx"
-                  :name="projName"
-                  :title="projName"
-                  :footer="this.projectTotal.toLocaleString()"
-                  class="mt-3"
-                >
-                  <h5 style="text-align: center">
-                    {{ projName }} - {{ this.projectTotal.toLocaleString() }}
-                    <v-btn small class="btn btn-danger">
-                      <v-icon>mdi-download</v-icon>
-                    </v-btn>
-                  </h5>
-                </export-excel>
                 <v-data-table
-                  :headers="summaryHeaders"
-                  :items="projectFilter"
+                  :headers="bookHeaders"
+                  :items="bookInfo"
                   disable-pagination
                   hide-default-footer
-                  :item-class="itemRowBackground"
                   mobile-breakpoint="350"
                   fixed-header
                   class="elevation-3"
                   dense
                 >
-                  <template v-slot:[`item.total`]="{ item }">
-                    <span>
-                      {{ item.total ? item.total.toLocaleString() : "" }}</span
-                    >
-                  </template>
-                </v-data-table>
-              </v-container>
-            </v-flex>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
-      <v-dialog v-model="groupDialog" max-width="600px">
-        <v-card>
-          <v-card-text class="margin-card">
-            <v-flex>
-              <v-container class="grey lighten-2 elevation-3">
-                <export-excel
-                  :data="groupFilter"
-                  :fields="xlsHeders"
-                  type="xlsx"
-                  :name="groupName.toLocaleString()"
-                  :title="groupName"
-                  :footer="this.groupTotal.toLocaleString()"
-                  class="mt-3"
-                >
-                  <h5 style="text-align: center">
-                    {{ groupName }} - {{ this.groupTotal.toLocaleString() }}
-                    <v-btn small class="btn btn-danger">
-                      <v-icon>mdi-download</v-icon>
-                    </v-btn>
-                  </h5>
-                </export-excel>
-                <v-data-table
-                  :headers="summaryHeaders"
-                  :items="groupFilter"
-                  disable-pagination
-                  hide-default-footer
-                  :item-class="itemRowBackground"
-                  mobile-breakpoint="350"
-                  fixed-header
-                  class="elevation-3"
-                  dense
-                >
-                  <template v-slot:[`item.total`]="{ item }">
-                    <span>
-                      {{ item.total ? item.total.toLocaleString() : "" }}</span
-                    >
-                  </template>
                 </v-data-table>
               </v-container>
             </v-flex>
@@ -424,7 +339,7 @@ import Vue from "vue";
 import moment from "moment";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
-import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, TABLE_MODEL } from "../constants/constants";
+import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, TABLE_MODEL, BOOKS_MODEL } from "../constants/constants";
 
 Vue.use(excel);
 
@@ -436,7 +351,6 @@ Vue.filter("formatDate", function (value) {
 });
 
 export default {
-	// components: {AddInvoice},
 	// name: "invoices-list",
 	data() {
 		return {
@@ -449,23 +363,21 @@ export default {
 			// expanded: [],
 			updateInvoice: 0,
 			dialog: false,
-			supplierDialog: false,
-			projectDialog: false,
-			groupDialog: false,
-			supplierTotal: 0,
-			supplierFilter: [],
-			suppName: "",
-			projectTotal: 0,
-			projectFilter: [],
-			projName: "",
-			groupTotal: 0,
-			groupFilter: [],
-			groupName: "",
+			summaryDialog: false,
+      bookDialog: false,
+      summaryTotal: 0,
+			summaryFilter: [],
+			summaryName: "",
 			summaryHeaders: [
 				{ text: "Total", value: "total", align: "right" },
 				{ text: "Description", value: "description", align: "right" },
 				{ text: "Project", value: "project", align: "right" },
 			],
+      bookHeaders: [
+        { text: "Record_ID", value: "record_id", aligh: "right"},
+        { text: "asmacta1", value: "asmacta1", aligh: "right"},
+        { text: "Description", value: "pratim", aligh: "right"},
+      ],
 			exportExcel: false,
 			search: "",
 			headers: [],
@@ -510,6 +422,7 @@ export default {
 			timeout: null,
 			rowHeight: 24,
 			perPage: 25,
+      bookInfo: '',
 		};
 	},
 
@@ -521,46 +434,29 @@ export default {
 				return INVOICE_WEB_HEADERS;
 			}
 		},
-
-		supplierSummary(supplier) {
-			this.suppName = supplier;
-			this.supplierFilter = this.Invoices.filter(
-				(supp) => supp.supplier === supplier
-			);
-			this.supplierTotal = 0;
-			for (let i = 0; i < this.supplierFilter.length; i++) {
-				this.supplierTotal += this.supplierFilter[i].total;
-			}
-			if (!this.dialog) {
-				this.supplierDialog = true;
-			}
+		
+		getSummary(summaryField, summaryItem) {
+      switch (summaryField) {
+        case 'project':
+          this.summaryFilter = this.Invoices.filter((item) => item.project === summaryItem);
+          break;
+        case 'supplier':
+          this.summaryFilter = this.Invoices.filter((item) => item.supplier === summaryItem);
+          break;
+        case 'group':
+          this.summaryFilter = this.Invoices.filter((item) => item.group === summaryItem);
+          break;
+        default : break;
+      }
+      this.summaryName = summaryItem;
+      this.summaryTotal = this.summaryFilter.reduce((currentTotal, item) =>{
+        return item.total + currentTotal
+      }, 0)
+      if (!this.summaryDialog) {
+        this.summaryDialog = true;
+      }
 		},
 
-		projectSummary(project) {
-			this.projName = project;
-			this.projectFilter = this.Invoices.filter(
-				(supp) => supp.project === project
-			);
-			this.projectTotal = 0;
-			for (let i = 0; i < this.projectFilter.length; i++) {
-				this.projectTotal += this.projectFilter[i].total;
-			}
-			if (!this.dialog) {
-				this.projectDialog = true;
-			}
-		},
-
-		groupSummary(group) {
-			this.groupName = group;
-			this.groupFilter = this.Invoices.filter((supp) => supp.group === group);
-			this.groupTotal = 0;
-			for (let i = 0; i < this.groupFilter.length; i++) {
-				this.groupTotal += this.groupFilter[i].total;
-			}
-			if (!this.dialog) {
-				this.groupDialog = true;
-			}
-		},
 		isMobile() {
 			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
 				return true;
@@ -576,7 +472,14 @@ export default {
 				}
 			}
 		},
-
+    async retriveBookData(item){
+      const response = await apiService.get({ model: BOOKS_MODEL,
+                                              record_id:item.excelRecID,
+                                              year: item.year,
+                                              company: item.company});
+      this.bookInfo = response.data;
+      this.bookDialog = true;
+    },
 		async retrieveInvoices() {
 			this.isLoading = true;
 			const response = await apiService.get({
@@ -692,7 +595,7 @@ export default {
 
 		//Background of row if added to Book table
 		itemRowBackground(item) {
-			let classes = item.pratim ? "bg-green" : "";
+			let classes = item.excelRecID ? "bg-green" : "";
 			if (this.isMobile()) {
 				classes = `${classes} mobile-items`;
 			}
@@ -769,8 +672,8 @@ export default {
 }
 
 .mobile-search {
-  /* margin-top: 5px !important;
-  margin-bottom: -30px; */
+  margin-top: 5px !important;
+  margin-bottom: -30px;
 }
 
 .mt-4 {

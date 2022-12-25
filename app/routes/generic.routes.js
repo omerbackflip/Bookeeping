@@ -15,7 +15,7 @@ module.exports = app => {
 	// Delete a single entity with id
 	router.delete("/delete", generic.delete);
 
-	// Update a entity with id
+	// Update an entity with id
 	router.put("/update/:id", generic.update);
 
 	// Delete all generic

@@ -3,6 +3,7 @@ const Invoice = db.invoices;
 const Book = db.books;
 const csv = require('csvtojson')
 var fs = require('fs');
+const { books } = require("../models");
 
 exports.saveInvoicesBulk = async (req, res) => {
 	if (!req.body) {
@@ -10,8 +11,8 @@ exports.saveInvoicesBulk = async (req, res) => {
 			message: "Data of bulk to update can not be empty!"
 		});
 	}
-
 	try {
+        await Promise.all([Invoice.deleteMany()]);
 		let data = await csv().fromFile(`uploads/${req.file.filename}`);
 		data = data.map(item => item.published === 'T' ? { ...item, published: true } : { ...item, published: false });
 		if (data) {
@@ -19,8 +20,8 @@ exports.saveInvoicesBulk = async (req, res) => {
 			unLinkFile(`uploads/${req.file.filename}`);
 			if (result) {
 				return res.send({
-					hasErrors: false,
-					message: "Data successfully Imported"
+					success: true,
+					message: `Total ${result.length} INVOICES successfully Imported`
 				})
 			}
 		}
@@ -42,6 +43,7 @@ exports.saveBooksBulk = async (req, res) => {
 	}
 
 	try {
+        await Promise.all([Book.deleteMany({company: req.body.company, year: req.body.year})]);
 		let data = await csv().fromFile(`uploads/${req.file.filename}`);
 		if (data) {
 			// filter out all items with no "asmchta_date"
@@ -51,8 +53,8 @@ exports.saveBooksBulk = async (req, res) => {
 			unLinkFile(`uploads/${req.file.filename}`);
 			if (result) {
 				return res.send({
-					hasErrors: false,
-					message: "Data successfully Imported"
+					success: true,
+					message: `Total ${result.length} BOOKS successfully Imported`
 				})
 			}
 		}
