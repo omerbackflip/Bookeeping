@@ -250,7 +250,7 @@
       </v-dialog>
       <!-- ----------------------- -->
 
-      <!-- Summary dialog for supplier/Project/Group -->
+      <!-- SummaryDialog for supplier/Project/Group -->
       <v-dialog v-model="summaryDialog" max-width="600px">
         <v-card>
           <v-card-text class="margin-card">
