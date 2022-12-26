@@ -82,6 +82,26 @@ exports.saveBooksBulk = async (req, res) => {
 	}
 };
 
+exports.batchBooksInvoices = async (req, res) => {
+	if (!req.body) {
+		return res.status(400).send({
+			message: "Data of bulk to update can not be empty!"
+		});
+	}
+	try {
+		let data = await Book.find({});
+		data.map((item) => {
+			return updateExcelRecID(item.company, item.year, item.asmacta1, item.record_id)
+		})	
+
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error saving bulk of Invoices"
+		});
+	}	
+}
+
 async function getMappedItems(filteredData, company) {
 	// const data = await Promise.all(filteredData.map(async (item, i) => {
 	const data = await Promise.all(filteredData.map(async (item) => {

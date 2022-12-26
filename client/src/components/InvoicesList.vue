@@ -60,18 +60,15 @@
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
-            <!-- <span @click="supplierSummary(item.supplier)" class="summary">{{ item.supplier }}</span> -->
             <span @click="getSummary('supplier', item.supplier)" class="summary">{{ item.supplier }}</span>
           </template>
           <template v-slot:[`item.excelRecID`]="{ item }">
             <span @click="retriveBookData(item)" class="summary">{{ item.excelRecID }}</span>
           </template>
           <template v-slot:[`item.project`]="{ item }">
-            <!-- <span @click="projectSummary(item.project)" class="summary">{{ item.project }}</span> -->
             <span @click="getSummary('project', item.project)" class="summary">{{ item.project }}</span>
           </template>
           <template v-slot:[`item.group`]="{ item }">
-            <!-- <span @click="groupSummary(item.group)" class="summary">{{ item.group }}</span> -->
             <span @click="getSummary('group', item.group)" class="summary">{{ item.group }}</span>
           </template>
           <template v-slot:[`item.published`]="{ item }">
@@ -248,7 +245,6 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
-      <!-- ----------------------- -->
 
       <!-- SummaryDialog for supplier/Project/Group -->
       <v-dialog v-model="summaryDialog" max-width="600px">
@@ -316,8 +312,9 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-      <!--------------------------------->
     </v-layout>
+
+    <!-- produce excel with ALL DATA - emit from Navbar ($emit) -->
     <export-excel
       :data="Invoices"
       v-if="exportExcel"
@@ -339,6 +336,7 @@ import Vue from "vue";
 import moment from "moment";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
+import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
 import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, TABLE_MODEL, BOOKS_MODEL } from "../constants/constants";
 
 Vue.use(excel);
@@ -517,6 +515,16 @@ export default {
 				}
 			}
 		},
+
+		async batchBookInvoice() {
+			if (window.confirm(`Are you sure you want to merge record_id with excelRecID ?`)) {
+				const	response = await SpecificServiceEndPoints.batchBookInvoice() ;
+				if (response) {
+					this.refreshList();
+				}
+			}
+		},
+
 		saveInvoice: async function () {
 			try {
 				const response = await apiService.create(this.invoice, {
@@ -602,6 +610,7 @@ export default {
 			return classes;
 		},
 	},
+
 	async mounted() {
 		this.retrieveInvoices();
 		await this.loadTable(1, "companyName");
@@ -632,7 +641,11 @@ export default {
 				}, 1000);
 			}
 		});
-		this.isLoading = false;
+		this.$root.$on("runBatch", () => {
+			setTimeout(100);
+			this.batchBookInvoice();
+		});
+// this.isLoading = false;
 	},
 	watch: {
 		selectedYear() {

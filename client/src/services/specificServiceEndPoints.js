@@ -24,6 +24,9 @@ class SpecificServiceEndPoints {
     });
   }
 
+  async batchBookInvoice() {
+    return await axios.post(`${baseUrl}/specific/batch-book-invoice`);
+  }
 
 }
 

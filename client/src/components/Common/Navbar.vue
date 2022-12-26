@@ -10,7 +10,6 @@
                 single-line                
                 ></v-text-field>
             </div>
-
             <div :class="isMobile() ? 'search-wrapper-mobile' : ''" v-show="isBookingList" class="search-wrapper">
                 <v-row>
                     <v-col>
@@ -30,63 +29,44 @@
                     </v-col>
                 </v-row>
             </div>
-            
             <v-spacer></v-spacer>
-
-            <!-- <v-row >
-                <v-col col="2"> -->
-                <template>
-                    <div class="mt-2 text-center d-flex">
-                    
-                    <span class="d-content" v-show="isInvoices">
-                        <v-btn small @click="setAddNewRow" class="plus-button">
-                            <v-icon>mdi-plus</v-icon>
-                        </v-btn>
-                        <v-select class="year-input" 
-                            :items="[2019, 2020, 2021, 2022]"
-                            @change="onYearChange"
-                            :value="2022"
-                            dense
-                            solo
-                        ></v-select>
-
-                    </span>
-
-                        <v-menu offset-y>
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-btn icon v-bind="attrs" v-on="on" class="float-right">
-                                <v-icon>mdi-dots-vertical</v-icon>
-                            </v-btn>
-                        </template>
-                        <v-list v-show="isInvoices">
-                            <v-list-item v-for="(item, index) in items" :key="index">
-                                <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
-                                    {{item.title}}
-                                </v-list-item-title>
-                            </v-list-item>
-                        </v-list>
-                        <!-- <v-list>
-                            <template v-slot:activator="{ on, attrs }">
-                                <v-btn v-bind="attrs" v-on="on">
-                                    <v-icon left>expand_more</v-icon>
-                                    <span>Menu1</span>
-                                </v-btn>
-                            </template> -->
-                            <v-list>
-                                <v-list-item v-for="link in links" :key="link.text" router :to="link.route">
-                                    <v-list-item-title>{{link.text}}</v-list-item-title>
-                                </v-list-item>
-                            </v-list>
-                        <!-- </v-list> -->
-
-                        </v-menu>
-                    </div>
-                    </template>
-                <!-- </v-col>
-            </v-row> -->
-
+            <template>
+                <div class="mt-2 text-center d-flex">
+                <span class="d-content" v-show="isInvoices">
+                    <v-btn small @click="setAddNewRow" class="plus-button">
+                        <v-icon>mdi-plus</v-icon>
+                    </v-btn>
+                    <v-select class="year-input" 
+                        :items="[2019, 2020, 2021, 2022]"
+                        @change="onYearChange"
+                        :value="2022"
+                        dense
+                        solo
+                    ></v-select>
+                </span>
+                <v-menu offset-y>
+                <template v-slot:activator="{ on, attrs }">
+                    <v-btn icon v-bind="attrs" v-on="on" class="float-right">
+                        <v-icon>mdi-dots-vertical</v-icon>
+                    </v-btn>
+                </template>
+                <v-list v-show="isInvoices">
+                    <v-list-item v-for="(item, index) in items" :key="index">
+                        <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
+                            {{item.title}}
+                        </v-list-item-title>
+                    </v-list-item>
+                </v-list>
+                <v-list>
+                    <!-- <v-list-item v-for="link in links" :key="link.text" router :to="link.route"> -->
+                    <v-list-item v-for="link in links" :key="link.text" router @click="navigate(link)">
+                        <v-list-item-title>{{link.text}}</v-list-item-title>
+                    </v-list-item>
+                </v-list>
+                </v-menu>
+                </div>
+            </template>
         </v-app-bar>
-
         <v-navigation-drawer app v-model="drawer" class="primary">
             <v-list>
                 <!-- <v-list-item v-for="link in links" :key="link.text" router :to="link.route"> -->
@@ -104,7 +84,6 @@
             <ImportCSV :openImportModal="openImportModal" :setImportModal="toggleModal" :importData="importData"/>
         </template>
     </nav>
-    
 </template>
 
 
@@ -122,7 +101,6 @@ export default {
             links: [
                 {icon: 'dashboard', text: 'כרטסת ראשית', route: '/'},
                 {icon: 'person', text: 'הוסף רשומה (קוד מקורי)', route: '/add'},
-                // {icon: 'folder', text: 'Load Scv', route: '/loadCsv'},
                 {icon: 'folder', text: 'Import INVOICEs', route: null , onClick: this.toggleModal},
                 {icon: 'folder', text: 'Import BOOKs', route: null , onClick: this.toggleBook},
                 {icon: 'folder', text: 'כרטסת רו"ח', route: '/bookingList'},
@@ -164,7 +142,7 @@ export default {
             switch (index) {
                 case 0 : this.$root.$emit('removeAllItems',false);  break;
                 case 1 : this.$root.$emit('downloadExcel',false);   break; 
-                case 2 : console.log('Summary A');   break; 
+                case 2 : console.log('Run BATCH'); this.$root.$emit('runBatch',false);  break; 
                 case 3 : console.log('Summary B');   break; 
             }
         }, 
@@ -176,7 +154,8 @@ export default {
             } else {
                 link.onClick();
             }
-        }, 
+        },
+
         isMobile() {
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
                 return true;

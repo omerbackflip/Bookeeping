@@ -9,6 +9,7 @@ module.exports = app => {
 
   router.post("/save-invoices-bulk",upload.single('file'), specific.saveInvoicesBulk);
   router.post("/save-books-bulk",upload.single('file') , specific.saveBooksBulk);
+  router.post("/batch-book-invoice", specific.batchBooksInvoices);
 
   app.use('/api/specific', router);
 };
