@@ -296,6 +296,7 @@
           <v-card-text class="margin-card">
             <v-flex>
               <v-container class="grey lighten-2 elevation-3">
+                Data from Book
                 <v-data-table
                   :headers="bookHeaders"
                   :items="bookInfo"
