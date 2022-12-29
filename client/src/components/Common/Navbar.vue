@@ -109,7 +109,7 @@ export default {
             items: [
                 { title: 'Remove all items', onClick:  this.onMenuItemClick },
                 { title: 'Download to excel', onClick: this.onMenuItemClick },
-                { title: 'Sammary A', onClick: this.onMenuItemClick },
+                { title: 'Batch-merge', onClick: this.onMenuItemClick },
                 { title: 'Sammary B', onClick: this.onMenuItemClick },
             ],
         }

@@ -643,7 +643,6 @@ export default {
 			}
 		});
 		this.$root.$on("runBatch", () => {
-			setTimeout(100);
 			this.batchBookInvoice();
 		});
 // this.isLoading = false;
