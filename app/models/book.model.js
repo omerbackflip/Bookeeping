@@ -2,7 +2,7 @@ module.exports = mongoose => {
   var schema = mongoose.Schema(
     {
       company: String,
-      asmchta_date: String,
+      asmchta_date: Date,
       record_id: Number,
       year: Number,
       record_schum: Number,

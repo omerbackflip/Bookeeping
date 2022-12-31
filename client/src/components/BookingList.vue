@@ -14,22 +14,21 @@
           height="80vh"
           class="elevation-3 table-margin"
           no-data-text="No data available for current selected year!"
+          :loading="isLoading"
         >
 
 		<template v-slot:top>
 			<v-toolbar flat>
-				<v-toolbar-title>All Booking lists</v-toolbar-title>
-				<v-spacer></v-spacer>
+				<v-toolbar-title>Book keeping list - {{selectedYear}} - {{books.length.toLocaleString() }} </v-toolbar-title>
+				<v-spacer></v-spacer>		
 			</v-toolbar>
 		</template>
-
           <template v-slot:[`item.actions`]="{ item }">
             <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
             <v-icon small @click="deleteOne(item.id)">mdi-delete</v-icon>
           </template>
           <template v-slot:[`item.asmchta_date`]="{ item }">
-            <span> {{ item.asmchta_date }}</span>
-            <!-- <span> {{item.asmchta_date | formatDate}}</span> -->
+            <span> {{ item.asmchta_date | formatDate }}</span>
           </template>
           <template v-slot:[`item.record_schum`]="{ item }">
             <span>
@@ -123,6 +122,7 @@ export default {
 			fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
 			selectedYear: 2022,
+			value: 50,
 		};
 	},
 
@@ -177,7 +177,7 @@ export default {
 
 	mounted() {
 		this.retrieveBooks();
-		this.isLoading = false;
+		// this.isLoading = false;
 		this.$root.$on("yearChange", (year) => {
 			this.selectedYear = year;
 		});

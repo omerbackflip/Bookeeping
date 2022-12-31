@@ -85,13 +85,13 @@ exports.saveBooksBulk = async (req, res) => {
 exports.batchBooksInvoices = async (req, res) => {
 	if (!req.body) {
 		return res.status(400).send({
-			message: "Data of bulk to update can not be empty!"
+			message: "batch Book Invoice can not be empty!"
 		});
 	}
 	try {
 		let data = await Book.find({});
 		data.map((item) => {
-			return updateExcelRecID(item.company, item.year, item.asmacta1, item.record_id)
+			if (item.asmacta1 != '') return updateExcelRecID(item.company, item.year, item.asmacta1, item.record_id)
 		})	
 
 	} catch (error) {
@@ -103,15 +103,15 @@ exports.batchBooksInvoices = async (req, res) => {
 }
 
 async function getMappedItems(filteredData, company) {
-	// const data = await Promise.all(filteredData.map(async (item, i) => {
 	const data = await Promise.all(filteredData.map(async (item) => {
 		const { year, asmacta1, record_id } = item;
-		if (company && year && asmacta1) { // if no date - probbaly is Yitra...
+		if (company && year && asmacta1 != '') { // if no date - probbaly is Yitra...
 			await updateExcelRecID(company, year, asmacta1, record_id);
 		}
+		const [day,month,year1] = item.asmchta_date.split('/')
 		return {
 			company,
-			asmchta_date: item.asmchta_date,
+			asmchta_date: new Date(+year, +month - 1, +day),
 			record_id: item.record_id,
 			year: item.year,
 			record_schum: item.record_schum,
@@ -136,6 +136,22 @@ async function updateExcelRecID(company, year, invoiceId, excelRecID) {
 	},
 		{ excelRecID });
 };
+
+exports.batchClearExcelRecID = async (req, res) => {
+	if (!req.body) {
+		return res.status(400).send({
+			message: "batch ExcelRecID can not be empty!"
+		});
+	}
+	try {
+		await Invoice.updateMany({year:req.body.year},{excelRecID:""})
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error saving bulk of Invoices"
+		});
+	}	
+}
 
 function unLinkFile(path) {
 	fs.unlinkSync(path);

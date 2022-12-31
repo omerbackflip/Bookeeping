@@ -23,7 +23,7 @@
 
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>All Invoices YEAR = {{selectedYear}} </v-toolbar-title>
+              <v-toolbar-title>All Invoices YEAR = {{selectedYear}} - {{Invoices.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
             </v-toolbar>
           </template>
@@ -35,7 +35,6 @@
           </template>
           <template v-slot:[`item.date`]="{ item }">
             <span> {{ item.date | formatDate }}</span>
-            <span @click="projectSummary(item.project)" v-if="isMobile()">{{ item.project }}</span>
           </template>
           <template v-slot:[`item.total`]="{ item }">
             <v-tooltip bottom>
@@ -110,124 +109,53 @@
               <v-form ref="form">
                 <v-row>
                   <v-col cols="12" sm="6" md="4">
-                    <v-combobox
-                      v-model="invoice.company"
-                      :items="companyName"
-                      label="Company"
-                      dense
-                    ></v-combobox>
+                    <v-combobox v-model="invoice.company" :items="companyName" label="Company" dense></v-combobox>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-combobox
-                      v-model="invoice.project"
-                      :items="projectName"
-                      label="Project"
-                      dense
-                    ></v-combobox>
+                    <v-combobox v-model="invoice.project" :items="projectName" label="Project" dense></v-combobox>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.description"
-                      label="Description"
-                      required
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.amount"
-                      type="number"
-                      label="Amount"
-                      required
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.amount" type="number" label="Amount" required></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.vat"
-                      type="number"
-                      label="Vat"
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.vat" type="number" label="Vat"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.year"
-                      type="number"
-                      label="Year"
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.year" type="number" label="Year"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.total"
-                      type="number"
-                      label="Total"
-                      required
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.total" type="number" label="Total" required></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.group"
-                      type="number"
-                      label="Group"
-                      required
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.group" type="number" label="Group" required></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-dialog
-                      ref="dialog"
-                      :return-value.sync="invoice.date"
-                      persistent
-                      width="290px"
-                    >
+                    <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
                       <template v-slot:activator="{ on, attrs }">
-                        <v-text-field
-                          v-model="invoice.date"
-                          label="Date"
-                          prepend-icon="mdi-calendar"
-                          readonly
-                          v-bind="attrs"
-                          v-on="on"
-                          required
-                        >
+                        <v-text-field v-model="invoice.date" label="Date" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on" required>
                         </v-text-field>
                       </template>
                       <v-date-picker v-model="invoice.date" scrollable>
                         <v-spacer></v-spacer>
-                        <v-btn text color="primary" @click="dialog = false"
-                          >Cancel</v-btn
-                        >
-                        <v-btn
-                          text
-                          color="primary"
-                          @click="$refs.dialog.save(invoice.date)"
-                          >OK</v-btn
-                        >
+                        <v-btn text color="primary" @click="dialog = false"> Cancel </v-btn>
+                        <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)"> OK </v-btn>
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-combobox
-                      v-model="invoice.supplier"
-                      :items="supplierName"
-                      label="Supplier"
-                      dense
-                    ></v-combobox>
+                    <v-combobox v-model="invoice.supplier" :items="supplierName" label="Supplier" dense></v-combobox>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.invoiceId"
-                      label="Invoice Id"
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.invoiceId" label="Invoice Id"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.excelRecID"
-                      label="ExcelRecID"
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
                   </v-col>
                   <v-col cols="12" sm="6" md="4">
-                    <v-text-field
-                      v-model="invoice.remark"
-                      label="Remark"
-                    ></v-text-field>
+                    <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
                   </v-col>
                 </v-row>
               </v-form>
@@ -239,9 +167,7 @@
             <v-btn @click="updateInvoice ? editInvoice() : saveInvoice()">
               {{ updateInvoice ? "-Update-" : "-Add-" }}
             </v-btn>
-            <v-btn v-show="!updateInvoice" class="mx-3" @click="clearForm"
-              >Clear</v-btn
-            >
+            <v-btn v-show="!updateInvoice" class="mx-3" @click="clearForm"> Clear </v-btn>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -296,7 +222,7 @@
           <v-card-text class="margin-card">
             <v-flex>
               <v-container class="grey lighten-2 elevation-3">
-                Data from Book
+                Data from Book - {{bookInfo.length}}
                 <v-data-table
                   :headers="bookHeaders"
                   :items="bookInfo"
@@ -307,6 +233,9 @@
                   class="elevation-3"
                   dense
                 >
+                <template v-slot:[`item.asmchta_date`]="{ item }">
+                  <span> {{ item.asmchta_date | formatDate }}</span>
+                </template>
                 </v-data-table>
               </v-container>
             </v-flex>
@@ -354,8 +283,8 @@ export default {
 	data() {
 		return {
 			Invoices: [],
-			currInvoice: null,
-			currentIndex: -1,
+			// currInvoice: null,
+			// currentIndex: -1,
 			companyName: [],
 			projectName: [],
 			supplierName: [],
@@ -375,6 +304,7 @@ export default {
       bookHeaders: [
         { text: "Record_ID", value: "record_id", aligh: "right"},
         { text: "asmacta1", value: "asmacta1", aligh: "right"},
+        { text: "date", value: "asmchta_date"},
         { text: "Description", value: "pratim", aligh: "right"},
       ],
 			exportExcel: false,
@@ -473,7 +403,8 @@ export default {
 		},
     async retriveBookData(item){
       const response = await apiService.get({ model: BOOKS_MODEL,
-                                              record_id:item.excelRecID,
+                                              // record_id:item.excelRecID,
+                                              asmacta1: item.invoiceId,
                                               year: item.year,
                                               company: item.company});
       this.bookInfo = response.data;
@@ -504,8 +435,8 @@ export default {
 
 		refreshList() {
 			this.retrieveInvoices();
-			this.currInvoice = this.Invoices[0];
-			this.currentIndex = -1;
+			// this.currInvoice = this.Invoices[0];
+			// this.currentIndex = -1;
 		},
 
 		async removeAllInvoices() {
@@ -522,6 +453,17 @@ export default {
 				const	response = await SpecificServiceEndPoints.batchBookInvoice() ;
 				if (response) {
 					this.refreshList();
+					window.location.reload();
+				}
+			}
+		},
+
+		async batchClearExcelRecID() {
+			if (window.confirm(`Are you sure you want to delete all ExcelRecID ? year ${this.selectedYear}`)) {
+				const	response = await SpecificServiceEndPoints.batchClearExcelRecID(this.selectedYear) ;
+				if (response) {
+					this.refreshList();
+					window.location.reload();
 				}
 			}
 		},
@@ -645,7 +587,9 @@ export default {
 		this.$root.$on("runBatch", () => {
 			this.batchBookInvoice();
 		});
-// this.isLoading = false;
+    this.$root.$on("clearExcelRecID", () => {
+      this.batchClearExcelRecID();
+    })
 	},
 	watch: {
 		selectedYear() {

@@ -13,16 +13,6 @@ export default new Router({
       component: () => import("./components/InvoicesList")
     },
     {
-      path: "/invoices/:id",
-      name: "invoice-details",
-      component: () => import("./components/Invoice")
-    },
-    {
-      path: "/add",
-      name: "add",
-      component: () => import("./components/AddInvoice")
-    },
-    {
       path: "/bookingList",
       name: "bookingList",
       component: () => import("./components/BookingList")

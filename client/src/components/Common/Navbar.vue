@@ -24,7 +24,7 @@
                     </v-col>
                     <v-col>
                         <v-btn :class="isMobile() ? 'mobile-button' : ''" class="m-3 btn btn-sm btn-danger" @click="removeAllBooks">
-                            Remove All books
+                            Remove All Book-keeping data
                         </v-btn>
                     </v-col>
                 </v-row>
@@ -32,7 +32,7 @@
             <v-spacer></v-spacer>
             <template>
                 <div class="mt-2 text-center d-flex">
-                <span class="d-content" v-show="isInvoices">
+                <span class="d-content">
                     <v-btn small @click="setAddNewRow" class="plus-button">
                         <v-icon>mdi-plus</v-icon>
                     </v-btn>
@@ -67,7 +67,7 @@
                 </div>
             </template>
         </v-app-bar>
-        <v-navigation-drawer app v-model="drawer" class="primary">
+        <v-navigation-drawer app v-model="drawer" class="primary" temporary>
             <v-list>
                 <!-- <v-list-item v-for="link in links" :key="link.text" router :to="link.route"> -->
                 <v-list-item v-for="link in links" :key="link.text" router @click="navigate(link)">
@@ -99,18 +99,17 @@ export default {
             openImportModal: false,
             importData: [], // InvoicesCsvData or BooksCsvData
             links: [
-                {icon: 'dashboard', text: 'כרטסת ראשית', route: '/'},
-                {icon: 'person', text: 'הוסף רשומה (קוד מקורי)', route: '/add'},
+                {icon: 'dashboard', text: 'Invice List', route: '/'},
+                {icon: 'dashboard', text: 'Book List', route: '/bookingList'},
+                {icon: 'dashboard', text: 'Table List', route: '/tableList'},
                 {icon: 'folder', text: 'Import INVOICEs', route: null , onClick: this.toggleModal},
                 {icon: 'folder', text: 'Import BOOKs', route: null , onClick: this.toggleBook},
-                {icon: 'folder', text: 'כרטסת רו"ח', route: '/bookingList'},
-                {icon: 'folder', text: 'טבלת הטבלאות', route: '/tableList'},
             ],
             items: [
                 { title: 'Remove all items', onClick:  this.onMenuItemClick },
                 { title: 'Download to excel', onClick: this.onMenuItemClick },
                 { title: 'Batch-merge', onClick: this.onMenuItemClick },
-                { title: 'Sammary B', onClick: this.onMenuItemClick },
+                { title: 'Clear ExcelRecID', onClick: this.onMenuItemClick },
             ],
         }
     },
@@ -142,8 +141,8 @@ export default {
             switch (index) {
                 case 0 : this.$root.$emit('removeAllItems',false);  break;
                 case 1 : this.$root.$emit('downloadExcel',false);   break; 
-                case 2 : console.log('Run BATCH'); this.$root.$emit('runBatch',false);  break; 
-                case 3 : console.log('Summary B');   break; 
+                case 2 : this.$root.$emit('runBatch',false);  break; 
+                case 3 : this.$root.$emit('clearExcelRecID',false);  break; 
             }
         }, 
         navigate(link) {

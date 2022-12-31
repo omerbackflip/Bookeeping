@@ -3,7 +3,7 @@ const baseUrl = process.env.VUE_APP_API_URL;
 class SpecificServiceEndPoints {
  
   async saveInvoicesBulk(bulk) {
-    var formData = new FormData();
+    var formData = new FormData(); // FormData is being used because need to transfer file to server
     formData.append("file", bulk);
     return await axios.post(`${baseUrl}/specific/save-invoices-bulk`, formData, {
       headers: {
@@ -13,7 +13,7 @@ class SpecificServiceEndPoints {
   }
 
   async saveBooksBulk(bulk,company,year) {
-    var formData = new FormData();
+    var formData = new FormData(); // FormData is being used because need to transfer file to server
     formData.append("file", bulk);
     formData.append("company", company);
     formData.append("year", year);
@@ -28,6 +28,9 @@ class SpecificServiceEndPoints {
     return await axios.post(`${baseUrl}/specific/batch-book-invoice`);
   }
 
+  async batchClearExcelRecID(year) {
+    return await axios.post(`${baseUrl}/specific/batch-clear-ExcelRecID`, {'year':year});
+  }
 }
 
 export default new SpecificServiceEndPoints();
