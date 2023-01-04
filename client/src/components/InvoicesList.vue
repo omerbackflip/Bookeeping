@@ -19,6 +19,7 @@
           item-key="id"
           :show-expand="isMobile()"
           :single-expand="true"
+          @click:row="editOne"
         >
 
           <template v-slot:top>
@@ -27,12 +28,12 @@
               <v-spacer></v-spacer>
             </v-toolbar>
           </template>
-          <template v-slot:[`item.actions`]="{ item }">
+          <!-- <template v-slot:[`item.actions`]="{ item }">
             <div :class="isMobile() ? 'd-grid' : ''">
               <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
               <v-icon small @click="deleteOne(item.id, item.description)">mdi-delete</v-icon>
             </div>
-          </template>
+          </template> -->
           <template v-slot:[`item.date`]="{ item }">
             <span> {{ item.date | formatDate }}</span>
           </template>
@@ -108,31 +109,31 @@
               </p>
               <v-form ref="form">
                 <v-row>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-combobox v-model="invoice.company" :items="companyName" label="Company" dense></v-combobox>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-combobox v-model="invoice.project" :items="projectName" label="Project" dense></v-combobox>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.amount" type="number" label="Amount" required></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.vat" type="number" label="Vat"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.year" type="number" label="Year"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.total" type="number" label="Total" required></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.group" type="number" label="Group" required></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field v-model="invoice.date" label="Date" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on" required>
@@ -145,16 +146,16 @@
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-combobox v-model="invoice.supplier" :items="supplierName" label="Supplier" dense></v-combobox>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.invoiceId" label="Invoice Id"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
                   </v-col>
                 </v-row>
@@ -168,6 +169,8 @@
               {{ updateInvoice ? "-Update-" : "-Add-" }}
             </v-btn>
             <v-btn v-show="!updateInvoice" class="mx-3" @click="clearForm"> Clear </v-btn>
+            <v-spacer></v-spacer>
+            <v-icon small color="error" @click="deleteOne(invoice.id, invoice.description)">mdi-delete</v-icon>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -206,9 +209,7 @@
                   dense
                 >
                   <template v-slot:[`item.total`]="{ item }">
-                    <span>
-                      {{ item.total ? item.total.toLocaleString() : "" }}</span
-                    >
+                    <span>{{ item.total ? item.total.toLocaleString() : "" }}</span>
                   </template>
                 </v-data-table>
               </v-container>
@@ -397,6 +398,7 @@ export default {
 			if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
 				const response = await apiService.deleteOne({model: INVOICE_MODEL,id});
 				if (response) {
+					this.dialog = false;
 					this.refreshList();
 				}
 			}
@@ -515,12 +517,10 @@ export default {
 			this.$refs.form.reset();
 		},
 
-		async editOne(id) {
-			// this is called from the edit button on the table
-			// this.$router.push({ name: "invoice-details", params: { id: id } });
-			if (id) {
-				this.updateInvoice = id;
-				const response = await apiService.getById(id, { model: INVOICE_MODEL });
+		async editOne(item) {
+			if (item.id) {
+				this.updateInvoice = item.id;
+				const response = await apiService.getById(item.id, { model: INVOICE_MODEL });
 				if (response && response.data) {
 					this.invoice = response.data;
 				}
@@ -615,7 +615,7 @@ export default {
 }
 
 .mobile-items > td {
-  font-size: 10px !important;
+  /* font-size: 13px !important; */
   padding: 0px !important;
 }
 
@@ -638,7 +638,7 @@ export default {
 }
 
 .table-margin {
-  margin-top: 29px;
+  margin-top: 0px;
 }
 
 .margin-card {
@@ -655,6 +655,7 @@ th > i {
 
 .amount-width {
   width: 100% !important;
+  padding-right: 10px;
 }
 .description-width {
   width: 110% !important;

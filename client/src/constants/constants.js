@@ -7,7 +7,7 @@ export const INVOICE_MOBILE_HEADERS = [
     { text: "Date",         value: "date",              class: " mobile-headers",                   groupable: false},	
     { text: "Description",  value: "description",       class: " mobile-headers",                   groupable: false,   align: "right"},
     { text: "Amount",       value: "amount",            class: " mobile-headers",                   groupable: false,   align: "right"},
-    { text: "Act.",         value: "actions",           class: " mobile-headers",                   groupable: false}
+    // { text: "Act.",         value: "actions",           class: " mobile-headers",                   groupable: false}
 ];
 
 export const INVOICE_WEB_HEADERS = [
