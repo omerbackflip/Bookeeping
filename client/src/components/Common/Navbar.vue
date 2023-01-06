@@ -108,7 +108,8 @@ export default {
             items: [
                 { title: 'Remove all items', onClick:  this.onMenuItemClick },
                 { title: 'Download to excel', onClick: this.onMenuItemClick },
-                { title: 'Batch-merge', onClick: this.onMenuItemClick },
+                { title: 'Book Marge', onClick: this.onMenuItemClick },
+                { title: 'Invoice Marge', onClick: this.onMenuItemClick },
                 { title: 'Clear ExcelRecID', onClick: this.onMenuItemClick },
             ],
         }
@@ -141,8 +142,9 @@ export default {
             switch (index) {
                 case 0 : this.$root.$emit('removeAllItems',false);  break;
                 case 1 : this.$root.$emit('downloadExcel',false);   break; 
-                case 2 : this.$root.$emit('runBatch',false);  break; 
-                case 3 : this.$root.$emit('clearExcelRecID',false);  break; 
+                case 2 : this.$root.$emit('bookMarge',false);  break; 
+                case 3 : this.$root.$emit('invoiceMarge',false);  break; 
+                case 4 : this.$root.$emit('clearExcelRecID',false);  break; 
             }
         }, 
         navigate(link) {

@@ -28,12 +28,6 @@
               <v-spacer></v-spacer>
             </v-toolbar>
           </template>
-          <!-- <template v-slot:[`item.actions`]="{ item }">
-            <div :class="isMobile() ? 'd-grid' : ''">
-              <v-icon small @click="editOne(item.id)">mdi-pencil</v-icon>
-              <v-icon small @click="deleteOne(item.id, item.description)">mdi-delete</v-icon>
-            </div>
-          </template> -->
           <template v-slot:[`item.date`]="{ item }">
             <span> {{ item.date | formatDate }}</span>
           </template>
@@ -56,7 +50,7 @@
           <template v-slot:[`item.amount`]="{ item }">
             <div class="amount-width d-grid">
               <span>{{ item.amount ? item.amount.toLocaleString() : "" }}</span>
-              <span @click="supplierSummary(item.supplier)" v-if="isMobile()">{{ item.supplier }}</span>
+              <span v-if="isMobile()"> {{ item.supplier }} </span>
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
@@ -134,14 +128,14 @@
                     <v-text-field v-model="invoice.group" type="number" label="Group" required></v-text-field>
                   </v-col>
                   <v-col cols="6" sm="6" md="4">
-                    <v-dialog ref="dialog" :return-value.sync="invoice.date" persistent width="290px">
+                    <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="invoice.date" persistent width="290px">
                       <template v-slot:activator="{ on, attrs }">
-                        <v-text-field v-model="invoice.date" label="Date" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on" required>
+                        <v-text-field v-model="invoice.date" label="Date" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on">
                         </v-text-field>
                       </template>
                       <v-date-picker v-model="invoice.date" scrollable>
                         <v-spacer></v-spacer>
-                        <v-btn text color="primary" @click="dialog = false"> Cancel </v-btn>
+                        <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
                         <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)"> OK </v-btn>
                       </v-date-picker>
                     </v-dialog>
@@ -155,22 +149,22 @@
                   <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
+                  <v-col cols="12" sm="6" md="4">
                     <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
                   </v-col>
                 </v-row>
               </v-form>
             </v-container>
-            <small>*indicates required field</small>
           </v-card-text>
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn @click="updateInvoice ? editInvoice() : saveInvoice()">
-              {{ updateInvoice ? "-Update-" : "-Add-" }}
+            <v-btn small @click="updateInvoice ? editInvoice() : saveInvoice()">
+              {{ updateInvoice ? "Update" : "Create" }}
             </v-btn>
-            <v-btn v-show="!updateInvoice" class="mx-3" @click="clearForm"> Clear </v-btn>
+            <v-btn small v-show="!updateInvoice" class="mx-3" @click="clearForm"> Clear </v-btn>
             <v-spacer></v-spacer>
-            <v-icon small color="error" @click="deleteOne(invoice.id, invoice.description)">mdi-delete</v-icon>
+            <v-icon color="red" @click="deleteOne(invoice.id, invoice.description)">mdi-delete</v-icon>
+            <v-icon color="red" @click="dialog = false">mdi-close-box</v-icon>
           </v-card-actions>
         </v-card>
       </v-dialog>
@@ -326,23 +320,23 @@ export default {
 				הערה: "remark",
 				נשלח: "published",
 			},
-			invoice: {
-				id: null,
-				company: "",
-				project: "",
-				description: "",
-				published: false,
-				amount: null,
-				vat: null,
-				total: null,
-				group: "",
-				date: null,
-				supplier: "",
-				invoiceId: "",
-				remark: "",
-				excelRecID: null,
-				year: null,
-			},
+			invoice: {},
+			// 	id: null,
+			// 	company: "",
+			// 	project: "",
+			// 	description: "",
+			// 	published: false,
+			// 	amount: null,
+			// 	vat: null,
+			// 	total: null,
+			// 	group: "",
+			// 	date: null,
+			// 	supplier: "",
+			// 	invoiceId: "",
+			// 	remark: "",
+			// 	excelRecID: null,
+			// 	year: null,
+			// },
 			msg: "",
 			fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
@@ -353,6 +347,7 @@ export default {
 			rowHeight: 24,
 			perPage: 25,
       bookInfo: '',
+      dateModal : false,
 		};
 	},
 
@@ -453,6 +448,16 @@ export default {
 		async batchBookInvoice() {
 			if (window.confirm(`Are you sure you want to merge record_id with excelRecID ?`)) {
 				const	response = await SpecificServiceEndPoints.batchBookInvoice() ;
+				if (response) {
+					this.refreshList();
+					window.location.reload();
+				}
+			}
+		},
+
+		async batchInvoiceBook() {
+			if (window.confirm(`Are you sure you want to merge record_id with excelRecID ?`)) {
+				const	response = await SpecificServiceEndPoints.batchInvoiceBook() ;
 				if (response) {
 					this.refreshList();
 					window.location.reload();
@@ -584,8 +589,11 @@ export default {
 				}, 1000);
 			}
 		});
-		this.$root.$on("runBatch", () => {
+		this.$root.$on("bookMarge", () => {
 			this.batchBookInvoice();
+		});
+    this.$root.$on("invoiceMarge", () => {
+			this.batchInvoiceBook();
 		});
     this.$root.$on("clearExcelRecID", () => {
       this.batchClearExcelRecID();

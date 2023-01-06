@@ -82,6 +82,7 @@ exports.saveBooksBulk = async (req, res) => {
 	}
 };
 
+// Run whole asmacta1 in Book table, and find maching asnacta1=invoiceId in Invoice table and update excelRecID in Invoice with record_id
 exports.batchBooksInvoices = async (req, res) => {
 	if (!req.body) {
 		return res.status(400).send({
@@ -100,6 +101,28 @@ exports.batchBooksInvoices = async (req, res) => {
 			message: "Error saving bulk of Invoices"
 		});
 	}	
+}
+
+// run on whole Invoice table, looks for match record_id in Book table and update excelRecID in Invoice with record_id
+exports.batchInvoicesBooks = async (req, res) => {
+	if (!req.body) {
+		return res.status(400).send({
+			message: "batch Book Invoice can not be empty!"
+		});
+	}
+	try {
+		let data = await Invoice.find({});
+		data.map(async (item) => {
+			let record = await Book.findOne({company: item.company, year: item.year, asmacta1: item.invoiceId});
+			if (record) return Invoice.findOneAndUpdate({_id: item._id},{excelRecID: record.record_id})
+		})	
+
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error saving bulk of Invoices"
+		});
+	}
 }
 
 async function getMappedItems(filteredData, company) {

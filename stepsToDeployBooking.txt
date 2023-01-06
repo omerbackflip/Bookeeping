@@ -19,5 +19,5 @@
 
 	BACKEND
 	cd ../				// go to backend
-	pm2 start server.js
+	pm2 start server.js  --name bookserver
  

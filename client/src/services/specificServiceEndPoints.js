@@ -28,6 +28,10 @@ class SpecificServiceEndPoints {
     return await axios.post(`${baseUrl}/specific/batch-book-invoice`);
   }
 
+  async batchInvoiceBook() {
+    return await axios.post(`${baseUrl}/specific/batch-invoice-book`);
+  }
+
   async batchClearExcelRecID(year) {
     return await axios.post(`${baseUrl}/specific/batch-clear-ExcelRecID`, {'year':year});
   }
