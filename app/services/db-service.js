@@ -8,7 +8,7 @@ exports.getSingleItem = async (model,query) => {
 },
 exports.getMultipleItems = async (model,query) => {
     try {
-        return await model.find(query);
+        return await model.find(query).lean();
     } catch (error) {
         console.log(error)
         throw error;

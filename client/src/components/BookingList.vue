@@ -19,8 +19,9 @@
 
 		<template v-slot:top>
 			<v-toolbar flat>
-				<v-toolbar-title>Book keeping list - {{selectedYear}} - {{books.length.toLocaleString() }} </v-toolbar-title>
+				<v-toolbar-title> {{selectedYear}} - {{books.length.toLocaleString() }} </v-toolbar-title>
 				<v-spacer></v-spacer>		
+				<v-text-field v-model="search" label="Search" class="mx-4"></v-text-field>
 			</v-toolbar>
 		</template>
           <template v-slot:[`item.actions`]="{ item }">
@@ -181,9 +182,9 @@ export default {
 		this.$root.$on("yearChange", (year) => {
 			this.selectedYear = year;
 		});
-		this.$root.$on("onSearchBooking", (search) => {
-			this.search = search;
-		});
+		// this.$root.$on("onSearchBooking", (search) => {
+		// 	this.search = search;
+		// });
 		this.$root.$on("removeAllBooksItems", () => {
 			this.removeAllBooks();
 		});

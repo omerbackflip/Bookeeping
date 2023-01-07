@@ -24,8 +24,9 @@
 
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>All Invoices YEAR = {{selectedYear}} - {{Invoices.length.toLocaleString()}} </v-toolbar-title>
+              <v-toolbar-title> {{selectedYear}} - {{Invoices.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
+              <v-text-field v-model="search" label="Search" class="mx-4"></v-text-field>
             </v-toolbar>
           </template>
           <template v-slot:[`item.date`]="{ item }">
@@ -65,6 +66,9 @@
           <template v-slot:[`item.group`]="{ item }">
             <span @click="getSummary('group', item.group)" class="summary">{{ item.group }}</span>
           </template>
+          <!-- <template v-slot:[`item.actions`]="{ item }">
+            <v-icon v-show="item.excelRecID != null">mdi-checkbox-marked-circle</v-icon>
+          </template> -->
           <template v-slot:[`item.published`]="{ item }">
             <v-checkbox v-model="item.published" @click="updateOne(item)">
             </v-checkbox>
@@ -205,6 +209,9 @@
                   <template v-slot:[`item.total`]="{ item }">
                     <span>{{ item.total ? item.total.toLocaleString() : "" }}</span>
                   </template>
+                  <template v-slot:[`item.date`]="{ item }">
+                    <span> {{ item.date | formatDate }}</span>
+                  </template>
                 </v-data-table>
               </v-container>
             </v-flex>
@@ -278,12 +285,9 @@ export default {
 	data() {
 		return {
 			Invoices: [],
-			// currInvoice: null,
-			// currentIndex: -1,
 			companyName: [],
 			projectName: [],
 			supplierName: [],
-			// expanded: [],
 			updateInvoice: 0,
 			dialog: false,
 			summaryDialog: false,
@@ -295,11 +299,13 @@ export default {
 				{ text: "Total", value: "total", align: "right" },
 				{ text: "Description", value: "description", align: "right" },
 				{ text: "Project", value: "project", align: "right" },
+				{ text: "Date", value: "date", align: "right"},
 			],
       bookHeaders: [
         { text: "Record_ID", value: "record_id", aligh: "right"},
         { text: "asmacta1", value: "asmacta1", aligh: "right"},
         { text: "date", value: "asmchta_date"},
+        { text: "Amount", value: "record_schum", aligh: "right"},
         { text: "Description", value: "pratim", aligh: "right"},
       ],
 			exportExcel: false,
@@ -321,22 +327,6 @@ export default {
 				נשלח: "published",
 			},
 			invoice: {},
-			// 	id: null,
-			// 	company: "",
-			// 	project: "",
-			// 	description: "",
-			// 	published: false,
-			// 	amount: null,
-			// 	vat: null,
-			// 	total: null,
-			// 	group: "",
-			// 	date: null,
-			// 	supplier: "",
-			// 	invoiceId: "",
-			// 	remark: "",
-			// 	excelRecID: null,
-			// 	year: null,
-			// },
 			msg: "",
 			fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
@@ -360,16 +350,23 @@ export default {
 			}
 		},
 		
-		getSummary(summaryField, summaryItem) {
+		async getSummary(summaryField, summaryItem) {
+      let response = "";
       switch (summaryField) {
         case 'project':
-          this.summaryFilter = this.Invoices.filter((item) => item.project === summaryItem);
+          // fatch all paymanets for this project cross years.
+          response = await apiService.get({model: INVOICE_MODEL,project: summaryItem})
+          this.summaryFilter = response.data
           break;
         case 'supplier':
-          this.summaryFilter = this.Invoices.filter((item) => item.supplier === summaryItem);
+          // fatch all paymanets for this supplier cross years.
+          response = await apiService.get({model: INVOICE_MODEL,supplier: summaryItem})
+          this.summaryFilter = response.data
           break;
         case 'group':
-          this.summaryFilter = this.Invoices.filter((item) => item.group === summaryItem);
+          // fatch all paymanets for this group cross years.
+          response = await apiService.get({model: INVOICE_MODEL,group: summaryItem})
+          this.summaryFilter = response.data
           break;
         default : break;
       }
@@ -419,11 +416,11 @@ export default {
 			}
 		},
 
-		loadTable: async function (table_id, key) {
+		loadTable: async function (table_id, tableName) {
 			try {
 				const response = await apiService.get({ table_id, model: TABLE_MODEL });
 				if (response) {
-					this[key] = response.data.map((code) => code.description);
+					this[tableName] = response.data.map((code) => code.description);
 				}
 			} catch (error) {
 				console.log(error);
@@ -523,9 +520,9 @@ export default {
 		},
 
 		async editOne(item) {
-			if (item.id) {
-				this.updateInvoice = item.id;
-				const response = await apiService.getById(item.id, { model: INVOICE_MODEL });
+			if (item._id) {
+				this.updateInvoice = item._id;
+				const response = await apiService.getById(item._id, { model: INVOICE_MODEL });
 				if (response && response.data) {
 					this.invoice = response.data;
 				}
@@ -535,18 +532,11 @@ export default {
 
 		async updateOne(item) {
 			await apiService.update(
-				item.id,
+				item._id,
 				{ published: item.published },
 				{ model: INVOICE_MODEL }
 			);
 			this.itemToEdit = "";
-		},
-
-		setEdit(item) {
-			this.itemToEdit = item._id;
-			setTimeout(() => {
-				document.getElementById(`itemEdit-${item._id}`).focus();
-			}, 1);
 		},
 
 		//Background of row if added to Book table
@@ -572,9 +562,9 @@ export default {
 		this.$root.$on("yearChange", (year) => {
 			this.selectedYear = year;
 		});
-		this.$root.$on("onSearch", (search) => {
-			this.search = search;
-		});
+		// this.$root.$on("onSearch", (search) => {
+		// 	this.search = search;
+		// });
 		this.$root.$on("removeAllItems", () => {
 			setTimeout(100);
 			this.removeAllInvoices();

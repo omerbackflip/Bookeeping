@@ -22,7 +22,7 @@ export const INVOICE_WEB_HEADERS = [
     { text: "Total",        value: "total",         groupable: false,   align: "right"},
     { text: "Invoice ID",   value: "invoiceId",     groupable: false,   align: "right"},
     { text: "Excel Rec ID", value: "excelRecID",    groupable: false,                   width: "4%"},
-    { text: "Remark",       value: "remark",        groupable: false,   align: "right", width: "20%"},
-    { text: "Act.",         value: "actions",       groupable: false,   },
+    { text: "Remark",       value: "remark",        groupable: false,   align: "right", width: "30%"},
+    // { text: "Act.",         value: "actions",       groupable: false,   },
     { text: "P",            value: "published",     groupable: false}
 ];

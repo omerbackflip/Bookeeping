@@ -2,17 +2,17 @@
     <nav>
         <v-app-bar app dark>
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-            <div v-show="isInvoices" :class="isMobile() ? 'mobile-search' : ''" class="search-wrapper">
+            <!-- <div v-show="isInvoices" :class="isMobile() ? 'mobile-search' : ''" class="search-wrapper">
                 <v-text-field
                 append-icon="mdi-magnify"
                 @change="onSearch"
                 label="Search..."
                 single-line                
                 ></v-text-field>
-            </div>
+            </div> -->
             <div :class="isMobile() ? 'search-wrapper-mobile' : ''" v-show="isBookingList" class="search-wrapper">
                 <v-row>
-                    <v-col>
+                    <!-- <v-col>
                         <v-text-field
                         @change="onSearchBooking"
                         append-icon="mdi-magnify"
@@ -21,7 +21,7 @@
                         single-line
                         ></v-text-field>
 
-                    </v-col>
+                    </v-col> -->
                     <v-col>
                         <v-btn :class="isMobile() ? 'mobile-button' : ''" class="m-3 btn btn-sm btn-danger" @click="removeAllBooks">
                             Remove All Book-keeping data
@@ -129,12 +129,12 @@ export default {
             this.importData = "BOOKS";
             this.openImportModal = !this.openImportModal;
         },
-        onSearch(event) {
-            this.$root.$emit('onSearch',event);
-        },
-        onSearchBooking(event) {
-            this.$root.$emit('onSearchBooking',event);
-        },
+        // onSearch(event) {
+        //     this.$root.$emit('onSearch',event);
+        // },
+        // onSearchBooking(event) {
+        //     this.$root.$emit('onSearchBooking',event);
+        // },
         removeAllBooks(event) {
             this.$root.$emit('removeAllBooksItems',event);
         },
