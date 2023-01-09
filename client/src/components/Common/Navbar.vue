@@ -43,6 +43,13 @@
                         dense
                         solo
                     ></v-select>
+                    <v-select class="year-input" 
+                        :items="['ביצועים','יזמות','ALL']"
+                        @change="onCompanyChange"
+                        value="ALL"
+                        dense
+                        solo
+                    ></v-select>
                 </span>
                 <v-menu offset-y>
                 <template v-slot:activator="{ on, attrs }">
@@ -121,6 +128,9 @@ export default {
         onYearChange(event) {
             this.$root.$emit('yearChange',event);
         },
+        onCompanyChange(event) {
+            this.$root.$emit('companyChange',event);
+        },
         toggleModal() {
             this.importData = "INVOICES";
             this.openImportModal = !this.openImportModal;
@@ -191,6 +201,7 @@ export default {
     .year-input{
         padding: 0;
         margin-top: 7px;
+        margin-left: 7px;
         width: -webkit-min-content;
         width: -moz-min-content;
         /* width: min-content; */
