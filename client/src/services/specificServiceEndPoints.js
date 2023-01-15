@@ -35,6 +35,10 @@ class SpecificServiceEndPoints {
   async batchClearExcelRecID(year) {
     return await axios.post(`${baseUrl}/specific/batch-clear-ExcelRecID`, {'year':year});
   }
+
+  async addPaymentsToInvoice(invoiceId,paymentList) {
+		return await axios.put(`${baseUrl}/specific/add-payments-to-invoice/${invoiceId}`, paymentList);
+	}
 }
 
 export default new SpecificServiceEndPoints();

@@ -176,6 +176,21 @@ exports.batchClearExcelRecID = async (req, res) => {
 	}	
 }
 
+exports.addPaymentsToInvoice = async(req,res) => {
+		try {
+        const { invoiceId } = req.params;
+        const paymentsList = req.body;
+        if(paymentsList) {
+           await Invoice.updateOne({_id: invoiceId}, { payments: paymentsList })
+        }
+        return res.send({success: true, message: "Successfully added supplier to PROJECT"});
+
+    } catch (error) {
+        console.log(error)
+		res.status(500).send({ message: "Error updating PROJECT with associated suppliers", error });
+    }
+}
+
 function unLinkFile(path) {
 	fs.unlinkSync(path);
 }

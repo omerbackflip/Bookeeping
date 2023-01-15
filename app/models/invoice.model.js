@@ -15,6 +15,11 @@ module.exports = mongoose => {
       remark: String,
       excelRecID: Number,
       year: Number,
+      payments: [{
+				checkID: {type: Number , default: 0},
+				payment: {type: Number , default: 0},	
+        date: Date,
+			}],
     },
     { timestamps: true }
   );

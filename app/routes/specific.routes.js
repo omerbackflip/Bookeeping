@@ -12,6 +12,7 @@ module.exports = app => {
   router.post("/batch-book-invoice", specific.batchBooksInvoices);
   router.post("/batch-invoice-book", specific.batchInvoicesBooks);
   router.post("/batch-clear-ExcelRecID", specific.batchClearExcelRecID);
+  router.put("/add-payments-to-invoice/:invoiceId", specific.addPaymentsToInvoice);
 
   app.use('/api/specific', router);
 };

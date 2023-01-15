@@ -17,9 +17,10 @@
           :loading="isLoading"
           loading-text="Loading... Please wait"
           item-key="id"
+          :expanded.sync="expanded"
           :show-expand="isMobile()"
           :single-expand="true"
-          @click:row="editOne"
+          @click:row="getInvoiceForEdit"
         >
 
           <template v-slot:top>
@@ -97,7 +98,7 @@
         <v-card>
           <v-card-title>
             <span class="text-h5">{{
-              updateInvoice ? "Update" : "Add New"
+              invoiceID ? "Update" : "Add New"
             }}</span>
           </v-card-title>
           <v-card-text>
@@ -160,12 +161,33 @@
               </v-form>
             </v-container>
           </v-card-text>
+
+          <div class="payments-wrapper">
+              <h3>Payments</h3>
+              <v-container>
+                  <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
+                      <v-row>
+                          <v-col cols="4" sm="6">
+                              <v-text-field label="checkID" v-model="inv.checkID" ></v-text-field>
+                          </v-col>
+                          <v-col cols="4" sm="6">
+                              <v-text-field label="Payment" v-model="inv.payment" ></v-text-field>
+                          </v-col>
+                          <v-col cols="2">
+                              <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small >mdi-delete</v-icon></v-btn>
+                          </v-col>
+                      </v-row>
+                  </div>                    
+                  <v-btn @click="addPaymentRow" class="primary" small><v-icon small >mdi-plus</v-icon></v-btn>					
+              </v-container>
+          </div>
+
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn small @click="updateInvoice ? editInvoice() : saveInvoice()">
-              {{ updateInvoice ? "Update" : "Create" }}
+            <v-btn small @click="invoiceID ? updateInvoice() : saveNewInvoice()">
+              {{ invoiceID ? "Update" : "Create" }}
             </v-btn>
-            <v-btn small v-show="!updateInvoice" class="mx-3" @click="clearForm"> Clear </v-btn>
+            <v-btn small v-show="!invoiceID" class="mx-3" @click="clearForm"> Clear </v-btn>
             <v-spacer></v-spacer>
             <v-icon color="red" @click="deleteOne(invoice.id, invoice.description)">mdi-delete</v-icon>
             <v-icon color="red" @click="dialog = false">mdi-close-box</v-icon>
@@ -269,7 +291,7 @@ import moment from "moment";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
-import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, TABLE_MODEL, BOOKS_MODEL } from "../constants/constants";
+import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE } from "../constants/constants";
 
 Vue.use(excel);
 
@@ -288,13 +310,14 @@ export default {
 			companyName: [],
 			projectName: [],
 			supplierName: [],
-			updateInvoice: 0,
+			invoiceID: 0,
 			dialog: false,
       bookDialog: false,
 			summaryDialog: false,
       summaryTotal: 0,
 			summaryFilter: [],
 			summaryName: "",
+      expanded: [],
 			summaryHeaders: [
 				{ text: "Total", value: "total", align: "right" },
 				{ text: "Description", value: "description", align: "right" },
@@ -326,17 +349,17 @@ export default {
 				הערה: "remark",
 				נשלח: "published",
 			},
-			invoice: {},
+			invoice: [],
 			msg: "",
-			fldRules: [(v) => !!v || "Field is required"],
+			// fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
 			itemToEdit: "",
 			selectedYear: 2022,
-			selectedCompany: 'ביצועים',
-			start: 0,
-			timeout: null,
-			rowHeight: 24,
-			perPage: 25,
+			// selectedCompany: 'ביצועים',
+			// start: 0,
+			// timeout: null,
+			// rowHeight: 24,
+			// perPage: 25,
       bookInfo: '',
       dateModal : false,
 		};
@@ -473,12 +496,14 @@ export default {
 			}
 		},
 
-		saveInvoice: async function () {
+		saveNewInvoice: async function () {
 			try {
-				const response = await apiService.create(this.invoice, {
-					model: INVOICE_MODEL,
-				});
+				const response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
 				if (response) {
+          await SpecificServiceEndPoints.addPaymentsToInvoice(
+                response.data.id,     // 1st param -> projectId
+                {checkID: 123, payment: 123, date: new Date()} // 2nd param -> payments List
+          );
 					this.invoice.id = response.data.id;
 					this.refreshList();
 					this.clearForm();
@@ -493,18 +518,18 @@ export default {
 			}
 		},
 
-		async editInvoice() {
-			// this is called from the update dialog
+    // this is called from the update dialog
+		async updateInvoice() {
 			try {
 				const response = await apiService.update(
-					this.updateInvoice,
+					this.invoiceID,
 					this.invoice,
 					{ model: INVOICE_MODEL }
 				);
 				if (response) {
 					this.refreshList();
 					this.clearForm();
-					this.updateInvoice = 0;
+					this.invoiceID = 0;
 					this.dialog = false;
 				}
 			} catch (error) {
@@ -520,9 +545,10 @@ export default {
 			this.$refs.form.reset();
 		},
 
-		async editOne(item) {
+    // get invoice data before open dialog for edit
+		async getInvoiceForEdit(item) {
 			if (item._id) {
-				this.updateInvoice = item._id;
+				this.invoiceID = item._id;
 				const response = await apiService.getById(item._id, { model: INVOICE_MODEL });
 				if (response && response.data) {
 					this.invoice = response.data;
@@ -531,6 +557,7 @@ export default {
 			}
 		},
 
+    // called @click on toggle "published" field
 		async updateOne(item) {
 			await apiService.update(
 				item._id,
@@ -548,6 +575,16 @@ export default {
 			}
 			return classes;
 		},
+
+    removePaymentRec(index) {
+			this.invoice.payments.splice(index, 1);
+		},
+
+    addPaymentRow() {
+      this.invoice = NEW_INVOICE;
+			this.invoice.payments.push({ checkID: 444, payment: 444, date: new Date() });
+      console.log(this.invoice)
+		},
 	},
 
 	async mounted() {
@@ -557,7 +594,7 @@ export default {
 		await this.loadTable(3, "supplierName");
 		this.$root.$on("addNewRow", () => {
 			this.dialog = true;
-			this.updateInvoice = 0;
+			this.invoiceID = 0;
 			this.invoice = {};
 		});
 		this.$root.$on("yearChange", (year) => {
@@ -677,5 +714,11 @@ th > i {
 .theme--light.v-data-table > .v-data-table__wrapper > table > thead > tr > th {
     color: rgba(0, 0, 0, 0.6);
     white-space: nowrap;
+}
+
+.payments-wrapper{
+    border: 10px solid #85a7ff;
+    margin: 20px;
+    padding: 20px;
 }
 </style>
