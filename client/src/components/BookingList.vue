@@ -2,11 +2,10 @@
   <div class="list row">
     <v-layout row wrap>
       <v-flex md6>
-        <v-data-table
+        <!-- <v-data-table
           :headers="headers"
           :items="books"
           :search="search"
-          @click:row="rowClicked"
           disable-pagination
           hide-default-footer
           fixed-header
@@ -14,8 +13,8 @@
           class="elevation-3 table-margin"
           no-data-text="No data available for current selected year!"
           :loading="isLoading"
-        >
-			<template v-slot:top>
+        > -->
+			<!-- <template v-slot:top>
 				<v-toolbar flat>
 					<v-toolbar-title> {{selectedYear}} - {{books.length.toLocaleString() }} </v-toolbar-title>
 					<v-spacer></v-spacer>		
@@ -40,10 +39,46 @@
 			</template>
 			<template v-slot:[`item.cust_lname`]="{ item }">
 				<span @click="getSummary('cust', item.cust_lname)" class="summary">{{ item.cust_lname }}</span>
-			</template>
-        </v-data-table>
-      </v-flex>
+			</template> -->
 
+        <!-- </v-data-table> -->
+
+		<vue-virtual-table
+			:config="headers"
+			:data="books"
+			:height="800"			
+			:itemHeight="55"
+			:minWidth="1000"
+			:enableExport="true"
+			class="mt-2"
+		>
+
+       <template slot-scope="scope" slot="actionCommon">
+			<v-icon small @click="editOne(scope.row._id)">mdi-pencil</v-icon>
+			<v-icon small @click="deleteOne(scope.row._id)">mdi-delete</v-icon>
+        </template>
+
+		<template slot-scope="scope" slot="asmchta_date">
+			<span> {{ scope.row.asmchta_date | formatDate }}</span>
+		</template>
+		
+		<template slot-scope="scope" slot="record_schum">
+			<span>{{ scope.row.record_schum ? scope.row.record_schum.toLocaleString() : "" }}</span>
+		</template>
+		<template slot-scope="scope" slot="schum_hova">
+			<span>{{ scope.row.schum_hova ? scope.row.schum_hova.toLocaleString() : "" }}</span>
+		</template>
+		<template slot-scope="scope" slot="schum_zchut">
+			<span>{{ scope.row.schum_zchut ? scope.row.schum_zchut.toLocaleString() : "" }}</span>
+		</template>
+		<template slot-scope="scope" slot="cust_lname">
+			<span @click="getSummary('cust', scope.row.cust_lname)" class="summary">{{ scope.row.cust_lname }}</span>
+		</template> 
+
+		</vue-virtual-table>
+
+
+      </v-flex>
       <!-- SummaryDialog for cust_name -->
       <v-dialog v-model="summaryDialog" max-width="600px">
         <v-card>
@@ -89,6 +124,51 @@
       </v-dialog>
 
     </v-layout>
+
+      <!-- SummaryDialog for cust_name -->
+      <v-dialog v-model="summaryDialog" max-width="600px">
+        <v-card>
+          <v-card-text class="margin-card">
+            <v-flex>
+              <v-container class="grey lighten-2 elevation-3">
+                <export-excel
+                  :data="summaryFilter"
+                  type="xlsx"
+                  :name="summaryName"
+                  :title="summaryName"
+                  :footer="summaryTotal.toLocaleString()"
+                  class="mt-3"
+                >
+                  <h5 style="text-align: center">
+                    {{ summaryName }} - {{ this.summaryTotal.toLocaleString() }}
+                    <v-btn small class="btn btn-danger">
+                      <v-icon>mdi-download</v-icon>
+                    </v-btn>
+                  </h5>
+                </export-excel>
+                <v-data-table
+                  :headers="summaryHeaders"
+                  :items="summaryFilter"
+                  disable-pagination
+                  hide-default-footer
+                  mobile-breakpoint="350"
+                  fixed-header
+                  class="elevation-3"
+                  dense
+                >
+                  <template v-slot:[`item.record_schum`]="{ item }">
+                    <span>{{ item.record_schum ? item.record_schum.toLocaleString() : "" }}</span>
+                  </template>
+                  <template v-slot:[`item.asmchta_date`]="{ item }">
+                    <span> {{ item.asmchta_date | formatDate }}</span>
+                  </template>
+                </v-data-table>
+              </v-container>
+            </v-flex>
+          </v-card-text>
+        </v-card>
+      </v-dialog>
+
   </div>
 </template>
 
@@ -97,9 +177,11 @@
 <script>
 import Vue from "vue";
 import moment from "moment";
-import { BOOKS_MODEL } from "../constants/constants";
-import apiService from "../services/apiService";
 import excel from "vue-excel-export";
+import VueVirtualTable from 'vue-virtual-table'
+import apiService from '../services/apiService';
+import { BOOKS_MODEL } from '../constants/constants';
+
 
 Vue.use(excel);
 Vue.filter("formatDate", function (value) {
@@ -111,6 +193,7 @@ Vue.filter("formatDate", function (value) {
 
 export default {
 	name: "booking-list",
+	components: { VueVirtualTable },
 	data() {
 		return {
 			books: [],
@@ -118,20 +201,20 @@ export default {
 			currentIndex: -1,
 			search: "",
 			headers: [
-				{ text: "company", value: "company", class: "" },
-				{ text: "asmchta_date", value: "asmchta_date", class: "" },
-				{ text: "record_id", value: "record_id", class: "" },
-				{ text: "year", value: "year", class: "" },
-				{ text: "record_schum", value: "record_schum", class: "" },
-				{ text: "pratim", value: "pratim", class: "" },
-				{ text: "asmacta1", value: "asmacta1", class: "" },
-				{ text: "schum_hova", value: "schum_hova", class: "" },
-				{ text: "schum_zchut", value: "schum_zchut", class: "" },
-				{ text: "cust_lname", value: "cust_lname", class: "" },
-				{ text: "cust_fname", value: "cust_fname", class: "" },
-				{ text: "bs_item_name", value: "bs_item_name", class: "" },
-				{ text: "bs_group_name",	value: "bs_group_name",	class: "",},
-				{ text: "Act.",	value: "actions", sortable: false, class: "",},
+				{ name: "company", prop: "company", actionName: 'company', searchable: true },
+				{ prop: "_action", name: "Asmchta date" , actionName: 'asmchta_date'},
+				{ name: "record_id", prop: "record_id", searchable: true},
+				{ name: "year", prop: "year", searchable: true},
+				{ name: "record_schum", prop: "_action", actionName: 'record_schum', },
+				{ name: "pratim", prop: "pratim", searchable: true },
+				{ name: "asmacta1", prop: "asmacta1", searchable: true },
+				{ name: "schum_hova", prop: "_action", actionName: 'schum_hova', },
+				{ name: "schum_zchut", prop: "_action", actionName: 'schum_zchut', },
+				{ name: "cust_lname", prop: "_action", actionName: 'cust_lname', },
+				{ name: "cust_fname", prop: "cust_fname", searchable: true },
+				{ name: "bs_item_name", prop: "bs_item_name", searchable: true },
+				{ name: "bs_group_name",	prop: "bs_group_name", searchable: true,},
+				{ prop: "_action", name: "Action", actionName: "actionCommon" },
 			],
 			book: {
 				id: null,
@@ -287,5 +370,8 @@ export default {
   cursor: pointer;
   text-decoration: underline;
   color: blue;
+}
+.mt-2{
+	margin-top: 20px;
 }
 </style>
