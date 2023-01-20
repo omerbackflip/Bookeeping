@@ -16,7 +16,7 @@
           :item-class="itemRowBackground"
           :loading="isLoading"
           loading-text="Loading... Please wait"
-          item-key="id"
+          item-key="_id"
           :expanded.sync="expanded"
           :show-expand="isMobile()"
           :single-expand="true"
@@ -56,16 +56,24 @@
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
-            <span @click="getSummary('supplier', item.supplier)" class="summary">{{ item.supplier }}</span>
+            <td @click.stop>
+              <span @click="getSummary('supplier', item.supplier)" class="summary">{{ item.supplier }}</span>
+            </td>
           </template>
           <template v-slot:[`item.excelRecID`]="{ item }">
-            <span @click="retriveBookData(item)" class="summary">{{ item.excelRecID }}</span>
+            <td @click.stop>
+              <span @click="retriveBookData(item)" class="summary">{{ item.excelRecID }}</span>
+            </td>
           </template>
           <template v-slot:[`item.project`]="{ item }">
-            <span @click="getSummary('project', item.project)" class="summary">{{ item.project }}</span>
+            <td @click.stop>
+              <span @click="getSummary('project', item.project)" class="summary">{{ item.project }}</span>
+            </td>
           </template>
           <template v-slot:[`item.group`]="{ item }">
-            <span @click="getSummary('group', item.group)" class="summary">{{ item.group }}</span>
+            <td @click.stop>
+              <span @click="getSummary('group', item.group)" class="summary">{{ item.group }}</span>
+            </td>
           </template>
           <!-- <template v-slot:[`item.actions`]="{ item }">
             <v-icon v-show="item.excelRecID != null">mdi-checkbox-marked-circle</v-icon>
@@ -121,13 +129,13 @@
                     <v-text-field v-model="invoice.amount" type="number" label="Amount" required></v-text-field>
                   </v-col>
                   <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.vat" type="number" label="Vat"></v-text-field>
-                  </v-col>
-                  <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.year" type="number" label="Year"></v-text-field>
+                    <v-text-field v-model="invoice.vat" type="number" label="Vat" ></v-text-field>
                   </v-col>
                   <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.total" type="number" label="Total" required></v-text-field>
+                  </v-col>
+                  <v-col cols="6" sm="6" md="4">
+                    <v-text-field v-model="invoice.year" type="number" label="Year"></v-text-field>
                   </v-col>
                   <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.group" type="number" label="Group" required></v-text-field>
@@ -161,19 +169,21 @@
               </v-form>
             </v-container>
           </v-card-text>
-
           <div class="payments-wrapper">
               <h3>Payments</h3>
               <v-container>
                   <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
                       <v-row>
-                          <v-col cols="4" sm="6">
+                          <v-col cols="4" sm="3">
                               <v-text-field label="checkID" v-model="inv.checkID" ></v-text-field>
                           </v-col>
-                          <v-col cols="4" sm="6">
+                          <v-col cols="4" sm="3">
                               <v-text-field label="Payment" v-model="inv.payment" ></v-text-field>
                           </v-col>
-                          <v-col cols="2">
+                          <v-col cols="4" sm="3">
+                              <v-text-field label="Date" v-model="inv.date" ></v-text-field>
+                          </v-col>
+                          <v-col cols="3">
                               <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small >mdi-delete</v-icon></v-btn>
                           </v-col>
                       </v-row>
@@ -500,10 +510,10 @@ export default {
 			try {
 				const response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
 				if (response) {
-          await SpecificServiceEndPoints.addPaymentsToInvoice(
-                response.data.id,     // 1st param -> projectId
-                {checkID: 123, payment: 123, date: new Date()} // 2nd param -> payments List
-          );
+          // await SpecificServiceEndPoints.addPaymentsToInvoice(
+          //       response.data.id,     // 1st param -> projectId
+          //       {checkID: 123, payment: 123, date: new Date()} // 2nd param -> payments List
+          // );
 					this.invoice.id = response.data.id;
 					this.refreshList();
 					this.clearForm();
@@ -521,11 +531,7 @@ export default {
     // this is called from the update dialog
 		async updateInvoice() {
 			try {
-				const response = await apiService.update(
-					this.invoiceID,
-					this.invoice,
-					{ model: INVOICE_MODEL }
-				);
+				const response = await apiService.update(this.invoiceID, this.invoice, { model: INVOICE_MODEL });
 				if (response) {
 					this.refreshList();
 					this.clearForm();
@@ -581,8 +587,7 @@ export default {
 		},
 
     addPaymentRow() {
-      this.invoice = NEW_INVOICE;
-			this.invoice.payments.push({ checkID: 444, payment: 444, date: new Date() });
+			this.invoice.payments.push({ checkID: 0, payment: 0, date: new Date() });
       console.log(this.invoice)
 		},
 	},
@@ -592,10 +597,10 @@ export default {
 		await this.loadTable(1, "companyName");
 		await this.loadTable(2, "projectName");
 		await this.loadTable(3, "supplierName");
-		this.$root.$on("addNewRow", () => {
+		this.$root.$on("addNewInvoice", () => {
 			this.dialog = true;
 			this.invoiceID = 0;
-			this.invoice = {};
+      this.invoice = NEW_INVOICE;
 		});
 		this.$root.$on("yearChange", (year) => {
 			this.selectedYear = year;
@@ -640,6 +645,7 @@ export default {
   text-align: left;
   max-width: auto;
   margin: auto;
+  cursor: pointer;
 }
 
 .bg-green {

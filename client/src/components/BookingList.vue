@@ -1,7 +1,7 @@
 <template>
   <div class="list row">
     <v-layout row wrap>
-      <v-flex md6>
+      <v-flex md12>
         <!-- <v-data-table
           :headers="headers"
           :items="books"
@@ -51,10 +51,11 @@
 			:minWidth="1000"
 			:enableExport="true"
 			class="mt-2"
+			language = 'en'
 		>
 
        <template slot-scope="scope" slot="actionCommon">
-			<v-icon small @click="editOne(scope.row._id)">mdi-pencil</v-icon>
+			<v-icon small @click="editOne(scope.row.id)">mdi-pencil</v-icon>
 			<v-icon small @click="deleteOne(scope.row._id)">mdi-delete</v-icon>
         </template>
 
@@ -125,50 +126,6 @@
 
     </v-layout>
 
-      <!-- SummaryDialog for cust_name -->
-      <v-dialog v-model="summaryDialog" max-width="600px">
-        <v-card>
-          <v-card-text class="margin-card">
-            <v-flex>
-              <v-container class="grey lighten-2 elevation-3">
-                <export-excel
-                  :data="summaryFilter"
-                  type="xlsx"
-                  :name="summaryName"
-                  :title="summaryName"
-                  :footer="summaryTotal.toLocaleString()"
-                  class="mt-3"
-                >
-                  <h5 style="text-align: center">
-                    {{ summaryName }} - {{ this.summaryTotal.toLocaleString() }}
-                    <v-btn small class="btn btn-danger">
-                      <v-icon>mdi-download</v-icon>
-                    </v-btn>
-                  </h5>
-                </export-excel>
-                <v-data-table
-                  :headers="summaryHeaders"
-                  :items="summaryFilter"
-                  disable-pagination
-                  hide-default-footer
-                  mobile-breakpoint="350"
-                  fixed-header
-                  class="elevation-3"
-                  dense
-                >
-                  <template v-slot:[`item.record_schum`]="{ item }">
-                    <span>{{ item.record_schum ? item.record_schum.toLocaleString() : "" }}</span>
-                  </template>
-                  <template v-slot:[`item.asmchta_date`]="{ item }">
-                    <span> {{ item.asmchta_date | formatDate }}</span>
-                  </template>
-                </v-data-table>
-              </v-container>
-            </v-flex>
-          </v-card-text>
-        </v-card>
-      </v-dialog>
-
   </div>
 </template>
 
@@ -201,20 +158,20 @@ export default {
 			currentIndex: -1,
 			search: "",
 			headers: [
-				{ name: "company", prop: "company", actionName: 'company', searchable: true },
-				{ prop: "_action", name: "Asmchta date" , actionName: 'asmchta_date'},
-				{ name: "record_id", prop: "record_id", searchable: true},
-				{ name: "year", prop: "year", searchable: true},
-				{ name: "record_schum", prop: "_action", actionName: 'record_schum', },
-				{ name: "pratim", prop: "pratim", searchable: true },
-				{ name: "asmacta1", prop: "asmacta1", searchable: true },
-				{ name: "schum_hova", prop: "_action", actionName: 'schum_hova', },
-				{ name: "schum_zchut", prop: "_action", actionName: 'schum_zchut', },
-				{ name: "cust_lname", prop: "_action", actionName: 'cust_lname', },
-				{ name: "cust_fname", prop: "cust_fname", searchable: true },
-				{ name: "bs_item_name", prop: "bs_item_name", searchable: true },
-				{ name: "bs_group_name",	prop: "bs_group_name", searchable: true,},
-				{ prop: "_action", name: "Action", actionName: "actionCommon" },
+				{ name: "company", 		prop: "company", 		actionName: 'company', 	searchable: true },
+				{ name: "Asmchta date", prop: "_action", 		actionName: 'asmchta_date'},
+				{ name: "record_id", 	prop: "record_id", 								numberFilter: true},
+				{ name: "year", 		prop: "year", 									searchable: true},
+				{ name: "record_schum", prop: "record_schum", 		actionName: 'record_schum', numberFilter: true},
+				{ name: "pratim", 		prop: "pratim", 								searchable: true },
+				{ name: "asmacta1", 	prop: "asmacta1", 								searchable: true },
+				{ name: "schum_hova", 	prop: "_action", 		actionName: 'schum_hova', },
+				{ name: "schum_zchut", 	prop: "_action", 		actionName: 'schum_zchut', },
+				{ name: "cust_lname", 	prop: "_action", 		actionName: 'cust_lname', },
+				{ name: "cust_fname", 	prop: "cust_fname", 							searchable: true },
+				{ name: "bs_item_name", prop: "bs_item_name", 							searchable: true },
+				{ name: "bs_group_name",prop: "bs_group_name",							searchable: true,},
+				{ name: "Action", 		prop: "_action", 		actionName: "actionCommon" },
 			],
 			book: {
 				id: null,

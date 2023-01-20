@@ -33,7 +33,7 @@
             <template>
                 <div class="mt-2 text-center d-flex">
                 <span class="d-content">
-                    <v-btn small @click="setAddNewRow" class="plus-button">
+                    <v-btn small @click="callAddNewInvoice" class="plus-button">
                         <v-icon>mdi-plus</v-icon>
                     </v-btn>
                     <v-select class="year-input" 
@@ -122,8 +122,8 @@ export default {
         }
     },
     methods:{
-        setAddNewRow() {
-            this.$root.$emit('addNewRow',{ newRow: true});
+        callAddNewInvoice() {
+            this.$root.$emit('addNewInvoice',{ newRow: true});
         },
         onYearChange(event) {
             this.$root.$emit('yearChange',event);
