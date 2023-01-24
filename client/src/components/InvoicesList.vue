@@ -143,7 +143,7 @@
                   <v-col cols="6" sm="6" md="4">
                     <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="invoice.date" persistent width="290px">
                       <template v-slot:activator="{ on, attrs }">
-                        <v-text-field v-model="invoice.date" label="Date" prepend-icon="mdi-calendar" readonly v-bind="attrs" v-on="on">
+                        <v-text-field v-model="invoice.date" label="Date" readonly v-bind="attrs" v-on="on">
                         </v-text-field>
                       </template>
                       <v-date-picker v-model="invoice.date" scrollable>
@@ -162,7 +162,7 @@
                   <v-col cols="6" sm="6" md="4">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="4">
+                  <v-col cols="12" sm="6" md="12">
                     <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
                   </v-col>
                 </v-row>
@@ -558,6 +558,7 @@ export default {
 				const response = await apiService.getById(item._id, { model: INVOICE_MODEL });
 				if (response && response.data) {
 					this.invoice = response.data;
+          // this.invoice.date = (new Date(this.invoice.date)).toISOString('he-EG').substr(0, 10)
 				}
 				this.dialog = true;
 			}

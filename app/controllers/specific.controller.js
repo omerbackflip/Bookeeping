@@ -131,10 +131,10 @@ async function getMappedItems(filteredData, company) {
 		if (company && year && asmacta1 != '') { // if no date - probbaly is Yitra...
 			await updateExcelRecID(company, year, asmacta1, record_id);
 		}
-		const [day,month,year1] = item.asmchta_date.split('/')
+		const [month,day,year1] = item.asmchta_date.split('/')
 		return {
 			company,
-			asmchta_date: new Date(+year, +month - 1, +day),
+			asmchta_date: new Date(+year1, +month-1, +day, +0, +0, +0),
 			record_id: item.record_id,
 			year: item.year,
 			record_schum: item.record_schum,
