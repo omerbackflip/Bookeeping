@@ -66,7 +66,7 @@
                 </v-list>
                 <v-list>
                     <!-- <v-list-item v-for="link in links" :key="link.text" router :to="link.route"> -->
-                    <v-list-item v-for="link in links" :key="link.text" router @click="navigate(link)">
+                    <v-list-item v-for="link in navItems" :key="link.text" router @click="navigate(link)">
                         <v-list-item-title>{{link.text}}</v-list-item-title>
                     </v-list-item>
                 </v-list>
@@ -76,8 +76,8 @@
         </v-app-bar>
         <v-navigation-drawer app v-model="drawer" class="primary" temporary>
             <v-list>
-                <!-- <v-list-item v-for="link in links" :key="link.text" router :to="link.route"> -->
-                <v-list-item v-for="link in links" :key="link.text" router @click="navigate(link)">
+                <!-- <v-list-item v-for="link in navItems" :key="link.text" router :to="link.route"> -->
+                <v-list-item v-for="link in navItems" :key="link.text" router @click="navigate(link)">
                     <v-list-item-action>
                         <v-icon class="white--text">{{link.icon}}</v-icon>
                     </v-list-item-action>
@@ -97,21 +97,16 @@
 
 <script>
 import ImportCSV from '../ImportCSV.vue';
+import { navItems } from '../../constants/constants';
 
 export default {
-    components: { ImportCSV},
+    components: { ImportCSV },
     data() {
         return {
+            navItems,
             drawer: false,
             openImportModal: false,
             importData: [], // InvoicesCsvData or BooksCsvData
-            links: [
-                {icon: 'dashboard', text: 'Invice List', route: '/'},
-                {icon: 'dashboard', text: 'Book List', route: '/bookingList'},
-                {icon: 'dashboard', text: 'Table List', route: '/tableList'},
-                {icon: 'folder', text: 'Import INVOICEs', route: null , onClick: this.toggleModal},
-                {icon: 'folder', text: 'Import BOOKs', route: null , onClick: this.toggleBook},
-            ],
             items: [
                 { title: 'Remove all items', onClick:  this.onMenuItemClick },
                 { title: 'Download to excel', onClick: this.onMenuItemClick },
@@ -163,7 +158,7 @@ export default {
                     this.$router.push({ path: link.route });
                 }
             } else {
-                link.onClick();
+                this[link.onClick]();
             }
         },
 

@@ -18,6 +18,11 @@ export default new Router({
       component: () => import("./components/BookingList")
     },
     {
+      path: "/synergyList",
+      name: "synergyList",
+      component: () => import("./components/SynergyList")
+    },
+    {
       path: "/tableList",
       name: "tableList",
       component: () => import("./components/TableList")

@@ -45,7 +45,7 @@
 
 		<vue-virtual-table
 			:config="headers"
-			:data="books"
+			:data="searchedBooks.length ? searchedBooks : books"
 			:height="800"			
 			:itemHeight="55"
 			:minWidth="1000"
@@ -123,7 +123,6 @@
           </v-card-text>
         </v-card>
       </v-dialog>
-
     </v-layout>
 
   </div>
@@ -192,6 +191,7 @@ export default {
 			selectedYear: 2022,
 			selectedCompany: 'ביצועים',
 			value: 50,
+			searchedBooks: [],
 			summaryDialog: false,
 			summaryTotal: 0,
 			summaryFilter: [],
@@ -254,6 +254,19 @@ export default {
 			this.$router.push({ name: "invoice-details", params: { id: id } });
 		},
 
+		onSearch(search) {
+			if(!search) {
+				this.searchedBooks = [];
+				return;
+			}
+			this.books.forEach(book => {
+				return Object.keys(book).map(key => {
+					if(book[key] === search) {
+						this.searchedBooks.push(book);
+					} 
+				});
+			});
+		},
 		async getSummary(summaryField, summaryItem) {
 			let response = "";
 			switch (summaryField) {
@@ -330,5 +343,9 @@ export default {
 }
 .mt-2{
 	margin-top: 20px;
+}
+.fab-button-placement{
+	bottom: 70px !important;
+    right: 45px !important;
 }
 </style>
