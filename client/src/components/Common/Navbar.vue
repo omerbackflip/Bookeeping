@@ -37,7 +37,7 @@
                         <v-icon>mdi-plus</v-icon>
                     </v-btn>
                     <v-select class="year-input" 
-                        :items="[2019, 2020, 2021, 2022]"
+                        :items="[2019, 2020, 2021, 2022, 2023]"
                         @change="onYearChange"
                         :value="2022"
                         dense
