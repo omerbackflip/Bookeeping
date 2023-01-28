@@ -364,7 +364,7 @@ export default {
 			// fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
 			itemToEdit: "",
-			selectedYear: 2022,
+			selectedYear: 2023,
 			// selectedCompany: 'ביצועים',
 			// start: 0,
 			// timeout: null,
