@@ -181,7 +181,9 @@
                               <v-text-field label="Payment" v-model="inv.payment" ></v-text-field>
                           </v-col>
                           <v-col cols="4" sm="3">
-                              <v-text-field label="Date" v-model="inv.date" ></v-text-field>
+                            <div class="input-container">
+                              <input v-model="inv.date" type="date" />
+                            </div>
                           </v-col>
                           <v-col cols="3">
                               <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small >mdi-delete</v-icon></v-btn>
@@ -344,6 +346,7 @@ export default {
 			exportExcel: false,
 			search: "",
 			headers: [],
+      paymentDateDialog: false,
 			xlsHeders: {
 				חברה: "company",
 				פרויקט: "project",
@@ -527,7 +530,6 @@ export default {
 				console.log(error);
 			}
 		},
-
     // this is called from the update dialog
 		async updateInvoice() {
 			try {
@@ -558,7 +560,12 @@ export default {
 				const response = await apiService.getById(item._id, { model: INVOICE_MODEL });
 				if (response && response.data) {
 					this.invoice = response.data;
-          // this.invoice.date = (new Date(this.invoice.date)).toISOString('he-EG').substr(0, 10)
+          this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD');
+          if(this.invoice.payments && this.invoice.payments.length) {
+            this.invoice.payments.map(payment => {
+              payment.date = moment(payment.date).format('YYYY-MM-DD')
+            });
+          }
 				}
 				this.dialog = true;
 			}
@@ -588,7 +595,7 @@ export default {
 		},
 
     addPaymentRow() {
-			this.invoice.payments.push({ checkID: 0, payment: 0, date: new Date() });
+			this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
       console.log(this.invoice)
 		},
 	},
@@ -727,5 +734,33 @@ th > i {
     border: 10px solid #85a7ff;
     margin: 20px;
     padding: 20px;
+}
+
+.date-text{
+  font-size: 12px !important;
+}
+
+.input-container input {
+    box-sizing: border-box;
+    position: relative;
+    width: 100%;
+    font-size: 12px;
+    border: 1px solid #5d5d5d;
+    border-radius: 7px;
+    padding: 8px 14px 8px 14px;
+    margin-top: 12px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    bottom: 0;
+    color: transparent;
+    cursor: pointer;
+    height: auto;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: auto;
 }
 </style>
