@@ -1,31 +1,27 @@
 <template>
     <div>
-		<v-row no-gutters >
+		<div class="max-height-50">
+			<invoice-list/>
+		</div>
 
-			<v-col class="max-width-50">
-				<invoice-list/>
-			</v-col>
-
-			<v-col class="max-width-50 mt-4">
-				<booking-list ref="bookingRef"/>
-				<v-fab-transition>
-					<v-btn
-						color="pink"
-						dark
-						@click="dialog=true"
-						class="fab-button-placement"
-						absolute
-						bottom
-						right
-						fab
-					>
-						<v-icon>mdi-magnify</v-icon>
-					</v-btn>
-				</v-fab-transition>
-				<v-btn @click="search = ''; searchSubmit();" class="clear-search">Clear search</v-btn>
-			</v-col>
-
-		</v-row>
+		<div class="max-height-50 mt-4">
+			<booking-list ref="bookingRef"/>
+			<v-fab-transition>
+				<v-btn
+					color="pink"
+					dark
+					@click="dialog=true"
+					class="fab-button-placement"
+					absolute
+					bottom
+					right
+					fab
+				>
+					<v-icon>mdi-magnify</v-icon>
+				</v-btn>
+			</v-fab-transition>
+			<v-btn @click="search = ''; searchSubmit();" class="clear-search">Clear search</v-btn>
+		</div>
 
 		<v-dialog
           v-model="dialog"
@@ -78,8 +74,8 @@ export default {
 
 <style>
 
-.max-width-50{
-	max-width: 50%;
+.max-height-50{
+	max-height: 50%;
 }
 
 .mt-4{
@@ -94,4 +90,9 @@ export default {
     float: right;
     margin-right: 32px;
 }
+
+div.max-height-50 > div > div > div.flex > div > div {
+	height: 45vh !important;
+}
+
 </style>
