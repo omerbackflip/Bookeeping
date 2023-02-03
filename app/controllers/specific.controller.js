@@ -113,8 +113,10 @@ exports.batchInvoicesBooks = async (req, res) => {
 	try {
 		let data = await Invoice.find({});
 		data.map(async (item) => {
-			let record = await Book.findOne({company: item.company, year: item.year, asmacta1: item.invoiceId});
-			if (record) return Invoice.findOneAndUpdate({_id: item._id},{excelRecID: record.record_id})
+			if (item.invoiceId) { // exclude items with no invoiceId
+				let record = await Book.findOne({company: item.company, year: item.year, asmacta1: item.invoiceId});
+				if (record) return Invoice.findOneAndUpdate({_id: item._id},{excelRecID: record.record_id})
+			}
 		})	
 
 	} catch (error) {
