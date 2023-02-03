@@ -4,7 +4,7 @@
 			<invoice-list/>
 		</div>
 
-		<div class="max-height-50 mt-4">
+		<div class="max-height-50 mt-2">
 			<booking-list ref="bookingRef"/>
 			<v-fab-transition>
 				<v-btn
@@ -92,7 +92,8 @@ export default {
 }
 
 div.max-height-50 > div > div > div.flex > div > div {
-	height: 45vh !important;
+	height: 40vh !important;
+	width: 200vh !important;
 }
 
 </style>

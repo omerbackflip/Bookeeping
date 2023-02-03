@@ -11,7 +11,7 @@
           fixed-header
           mobile-breakpoint="0"
           height="80vh"
-          class="elevation-3"
+          class="elevation-0"
           :class="isMobile() ? 'table-margin' : 'table-margin-web'"
           :item-class="itemRowBackground"
           :loading="isLoading"
@@ -367,7 +367,7 @@ export default {
 			// fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
 			itemToEdit: "",
-			selectedYear: 2023,
+			selectedYear: 2022,
 			// selectedCompany: 'ביצועים',
 			// start: 0,
 			// timeout: null,

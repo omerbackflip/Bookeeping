@@ -348,4 +348,8 @@ export default {
 	bottom: 70px !important;
     right: 45px !important;
 }
+.header-line{
+	color: white !important;
+    background: blue !important;
+}
 </style>
