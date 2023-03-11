@@ -33,6 +33,10 @@
             <template>
                 <div class="mt-2 text-center d-flex">
                 <span class="d-content">
+                    <v-btn-toggle v-model="toggleCompany" tile dark group mandatory @change="onCompanyChange">
+                        <v-btn value="ביצועים" color="success" >ביצועים</v-btn>
+                        <v-btn value="יזמות"   color="success" > יזמות </v-btn>
+                    </v-btn-toggle>
                     <v-btn small @click="callAddNewInvoice" class="plus-button">
                         <v-icon>mdi-plus</v-icon>
                     </v-btn>
@@ -43,13 +47,13 @@
                         dense
                         solo
                     ></v-select>
-                    <v-select class="year-input" 
+                    <!-- <v-select class="year-input" 
                         :items="['ביצועים','יזמות','ALL']"
                         @change="onCompanyChange"
                         value="ALL"
                         dense
                         solo
-                    ></v-select>
+                    ></v-select> -->
                 </span>
                 <v-menu offset-y>
                 <template v-slot:activator="{ on, attrs }">
@@ -114,6 +118,7 @@ export default {
                 { title: 'Invoice Marge', onClick: this.onMenuItemClick },
                 { title: 'Clear ExcelRecID', onClick: this.onMenuItemClick },
             ],
+            toggleCompany : 'ביצועים',
         }
     },
     methods:{
@@ -123,8 +128,8 @@ export default {
         onYearChange(event) {
             this.$root.$emit('yearChange',event);
         },
-        onCompanyChange(event) {
-            this.$root.$emit('companyChange',event);
+        onCompanyChange() {
+            this.$root.$emit('companyChange',this.toggleCompany);
         },
         toggleModal() {
             this.importData = "INVOICES";

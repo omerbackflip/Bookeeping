@@ -11,21 +11,21 @@ export const INVOICE_MOBILE_HEADERS = [
 ];
 
 export const INVOICE_WEB_HEADERS = [
-    { text: "G",            value: "group",          },
-    { text: "Comp.",        value: "company",                                           width: "4%"},	
-    { text: "Project",      value: "project",        },
-    { text: "Date",         value: "date",          groupable: false},	
-    { text: "Description",  value: "description",   groupable: false,   align: "right", width: "20%"},
-    { text: "Supplier",     value: "supplier",                          align: "right"},	
-    { text: "Amount",       value: "amount",        groupable: false,   align: "right"},
-    { text: "Vat",          value: "vat",           groupable: false,   align: "right"},
-    { text: "Total",        value: "total",         groupable: false,   align: "right"},
-    { text: "Invoice ID",   value: "invoiceId",     groupable: false,   align: "right"},
-    { text: "Excel Rec ID", value: "excelRecID",    groupable: false,                   width: "4%"},
-    { text: "Payments",     value: "payments[0].payment",        groupable: false,   align: "right"},
-    { text: "Remark",       value: "remark",        groupable: false,   align: "right", width: "30%"},
+    { text: "G",            value: "group",         class: 'hdr-styles',},
+    { text: "Comp.",        value: "company",       class: 'hdr-styles',                                   width: "4%"},	
+    { text: "Project",      value: "project",       class: 'hdr-styles',},
+    { text: "Date",         value: "date",          class: 'hdr-styles',groupable: false},	
+    { text: "Description",  value: "description",   class: 'hdr-styles',groupable: false,   align: "right", width: "20%"},
+    { text: "Supplier",     value: "supplier",      class: 'hdr-styles',                    align: "right"},	
+    { text: "Amount",       value: "amount",        class: 'hdr-styles',groupable: false,   align: "right"},
+    { text: "Vat",          value: "vat",           class: 'hdr-styles',groupable: false,   align: "right"},
+    { text: "Total",        value: "total",         class: 'hdr-styles',groupable: false,   align: "right"},
+    { text: "Invoice ID",   value: "invoiceId",     class: 'hdr-styles',groupable: false,   align: "right"},
+    { text: "Excel Rec ID", value: "excelRecID",    class: 'hdr-styles',groupable: false,                   width: "4%"},
+    { text: "Payments",     value: "payments[0].payment",   class: 'hdr-styles',        groupable: false,   align: "right"},
+    { text: "Remark",       value: "remark",        class: 'hdr-styles',    groupable: false,   align: "right", width: "30%"},
     // { text: "Act.",         value: "actions",       groupable: false,   },
-    { text: "P",            value: "published",     groupable: false}
+    { text: "P",            value: "published",     class: 'hdr-styles',    groupable: false}
 ];
 
 export const NEW_INVOICE = {

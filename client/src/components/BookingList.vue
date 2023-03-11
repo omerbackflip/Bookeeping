@@ -2,7 +2,7 @@
   <div class="list row">
     <v-layout row wrap>
       <v-flex md12>
-        <!-- <v-data-table
+        <v-data-table
           :headers="headers"
           :items="books"
           :search="search"
@@ -10,11 +10,11 @@
           hide-default-footer
           fixed-header
           height="80vh"
-          class="elevation-3 table-margin"
+          class="table-margin"
           no-data-text="No data available for current selected year!"
           :loading="isLoading"
-        > -->
-			<!-- <template v-slot:top>
+        >
+			<template v-slot:top>
 				<v-toolbar flat>
 					<v-toolbar-title> {{selectedYear}} - {{books.length.toLocaleString() }} </v-toolbar-title>
 					<v-spacer></v-spacer>		
@@ -39,11 +39,11 @@
 			</template>
 			<template v-slot:[`item.cust_lname`]="{ item }">
 				<span @click="getSummary('cust', item.cust_lname)" class="summary">{{ item.cust_lname }}</span>
-			</template> -->
+			</template>
 
-        <!-- </v-data-table> -->
+		</v-data-table>
 
-		<vue-virtual-table
+		<!-- <vue-virtual-table
 			:config="headers"
 			:data="searchedBooks.length ? searchedBooks : books"
 			:height="800"			
@@ -51,18 +51,14 @@
 			:minWidth="1000"
 			:enableExport="true"
 			class="mt-2"
-			language = 'en'
-		>
-
+			language = 'en'>
        <template slot-scope="scope" slot="actionCommon">
 			<v-icon small @click="editOne(scope.row.id)">mdi-pencil</v-icon>
 			<v-icon small @click="deleteOne(scope.row._id)">mdi-delete</v-icon>
         </template>
-
 		<template slot-scope="scope" slot="asmchta_date">
 			<span> {{ scope.row.asmchta_date | formatDate }}</span>
 		</template>
-		
 		<template slot-scope="scope" slot="record_schum">
 			<span>{{ scope.row.record_schum ? scope.row.record_schum.toLocaleString() : "" }}</span>
 		</template>
@@ -75,8 +71,7 @@
 		<template slot-scope="scope" slot="cust_lname">
 			<span @click="getSummary('cust', scope.row.cust_lname)" class="summary">{{ scope.row.cust_lname }}</span>
 		</template> 
-
-		</vue-virtual-table>
+		</vue-virtual-table> -->
 
 
       </v-flex>
@@ -134,7 +129,7 @@
 import Vue from "vue";
 import moment from "moment";
 import excel from "vue-excel-export";
-import VueVirtualTable from 'vue-virtual-table'
+// import VueVirtualTable from 'vue-virtual-table'
 import apiService from '../services/apiService';
 import { BOOKS_MODEL } from '../constants/constants';
 
@@ -149,7 +144,7 @@ Vue.filter("formatDate", function (value) {
 
 export default {
 	name: "booking-list",
-	components: { VueVirtualTable },
+	// components: { VueVirtualTable },
 	data() {
 		return {
 			books: [],
@@ -157,21 +152,36 @@ export default {
 			currentIndex: -1,
 			search: "",
 			headers: [
-				{ name: "company", 		prop: "company", 		actionName: 'company', 	searchable: true },
-				{ name: "Asmchta date", prop: "_action", 		actionName: 'asmchta_date'},
-				{ name: "record_id", 	prop: "record_id", 								numberFilter: true},
-				{ name: "year", 		prop: "year", 									searchable: true},
-				{ name: "record_schum", prop: "record_schum", 		actionName: 'record_schum', numberFilter: true},
-				{ name: "pratim", 		prop: "pratim", 								searchable: true },
-				{ name: "asmacta1", 	prop: "asmacta1", 								searchable: true },
-				{ name: "schum_hova", 	prop: "_action", 		actionName: 'schum_hova', },
-				{ name: "schum_zchut", 	prop: "_action", 		actionName: 'schum_zchut', },
-				{ name: "cust_lname", 	prop: "_action", 		actionName: 'cust_lname', },
-				{ name: "cust_fname", 	prop: "cust_fname", 							searchable: true },
-				{ name: "bs_item_name", prop: "bs_item_name", 							searchable: true },
-				{ name: "bs_group_name",prop: "bs_group_name",							searchable: true,},
-				{ name: "Action", 		prop: "_action", 		actionName: "actionCommon" },
+				{ text: "company", 		value: "company", class: "red white--text"	},
+				{ text: "Asmchta date", value: "asmchta_date", class: "red white--text"	},
+				{ text: "record_id", 	value: "record_id", class: "red white--text"},
+				{ text: "year", 		value: "year", 		class: "red white--text"},
+				{ text: "record_schum", value: "record_schum", class: "red white--text"},
+				{ text: "pratim", 		value: "pratim", 	class: "red white--text"},
+				{ text: "asmacta1", 	value: "asmacta1", 	class: "red white--text"},
+				{ text: "schum_hova", 	value: "schum_hova", 	class: "red white--text"},
+				{ text: "schum_zchut", 	value: "schum_zchut", 	class: "red white--text"},
+				{ text: "cust_lname", 	value: "cust_lname", 	class: "red white--text"},
+				{ text: "cust_fname", 	value: "cust_fname",class: "red white--text"},
+				{ text: "bs_item_name", value: "bs_item_name",class: "red white--text"},
+				{ text: "bs_group_name",prop: "bs_group_name",class: "red white--text"},
 			],
+			// headers: [
+			// 	{ name: "company", 		prop: "company", 		actionName: 'company', 	searchable: true },
+			// 	{ name: "Asmchta date", prop: "_action", 		actionName: 'asmchta_date'},
+			// 	{ name: "record_id", 	prop: "record_id", 								numberFilter: true},
+			// 	{ name: "year", 		prop: "year", 									searchable: true},
+			// 	{ name: "record_schum", prop: "record_schum", 		actionName: 'record_schum', numberFilter: true},
+			// 	{ name: "pratim", 		prop: "pratim", 								searchable: true },
+			// 	{ name: "asmacta1", 	prop: "asmacta1", 								searchable: true },
+			// 	{ name: "schum_hova", 	prop: "_action", 		actionName: 'schum_hova', },
+			// 	{ name: "schum_zchut", 	prop: "_action", 		actionName: 'schum_zchut', },
+			// 	{ name: "cust_lname", 	prop: "_action", 		actionName: 'cust_lname', },
+			// 	{ name: "cust_fname", 	prop: "cust_fname", 							searchable: true },
+			// 	{ name: "bs_item_name", prop: "bs_item_name", 							searchable: true },
+			// 	{ name: "bs_group_name",prop: "bs_group_name",							searchable: true,},
+			// 	{ name: "Action", 		prop: "_action", 		actionName: "actionCommon" },
+			// ],
 			book: {
 				id: null,
 				asmchta_date: "",
@@ -271,20 +281,10 @@ export default {
 			let response = "";
 			switch (summaryField) {
 				case 'cust':
-				// fatch all paymanets for this project cross years.
-				response = await apiService.get({model: BOOKS_MODEL, cust_lname: summaryItem})
-				this.summaryFilter = response.data
-				break;
-				// case 'supplier':
-				// // fatch all paymanets for this supplier cross years.
-				// response = await apiService.get({model: INVOICE_MODEL,supplier: summaryItem})
-				// this.summaryFilter = response.data
-				// break;
-				// case 'group':
-				// // fatch all paymanets for this group cross years.
-				// response = await apiService.get({model: INVOICE_MODEL,group: summaryItem})
-				// this.summaryFilter = response.data
-				// break;
+					// fatch all paymanets for this project cross years.
+					response = await apiService.get({model: BOOKS_MODEL, cust_lname: summaryItem})
+					this.summaryFilter = response.data
+					break;
 				default : break;
 			}
 			this.summaryName = summaryItem.replaceAll(".","-");
@@ -299,16 +299,12 @@ export default {
 
 	mounted() {
 		this.retrieveBooks();
-		// this.isLoading = false;
 		this.$root.$on("yearChange", (year) => {
 			this.selectedYear = year;
 		});
 		this.$root.$on("companyChange", (company) => {
 			this.selectedCompany = company;
 		});
-		// this.$root.$on("onSearchBooking", (search) => {
-		// 	this.search = search;
-		// });
 		this.$root.$on("removeAllBooksItems", () => {
 			this.removeAllBooks();
 		});
@@ -333,7 +329,7 @@ export default {
 }
 
 .table-margin{
-	margin-top: 29px !important;
+	margin-top: 20px !important;
 }
 
 .summary {
@@ -348,8 +344,12 @@ export default {
 	bottom: 70px !important;
     right: 45px !important;
 }
-.header-line{
-	color: white !important;
+/* .header-line{
     background: blue !important;
+	color: grey !important;
+} */
+.hdr-styles{
+	background: blue !important;
+	color: white !important;
 }
 </style>

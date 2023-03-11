@@ -368,7 +368,7 @@ export default {
 			isLoading: true,
 			itemToEdit: "",
 			selectedYear: 2022,
-			// selectedCompany: 'ביצועים',
+			selectedCompany: 'ביצועים',
 			// start: 0,
 			// timeout: null,
 			// rowHeight: 24,
@@ -446,6 +446,7 @@ export default {
 			const response = await apiService.get({
 				model: INVOICE_MODEL,
 				year: this.selectedYear,
+        company: this.selectedCompany,
 			});
 			if (response && response.data) {
 				this.Invoices = response.data;
@@ -613,6 +614,9 @@ export default {
 		this.$root.$on("yearChange", (year) => {
 			this.selectedYear = year;
 		});
+    this.$root.$on("companyChange", (company) => {
+			this.selectedCompany = company;
+		});
 		// this.$root.$on("onSearch", (search) => {
 		// 	this.search = search;
 		// });
@@ -643,6 +647,10 @@ export default {
 	watch: {
 		selectedYear() {
 			this.retrieveInvoices();
+		},
+    selectedCompany() {
+			this.retrieveInvoices();
+      this.refreshList();
 		},
 	},
 };
@@ -762,5 +770,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     right: 0;
     top: 0;
     width: auto;
+}
+
+.hdr-styles{
+	background: red !important;
+	color: white !important;
 }
 </style>

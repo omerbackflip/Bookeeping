@@ -6,7 +6,7 @@
 
 		<div class="max-height-50 mt-2">
 			<booking-list ref="bookingRef"/>
-			<v-fab-transition>
+			<!-- <v-fab-transition>
 				<v-btn
 					color="pink"
 					dark
@@ -20,10 +20,10 @@
 					<v-icon>mdi-magnify</v-icon>
 				</v-btn>
 			</v-fab-transition>
-			<v-btn @click="search = ''; searchSubmit();" class="clear-search">Clear search</v-btn>
+			<v-btn @click="search = ''; searchSubmit();" class="clear-search">Clear search</v-btn> -->
 		</div>
 
-		<v-dialog
+		<!-- <v-dialog
           v-model="dialog"
           max-width="500px"
         >
@@ -44,7 +44,7 @@
               </v-btn>
             </v-card-actions>
           </v-card>
-        </v-dialog>
+        </v-dialog> -->
 
 	</div>		  
 </template>
@@ -54,7 +54,7 @@ import BookingListVue from './BookingList.vue';
 import InvoicesListVue from './InvoicesList.vue';
 
 export default {
-	name:"Synergy list",
+	// name:"Synergy list",
 	components: { 'invoice-list': InvoicesListVue, 'booking-list': BookingListVue },
 	data() {
 		return {
