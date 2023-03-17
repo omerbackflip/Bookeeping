@@ -2,85 +2,50 @@
     <nav>
         <v-app-bar app dark>
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-            <!-- <div v-show="isInvoices" :class="isMobile() ? 'mobile-search' : ''" class="search-wrapper">
-                <v-text-field
-                append-icon="mdi-magnify"
-                @change="onSearch"
-                label="Search..."
-                single-line                
-                ></v-text-field>
-            </div> -->
-            <div :class="isMobile() ? 'search-wrapper-mobile' : ''" v-show="isBookingList" class="search-wrapper">
-                <v-row>
-                    <!-- <v-col>
-                        <v-text-field
-                        @change="onSearchBooking"
-                        append-icon="mdi-magnify"
-                        :class="isMobile() ? 'mobile-search' : 'mt-4'"
-                        label="Search booking..."
-                        single-line
-                        ></v-text-field>
-
-                    </v-col> -->
-                    <v-col>
-                        <v-btn :class="isMobile() ? 'mobile-button' : ''" class="m-3 btn btn-sm btn-danger" @click="removeAllBooks">
-                            Remove All Book-keeping data
-                        </v-btn>
-                    </v-col>
-                </v-row>
-            </div>
             <v-spacer></v-spacer>
             <template>
                 <div class="mt-2 text-center d-flex">
-                <span class="d-content">
-                    <v-btn-toggle v-model="toggleCompany" tile dark group mandatory @change="onCompanyChange">
-                        <v-btn value="ביצועים" color="success" >ביצועים</v-btn>
-                        <v-btn value="יזמות"   color="success" > יזמות </v-btn>
-                    </v-btn-toggle>
-                    <v-btn small @click="callAddNewInvoice" class="plus-button">
-                        <v-icon>mdi-plus</v-icon>
-                    </v-btn>
-                    <v-select class="year-input" 
-                        :items="[2019, 2020, 2021, 2022, 2023]"
-                        @change="onYearChange"
-                        :value="2022"
-                        dense
-                        solo
-                    ></v-select>
-                    <!-- <v-select class="year-input" 
-                        :items="['ביצועים','יזמות','ALL']"
-                        @change="onCompanyChange"
-                        value="ALL"
-                        dense
-                        solo
-                    ></v-select> -->
-                </span>
-                <v-menu offset-y>
-                <template v-slot:activator="{ on, attrs }">
-                    <v-btn icon v-bind="attrs" v-on="on" class="float-right">
-                        <v-icon>mdi-dots-vertical</v-icon>
-                    </v-btn>
-                </template>
-                <v-list v-show="isInvoices">
-                    <v-list-item v-for="(item, index) in items" :key="index">
-                        <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
-                            {{item.title}}
-                        </v-list-item-title>
-                    </v-list-item>
-                </v-list>
-                <v-list>
-                    <!-- <v-list-item v-for="link in links" :key="link.text" router :to="link.route"> -->
-                    <v-list-item v-for="link in navItems" :key="link.text" router @click="navigate(link)">
-                        <v-list-item-title>{{link.text}}</v-list-item-title>
-                    </v-list-item>
-                </v-list>
-                </v-menu>
+                    <span class="d-content">
+                        <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
+                            <v-btn value="ביצועים" elevation="3" small>ביצועים</v-btn>
+                            <v-btn value="יזמות"   elevation="3" small> יזמות </v-btn>
+                        </v-btn-toggle>
+                        <v-btn small @click="callAddNewInvoice" elevation="3" class="mt-1 ml-5">
+                            <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                        <v-select class="year-input" 
+                            :items="[2019, 2020, 2021, 2022, 2023]"
+                            @change="onYearChange"
+                            :value="2022"
+                            dense
+                            solo
+                            elevation="3"
+                        ></v-select>
+                    </span>
+                    <v-menu offset-y>
+                        <template v-slot:activator="{ on, attrs }">
+                            <v-btn icon v-bind="attrs" v-on="on" class="float-right">
+                                <v-icon>mdi-dots-vertical</v-icon>
+                            </v-btn>
+                        </template>
+                        <v-list v-show="isInvoices">
+                            <v-list-item v-for="(item, index) in items" :key="index">
+                                <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
+                                    {{item.title}}
+                                </v-list-item-title>
+                            </v-list-item>
+                        </v-list>
+                        <!-- <v-list>
+                            <v-list-item v-for="link in navItems" :key="link.text" router @click="navigate(link)">
+                                <v-list-item-title>{{link.text}}</v-list-item-title>
+                            </v-list-item>
+                        </v-list> -->
+                    </v-menu>
                 </div>
             </template>
         </v-app-bar>
         <v-navigation-drawer app v-model="drawer" class="primary" temporary>
             <v-list>
-                <!-- <v-list-item v-for="link in navItems" :key="link.text" router :to="link.route"> -->
                 <v-list-item v-for="link in navItems" :key="link.text" router @click="navigate(link)">
                     <v-list-item-action>
                         <v-icon class="white--text">{{link.icon}}</v-icon>
@@ -112,8 +77,7 @@ export default {
             openImportModal: false,
             importData: [], // InvoicesCsvData or BooksCsvData
             items: [
-                { title: 'Remove all items', onClick:  this.onMenuItemClick },
-                { title: 'Download to excel', onClick: this.onMenuItemClick },
+                { title: 'Remove all Invoices', onClick:  this.onMenuItemClick },
                 { title: 'Book Marge', onClick: this.onMenuItemClick },
                 { title: 'Invoice Marge', onClick: this.onMenuItemClick },
                 { title: 'Clear ExcelRecID', onClick: this.onMenuItemClick },
@@ -139,22 +103,12 @@ export default {
             this.importData = "BOOKS";
             this.openImportModal = !this.openImportModal;
         },
-        // onSearch(event) {
-        //     this.$root.$emit('onSearch',event);
-        // },
-        // onSearchBooking(event) {
-        //     this.$root.$emit('onSearchBooking',event);
-        // },
-        removeAllBooks(event) {
-            this.$root.$emit('removeAllBooksItems',event);
-        },
         onMenuItemClick(index) {
             switch (index) {
                 case 0 : this.$root.$emit('removeAllItems',false);  break;
-                case 1 : this.$root.$emit('downloadExcel',false);   break; 
-                case 2 : this.$root.$emit('bookMarge',false);  break; 
-                case 3 : this.$root.$emit('invoiceMarge',false);  break; 
-                case 4 : this.$root.$emit('clearExcelRecID',false);  break; 
+                case 1 : this.$root.$emit('bookMarge',false);  break; 
+                case 2 : this.$root.$emit('invoiceMarge',false);  break; 
+                case 3 : this.$root.$emit('clearExcelRecID',false);  break; 
             }
         }, 
         navigate(link) {
@@ -191,23 +145,22 @@ export default {
     .plus-button{
         font-size: 29px !important;
         padding-top: 0px;
-        padding-left: 15px;
+        /* padding-left: 15px; */
         border: 1px solid #ffffff;
-        margin-top: 0;
-        margin-left: 0;
+        /* margin-top: 0; */
+        margin-left: 14px;
         height: 42px !important;
-        margin-right: 12px;
+        margin-right: 3px;
     }
     .year-input{
-        padding: 0;
-        margin-top: 7px;
-        margin-left: 7px;
+        /* padding: 0px; */
+        /* margin-top: 7px; */
+        margin-left: 13px;
         width: -webkit-min-content;
         width: -moz-min-content;
         /* width: min-content; */
         color: white;
         font-size: 12px;
-        border: 1px solid white;
         height: 42px;
         box-shadow: none;
     }
@@ -233,11 +186,6 @@ export default {
         margin: 8px 0 4px 3px !important; 
     }
 
-    .mobile-button{
-        width: 103px !important;
-        font-size: 8px !important;
-        margin: 8px 0 !important;
-    }
 </style>
 
 

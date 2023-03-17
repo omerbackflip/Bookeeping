@@ -11,23 +11,36 @@
           fixed-header
           mobile-breakpoint="0"
           height="80vh"
-          class="elevation-0"
+          class="elevation-3 mt-0"
           :class="isMobile() ? 'table-margin' : 'table-margin-web'"
           :item-class="itemRowBackground"
           :loading="isLoading"
           loading-text="Loading... Please wait"
+          loader-height="20"
           item-key="_id"
           :expanded.sync="expanded"
           :show-expand="isMobile()"
           :single-expand="true"
           @click:row="getInvoiceForEdit"
+          dense
         >
-
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title> {{selectedYear}} - {{Invoices.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
-              <v-text-field v-model="search" label="Search" class="mx-4"></v-text-field>
+              <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
+              <v-spacer></v-spacer>
+              <export-excel
+                :data="Invoices"
+                :fields="xlsHeders"
+                type="xlsx"
+                name="all-data"
+                :title="selectedCompany + ` - ` + selectedYear"
+                footer="This is footer">
+                <v-btn small class="btn btn-danger">
+                  <v-icon>mdi-download</v-icon>
+                </v-btn>
+              </export-excel>
             </v-toolbar>
           </template>
           <template v-slot:[`item.date`]="{ item }">
@@ -75,9 +88,6 @@
               <span @click="getSummary('group', item.group)" class="summary">{{ item.group }}</span>
             </td>
           </template>
-          <!-- <template v-slot:[`item.actions`]="{ item }">
-            <v-icon v-show="item.excelRecID != null">mdi-checkbox-marked-circle</v-icon>
-          </template> -->
           <template v-slot:[`item.published`]="{ item }">
             <v-checkbox v-model="item.published" @click="updateOne(item)">
             </v-checkbox>
@@ -102,12 +112,10 @@
       </v-flex>
 
       <!-- Add New/Update row dialog -->
-      <v-dialog v-model="dialog" max-width="600px">
+      <v-dialog v-model="dialog" >
         <v-card>
           <v-card-title>
-            <span class="text-h5">{{
-              invoiceID ? "Update" : "Add New"
-            }}</span>
+            <span class="text-h5">{{ invoiceID ? "Update" : "Add New" }}</span>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -213,22 +221,6 @@
           <v-card-text class="margin-card">
             <v-flex>
               <v-container class="grey lighten-2 elevation-3">
-                <export-excel
-                  :data="summaryFilter"
-                  :fields="xlsHeders"
-                  type="xlsx"
-                  :name="summaryName.toLocaleString()"
-                  :title="summaryName"
-                  :footer="summaryTotal.toLocaleString()"
-                  class="mt-3"
-                >
-                  <h5 style="text-align: center">
-                    {{ summaryName }} - {{ this.summaryTotal.toLocaleString() }}
-                    <v-btn small class="btn btn-danger">
-                      <v-icon>mdi-download</v-icon>
-                    </v-btn>
-                  </h5>
-                </export-excel>
                 <v-data-table
                   :headers="summaryHeaders"
                   :items="summaryFilter"
@@ -240,6 +232,24 @@
                   class="elevation-3"
                   dense
                 >
+                  <template v-slot:top>
+                    <export-excel
+                        :data="summaryFilter"
+                        :fields="xlsHeders"
+                        type="xlsx"
+                        :name="summaryName.toLocaleString()"
+                        :title="summaryName"
+                        :footer="summaryTotal.toLocaleString()"
+                        class="mt-3"
+                      >
+                        <v-toolbar-title>
+                          {{ summaryName }} - {{ summaryTotal.toLocaleString() }}
+                          <v-btn small class="btn btn-danger">
+                            <v-icon>mdi-download</v-icon>
+                          </v-btn>
+                        </v-toolbar-title>
+                      </export-excel>
+                  </template>
                   <template v-slot:[`item.total`]="{ item }">
                     <span>{{ item.total ? item.total.toLocaleString() : "" }}</span>
                   </template>
@@ -279,19 +289,6 @@
         </v-card>
       </v-dialog>
     </v-layout>
-
-    <!-- produce excel with ALL DATA - emit from Navbar ($emit) -->
-    <export-excel
-      :data="Invoices"
-      v-if="exportExcel"
-      id="excel-export"
-      :fields="xlsHeders"
-      type="xlsx"
-      name="all-data"
-      title="ALL-DATA"
-      footer="This is footer"
-    >
-    </export-excel>
   </div>
 </template>
 
@@ -364,15 +361,10 @@ export default {
 			},
 			invoice: [],
 			msg: "",
-			// fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
 			itemToEdit: "",
 			selectedYear: 2022,
 			selectedCompany: 'ביצועים',
-			// start: 0,
-			// timeout: null,
-			// rowHeight: 24,
-			// perPage: 25,
       bookInfo: '',
       dateModal : false,
 		};
@@ -467,8 +459,6 @@ export default {
 
 		refreshList() {
 			this.retrieveInvoices();
-			// this.currInvoice = this.Invoices[0];
-			// this.currentIndex = -1;
 		},
 
 		async removeAllInvoices() {
@@ -559,8 +549,9 @@ export default {
 			if (item._id) {
 				this.invoiceID = item._id;
 				const response = await apiService.getById(item._id, { model: INVOICE_MODEL });
+				// const response = await apiService.getById("6413f03e3a77dfaf6a052718", { model: INVOICE_MODEL });
 				if (response && response.data) {
-					this.invoice = response.data;
+					this.invoice = response.data; 
           this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD');
           if(this.invoice.payments && this.invoice.payments.length) {
             this.invoice.payments.map(payment => {
@@ -606,45 +597,41 @@ export default {
 		await this.loadTable(1, "companyName");
 		await this.loadTable(2, "projectName");
 		await this.loadTable(3, "supplierName");
-		this.$root.$on("addNewInvoice", () => {
+
+    this.$root.$on("addNewInvoice", () => {
 			this.dialog = true;
 			this.invoiceID = 0;
       this.invoice = NEW_INVOICE;
 		});
-		this.$root.$on("yearChange", (year) => {
+
+    this.$root.$on("yearChange", (year) => {
 			this.selectedYear = year;
 		});
+
     this.$root.$on("companyChange", (company) => {
 			this.selectedCompany = company;
 		});
-		// this.$root.$on("onSearch", (search) => {
-		// 	this.search = search;
-		// });
+
 		this.$root.$on("removeAllItems", () => {
-			setTimeout(100);
+			// setTimeout(100);
 			this.removeAllInvoices();
 		});
-		this.$root.$on("downloadExcel", () => {
-			const excel = document.getElementById("excel-export");
-			this.exportExcel = true;
-			if (excel) {
-				excel.click();
-				setTimeout(() => {
-				this.exportExcel = false;
-				}, 1000);
-			}
-		});
-		this.$root.$on("bookMarge", () => {
+
+	
+    this.$root.$on("bookMarge", () => {
 			this.batchBookInvoice();
 		});
+    
     this.$root.$on("invoiceMarge", () => {
 			this.batchInvoiceBook();
 		});
+    
     this.$root.$on("clearExcelRecID", () => {
       this.batchClearExcelRecID();
     })
 	},
-	watch: {
+	
+  watch: {
 		selectedYear() {
 			this.retrieveInvoices();
 		},
@@ -716,7 +703,7 @@ th > i {
   padding-right: 10px;
 }
 .description-width {
-  width: 110% !important;
+  width: 100% !important;
 }
 
 .text-start > .v-data-table__expand-icon {
@@ -775,5 +762,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .hdr-styles{
 	background: red !important;
 	color: white !important;
+}
+
+.v-dialog{
+    max-width: 600px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    max-height: 70%;
 }
 </style>

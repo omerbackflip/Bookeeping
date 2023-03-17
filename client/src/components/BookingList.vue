@@ -1,24 +1,30 @@
 <template>
   <div class="list row">
-    <v-layout row wrap>
-      <v-flex md12>
+    <v-layout>
+      <v-flex>
         <v-data-table
-          :headers="headers"
-          :items="books"
-          :search="search"
-          disable-pagination
-          hide-default-footer
-          fixed-header
-          height="80vh"
-          class="table-margin"
-          no-data-text="No data available for current selected year!"
-          :loading="isLoading"
+			:headers="headers"
+			:items="books"
+			:search="search"
+			disable-pagination
+			hide-default-footer
+			fixed-header
+			height="80vh"
+			class="elevation-3 mt-0"
+			no-data-text="No data available for current selected year!"
+			:loading="isLoading"
+			mobile-breakpoint="0"
+			dense
         >
 			<template v-slot:top>
 				<v-toolbar flat>
-					<v-toolbar-title> {{selectedYear}} - {{books.length.toLocaleString() }} </v-toolbar-title>
-					<v-spacer></v-spacer>		
-					<v-text-field v-model="search" label="Search" class="mx-4"></v-text-field>
+					<v-btn x-small @click="removeAllBooks()">delete</v-btn>
+					<v-spacer></v-spacer>
+					<v-toolbar-title class="mx-1" style="font-size: smaller"> {{books.length.toLocaleString()}} </v-toolbar-title>
+					<v-spacer></v-spacer>
+					<v-flex xs6>
+					<v-text-field v-model="search" label="Search" class="mx-1" clearable></v-text-field>
+					</v-flex>
 				</v-toolbar>
 			</template>
 			<template v-slot:[`item.actions`]="{ item }">
@@ -304,9 +310,6 @@ export default {
 		});
 		this.$root.$on("companyChange", (company) => {
 			this.selectedCompany = company;
-		});
-		this.$root.$on("removeAllBooksItems", () => {
-			this.removeAllBooks();
 		});
 	},
 
