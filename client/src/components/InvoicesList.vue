@@ -12,15 +12,10 @@
           mobile-breakpoint="0"
           height="80vh"
           class="elevation-3 mt-0"
-          :class="isMobile() ? 'table-margin' : 'table-margin-web'"
           :item-class="itemRowBackground"
           :loading="isLoading"
           loading-text="Loading... Please wait"
           loader-height="20"
-          item-key="_id"
-          :expanded.sync="expanded"
-          :show-expand="isMobile()"
-          :single-expand="true"
           @click:row="getInvoiceForEdit"
           dense>
           <template v-slot:top>
@@ -84,28 +79,12 @@
           </template>
           <template v-slot:[`item.group`]="{ item }">
             <td @click.stop>
-              <span @click="getSummary('group', item.group)" class="summary">{{ item.group }}</span>
+              <span @click="getSummary('group', item.group)" style="margin-left: 0.7rem">{{ item.group }}</span>
             </td>
           </template>
           <template v-slot:[`item.published`]="{ item }">
             <v-checkbox v-model="item.published" @click="updateOne(item)">
             </v-checkbox>
-          </template>
-          <template v-slot:expanded-item="{ headers, item }">
-            <td v-if="isMobile()" :colspan="headers.length">
-              <ul>
-                <li>group: {{ item.group }}</li>
-                <li>company: {{ item.company }}</li>
-                <li>project: {{ item.project }}</li>
-                <li>supplier: {{ item.supplier }}</li>
-                <li>vat: {{ item.vat }}</li>
-                <li>total: {{ item.total }}</li>
-                <li>Invoice Id: {{ item.invoiceId }}</li>
-                <li>Excel record ID: {{ item.excelRecID }}</li>
-                <li>remark: {{ item.remark }}</li>
-                <li>published: {{ item.published ? "Yes" : "No" }}</li>
-              </ul>
-            </td>
           </template>
         </v-data-table>
       </v-flex>
@@ -435,8 +414,7 @@ export default {
 		async retrieveInvoices() {
       let response = '';
 			this.isLoading = true;
-      console.log(this.$route.params)
-      if (this.$route.params) {
+      if (this.$route.params.project) {
         response = await apiService.getMany({
           model: INVOICE_MODEL,
           project: this.$route.params.project,
@@ -783,5 +761,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 .sreach-width {
   width: 4rem;
+  margin-top: 1.5rem !important;
 }
 </style>

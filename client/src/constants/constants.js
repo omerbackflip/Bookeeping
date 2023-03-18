@@ -3,10 +3,10 @@ export const INVOICE_MODEL = 'invoices';
 export const TABLE_MODEL = 'tables';
 
 export const INVOICE_MOBILE_HEADERS = [
-    { text: "G",            value: "data-table-expand", class: " mobile-headers expantion-button",  groupable: false},	
-    { text: "Date",         value: "date",              class: " mobile-headers",                   groupable: false},	
-    { text: "Description",  value: "description",       class: " mobile-headers",                   groupable: false,   align: "right"},
-    { text: "Amount",       value: "amount",            class: " mobile-headers",                   groupable: false,   align: "right"},
+    { text: "G",            value: "group",         class: "hdr-styles",  groupable: false, align: "right"},	
+    { text: "Date",         value: "date",          class: "mobile-headers",  groupable: false},	
+    { text: "Description",  value: "description",   class: "mobile-headers",  groupable: false,   align: "right"},
+    { text: "Amount",       value: "amount",        class: "mobile-headers",  groupable: false,   align: "right"},
     // { text: "Act.",         value: "actions",           class: " mobile-headers",                   groupable: false}
 ];
 

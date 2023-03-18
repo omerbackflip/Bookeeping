@@ -13,6 +13,8 @@
 			class="elevation-3 mt-0"
 			no-data-text="No data available for current selected year!"
 			:loading="isLoading"
+			loading-text="Loading... Please wait"
+			loader-height="20"
 			mobile-breakpoint="0"
 			dense>
 			<template v-slot:top>

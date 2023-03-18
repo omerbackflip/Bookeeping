@@ -13,14 +13,9 @@
           mobile-breakpoint="0"
           height="80vh"
           class="elevation-3 mt-0"
-          :class="isMobile() ? 'table-margin' : 'table-margin-web'"
           :loading="isLoading"
           loading-text="Loading... Please wait"
           loader-height="20"
-          item-key="_id"
-          :expanded.sync="expanded"
-          :show-expand="isMobile()"
-          :single-expand="true"
           dense
         >
           <template v-slot:top>
