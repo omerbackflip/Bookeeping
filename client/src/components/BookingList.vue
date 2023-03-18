@@ -14,17 +14,14 @@
 			no-data-text="No data available for current selected year!"
 			:loading="isLoading"
 			mobile-breakpoint="0"
-			dense
-        >
+			dense>
 			<template v-slot:top>
 				<v-toolbar flat>
+					<v-toolbar-title> Total Records {{books.length.toLocaleString()}} </v-toolbar-title>
+					<v-spacer></v-spacer>
+					<v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
+					<v-spacer></v-spacer>
 					<v-btn x-small @click="removeAllBooks()">delete</v-btn>
-					<v-spacer></v-spacer>
-					<v-toolbar-title class="mx-1" style="font-size: smaller"> {{books.length.toLocaleString()}} </v-toolbar-title>
-					<v-spacer></v-spacer>
-					<v-flex xs6>
-					<v-text-field v-model="search" label="Search" class="mx-1" clearable></v-text-field>
-					</v-flex>
 				</v-toolbar>
 			</template>
 			<template v-slot:[`item.actions`]="{ item }">
@@ -46,40 +43,7 @@
 			<template v-slot:[`item.cust_lname`]="{ item }">
 				<span @click="getSummary('cust', item.cust_lname)" class="summary">{{ item.cust_lname }}</span>
 			</template>
-
 		</v-data-table>
-
-		<!-- <vue-virtual-table
-			:config="headers"
-			:data="searchedBooks.length ? searchedBooks : books"
-			:height="800"			
-			:itemHeight="55"
-			:minWidth="1000"
-			:enableExport="true"
-			class="mt-2"
-			language = 'en'>
-       <template slot-scope="scope" slot="actionCommon">
-			<v-icon small @click="editOne(scope.row.id)">mdi-pencil</v-icon>
-			<v-icon small @click="deleteOne(scope.row._id)">mdi-delete</v-icon>
-        </template>
-		<template slot-scope="scope" slot="asmchta_date">
-			<span> {{ scope.row.asmchta_date | formatDate }}</span>
-		</template>
-		<template slot-scope="scope" slot="record_schum">
-			<span>{{ scope.row.record_schum ? scope.row.record_schum.toLocaleString() : "" }}</span>
-		</template>
-		<template slot-scope="scope" slot="schum_hova">
-			<span>{{ scope.row.schum_hova ? scope.row.schum_hova.toLocaleString() : "" }}</span>
-		</template>
-		<template slot-scope="scope" slot="schum_zchut">
-			<span>{{ scope.row.schum_zchut ? scope.row.schum_zchut.toLocaleString() : "" }}</span>
-		</template>
-		<template slot-scope="scope" slot="cust_lname">
-			<span @click="getSummary('cust', scope.row.cust_lname)" class="summary">{{ scope.row.cust_lname }}</span>
-		</template> 
-		</vue-virtual-table> -->
-
-
       </v-flex>
       <!-- SummaryDialog for cust_name -->
       <v-dialog v-model="summaryDialog" max-width="600px">
@@ -170,7 +134,7 @@ export default {
 				{ text: "cust_lname", 	value: "cust_lname", 	class: "red white--text"},
 				{ text: "cust_fname", 	value: "cust_fname",class: "red white--text"},
 				{ text: "bs_item_name", value: "bs_item_name",class: "red white--text"},
-				{ text: "bs_group_name",prop: "bs_group_name",class: "red white--text"},
+				{ text: "bs_group_name",value: "bs_group_name",class: "red white--text"},
 			],
 			// headers: [
 			// 	{ name: "company", 		prop: "company", 		actionName: 'company', 	searchable: true },
@@ -237,7 +201,7 @@ export default {
 
 		async retrieveBooks() {
 			this.isLoading = true;
-			const response = await apiService.get({
+			const response = await apiService.getMany({
 				model: BOOKS_MODEL,
 				year: this.selectedYear,
 				company: this.selectedCompany,
@@ -288,7 +252,7 @@ export default {
 			switch (summaryField) {
 				case 'cust':
 					// fatch all paymanets for this project cross years.
-					response = await apiService.get({model: BOOKS_MODEL, cust_lname: summaryItem})
+					response = await apiService.getMany({model: BOOKS_MODEL, cust_lname: summaryItem})
 					this.summaryFilter = response.data
 					break;
 				default : break;
@@ -354,5 +318,8 @@ export default {
 .hdr-styles{
 	background: blue !important;
 	color: white !important;
+}
+.sreach-width {
+  width: 4rem;
 }
 </style>

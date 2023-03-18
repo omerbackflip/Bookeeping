@@ -7,8 +7,8 @@
                 <div class="mt-2 text-center d-flex">
                     <span class="d-content">
                         <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
-                            <v-btn value="ביצועים" elevation="3" small>ביצועים</v-btn>
-                            <v-btn value="יזמות"   elevation="3" small> יזמות </v-btn>
+                            <v-btn value="ביצועים" elevation="3" small >ביצועים</v-btn>
+                            <v-btn value="יזמות"   elevation="3" small > יזמות </v-btn>
                         </v-btn-toggle>
                         <v-btn small @click="callAddNewInvoice" elevation="3" class="mt-1 ml-5">
                             <v-icon>mdi-plus</v-icon>

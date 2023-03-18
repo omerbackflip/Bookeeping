@@ -22,13 +22,12 @@
           :show-expand="isMobile()"
           :single-expand="true"
           @click:row="getInvoiceForEdit"
-          dense
-        >
+          dense>
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title> {{selectedYear}} - {{Invoices.length.toLocaleString()}} </v-toolbar-title>
+              <v-toolbar-title> {{$route.params.project ? $route.params.project : selectedYear}} - {{Invoices.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
-              <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
+              <v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
               <v-spacer></v-spacer>
               <export-excel
                 :data="Invoices"
@@ -37,8 +36,8 @@
                 name="all-data"
                 :title="selectedCompany + ` - ` + selectedYear"
                 footer="This is footer">
-                <v-btn small class="btn btn-danger">
-                  <v-icon>mdi-download</v-icon>
+                <v-btn x-small class="btn btn-danger">
+                  <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
             </v-toolbar>
@@ -312,7 +311,7 @@ Vue.filter("formatDate", function (value) {
 });
 
 export default {
-	// name: "invoices-list",
+	name: "invoices-list",
 	data() {
 		return {
 			Invoices: [],
@@ -384,17 +383,17 @@ export default {
       switch (summaryField) {
         case 'project':
           // fatch all paymanets for this project cross years.
-          response = await apiService.get({model: INVOICE_MODEL,project: summaryItem})
+          response = await apiService.getMany({model: INVOICE_MODEL,project: summaryItem})
           this.summaryFilter = response.data
           break;
         case 'supplier':
           // fatch all paymanets for this supplier cross years.
-          response = await apiService.get({model: INVOICE_MODEL,supplier: summaryItem})
+          response = await apiService.getMany({model: INVOICE_MODEL,supplier: summaryItem})
           this.summaryFilter = response.data
           break;
         case 'group':
           // fatch all paymanets for this group cross years.
-          response = await apiService.get({model: INVOICE_MODEL,group: summaryItem})
+          response = await apiService.getMany({model: INVOICE_MODEL,group: summaryItem})
           this.summaryFilter = response.data
           break;
         default : break;
@@ -425,7 +424,7 @@ export default {
 			}
 		},
     async retriveBookData(item){
-      const response = await apiService.get({ model: BOOKS_MODEL,
+      const response = await apiService.getMany({ model: BOOKS_MODEL,
                                               // record_id:item.excelRecID,
                                               asmacta1: item.invoiceId,
                                               year: item.year,
@@ -434,12 +433,21 @@ export default {
       this.bookDialog = true;
     },
 		async retrieveInvoices() {
+      let response = '';
 			this.isLoading = true;
-			const response = await apiService.get({
-				model: INVOICE_MODEL,
-				year: this.selectedYear,
-        company: this.selectedCompany,
-			});
+      console.log(this.$route.params)
+      if (this.$route.params) {
+        response = await apiService.getMany({
+          model: INVOICE_MODEL,
+          project: this.$route.params.project,
+        });
+      } else {
+        response = await apiService.getMany({
+          model: INVOICE_MODEL,
+          year: this.selectedYear,
+          company: this.selectedCompany,
+        });
+      }
 			if (response && response.data) {
 				this.Invoices = response.data;
 				this.isLoading = false;
@@ -448,7 +456,7 @@ export default {
 
 		loadTable: async function (table_id, tableName) {
 			try {
-				const response = await apiService.get({ table_id, model: TABLE_MODEL });
+				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
 				if (response) {
 					this[tableName] = response.data.map((code) => code.description);
 				}
@@ -544,7 +552,7 @@ export default {
 			this.$refs.form.reset();
 		},
 
-    // get invoice data before open dialog for edit
+    // getMany invoice data before open dialog for edit
 		async getInvoiceForEdit(item) {
 			if (item._id) {
 				this.invoiceID = item._id;
@@ -769,5 +777,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     margin-top: 10px;
     margin-bottom: 10px;
     max-height: 70%;
+}
+.v-toolbar__title {
+    font-size: 1rem;
+}
+.sreach-width {
+  width: 4rem;
 }
 </style>

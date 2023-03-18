@@ -9,7 +9,7 @@ export default new Router({
     {
       path: "/",
       alias: "/invoices",
-      name: "invoices",
+      name: "invoices-list",
       component: () => import("./components/InvoicesList")
     },
     {
@@ -26,6 +26,11 @@ export default new Router({
       path: "/tableList",
       name: "tableList",
       component: () => import("./components/TableList")
+    },
+    {
+      path: "/summary",
+      name: "summary",
+      component: () => import("./components/Summary")
     },
   ]
 });

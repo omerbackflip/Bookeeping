@@ -1,7 +1,7 @@
 import http from "../http-common";
 
 class ApiService {
-  get(params) {
+  getMany(params) {
     return http.get("generic/get-list",{params});
   }
 

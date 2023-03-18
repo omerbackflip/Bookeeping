@@ -54,4 +54,5 @@ export const navItems = [
     {icon: 'folder', text: 'Import INVOICEs', route: null , onClick: 'toggleModal'},
     {icon: 'gavel', text: 'Import BOOKs', route: null , onClick: 'toggleBook'},
     {icon: 'widgets', text: 'Synergy List', route: '/synergyList'},
+    {icon: 'widgets', text: 'Summary', route: '/Summary'},
 ]
