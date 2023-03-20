@@ -19,6 +19,7 @@
 								<v-radio label="2020" value="2020"></v-radio>
 								<v-radio label="2021" value="2021"></v-radio>
 								<v-radio label="2022" value="2022"></v-radio>
+								<v-radio label="2023" value="2023"></v-radio>
 							</v-radio-group>
 						</v-col>
 					</v-row>
