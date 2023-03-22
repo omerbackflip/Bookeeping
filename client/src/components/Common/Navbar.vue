@@ -132,7 +132,7 @@ export default {
     },
     computed: {
         isInvoices() {
-            return this.$route.name === 'invoices';
+            return this.$route.name === 'invoices-list';
         },
         isBookingList() {
             return this.$route.name === 'bookingList';

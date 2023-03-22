@@ -467,7 +467,7 @@ export default {
 		},
 
 		async batchInvoiceBook() {
-			if (window.confirm(`Are you sure you want to merge record_id with excelRecID ?`)) {
+			if (window.confirm(`Are you sure you want to merge record_id with excelRecID (All years) ?`)) {
 				const	response = await SpecificServiceEndPoints.batchInvoiceBook() ;
 				if (response) {
 					this.refreshList();
