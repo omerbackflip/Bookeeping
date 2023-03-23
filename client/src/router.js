@@ -8,13 +8,11 @@ export default new Router({
   routes: [
     {
       path: "/",
-      // alias: "/invoices/:selectedYear",
       alias: "/invoices/:selectedYear",
       name: "invoices-list",
       component: () => import("./components/InvoicesList")
     },
     {
-      // path: "/bookingList/:selectedYear",
       path: "/bookingList",
       name: "bookingList",
       component: () => import("./components/BookingList")

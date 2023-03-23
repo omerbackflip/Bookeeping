@@ -121,7 +121,6 @@ export default {
             if(link.route) {
                 if (this.$router.history.current.fullPath != link.route) { // avoid calling same route
                     this.$router.push({ path: link.route , query: this.query || {}});
-                    // this.$router.push({ path: link.route+this.selectedYear });
                 }
             } else {
                 this[link.onClick]();

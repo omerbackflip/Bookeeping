@@ -50,48 +50,48 @@
       <!-- SummaryDialog for cust_name -->
       <v-dialog v-model="summaryDialog" max-width="600px">
         <v-card>
-          <v-card-text class="margin-card">
             <v-flex>
-              <v-container class="grey lighten-2 elevation-3">
-                <export-excel
-                  :data="summaryFilter"
-                  type="xlsx"
-                  :name="summaryName"
-                  :title="summaryName"
-                  :footer="summaryTotal.toLocaleString()"
-                  class="mt-3"
-                >
-                  <h5 style="text-align: center">
-                    {{ summaryName }} - {{ this.summaryTotal.toLocaleString() }}
-                    <v-btn small class="btn btn-danger">
-                      <v-icon>mdi-download</v-icon>
-                    </v-btn>
-                  </h5>
-                </export-excel>
                 <v-data-table
-                  :headers="summaryHeaders"
-                  :items="summaryFilter"
-                  disable-pagination
-                  hide-default-footer
-                  mobile-breakpoint="350"
-                  fixed-header
-                  class="elevation-3"
-                  dense
-                >
-                  <template v-slot:[`item.record_schum`]="{ item }">
-                    <span>{{ item.record_schum ? item.record_schum.toLocaleString() : "" }}</span>
-                  </template>
-                  <template v-slot:[`item.asmchta_date`]="{ item }">
-                    <span> {{ item.asmchta_date | formatDate }}</span>
-                  </template>
+					:headers="summaryHeaders"
+					:items="summaryFilter"
+					disable-pagination
+					hide-default-footer
+					mobile-breakpoint="350"
+					fixed-header
+					class="elevation-3"
+					height="80vh"
+					dense>
+					<template v-slot:top>
+						<v-toolbar>
+						<v-spacer />
+							<export-excel
+								:data="summaryFilter"
+								type="xlsx"
+								:name="summaryName"
+								:title="summaryName"
+								:footer="summaryTotal.toLocaleString()"
+								class="mt-3">
+								<v-toolbar-title>
+									{{ summaryName }} - {{summaryTotal.toLocaleString() }}
+									<v-btn small class="btn btn-danger">
+										<v-icon>mdi-download</v-icon>
+									</v-btn>
+								</v-toolbar-title>
+							</export-excel>
+						<v-spacer />
+						</v-toolbar>
+					</template>				  				
+					<template v-slot:[`item.record_schum`]="{ item }">
+						<span>{{ item.record_schum ? item.record_schum.toLocaleString() : "" }}</span>
+					</template>
+					<template v-slot:[`item.asmchta_date`]="{ item }">
+						<span> {{ item.asmchta_date | formatDate }}</span>
+					</template>
                 </v-data-table>
-              </v-container>
             </v-flex>
-          </v-card-text>
         </v-card>
       </v-dialog>
     </v-layout>
-
   </div>
 </template>
 
@@ -202,8 +202,6 @@ export default {
 		},
 
 		async retrieveBooks() {
-			// console.log(this.$router.options.routes)
-			// console.log(this.$route)
 			this.selectedYear = this.$route.query.year || this.selectedYear;
 			this.isLoading = true;
 			const response = await apiService.getMany({
