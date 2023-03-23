@@ -414,11 +414,11 @@ export default {
     },
 		async retrieveInvoices() {
 			// console.log(this.$router.options.routes)
-			if (this.$route.params.selectedYear) {
-        this.selectedYear = this.$route.params.selectedYear
+			if (this.$route.query.year) {
+        this.selectedYear = this.$route.query.year
       }
-			// console.log(this.$route.params.selectedYear)
-      let response = '';
+
+    let response = '';
 			this.isLoading = true;
       if (this.$route.params.project) {
         response = await apiService.getMany({

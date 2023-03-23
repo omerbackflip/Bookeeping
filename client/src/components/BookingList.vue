@@ -204,7 +204,7 @@ export default {
 		async retrieveBooks() {
 			// console.log(this.$router.options.routes)
 			// console.log(this.$route)
-			// this.selectedYear = this.$route.params.selectedYear
+			this.selectedYear = this.$route.query.year || this.selectedYear;
 			this.isLoading = true;
 			const response = await apiService.getMany({
 				model: BOOKS_MODEL,

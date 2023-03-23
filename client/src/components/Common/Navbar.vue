@@ -68,12 +68,14 @@
 <script>
 import ImportCSV from '../ImportCSV.vue';
 import { navItems } from '../../constants/constants';
+import router from '../../router';
 
 export default {
     components: { ImportCSV },
     data() {
         return {
             navItems,
+            query: null,
             drawer: false,
             openImportModal: false,
             importData: [], // InvoicesCsvData or BooksCsvData
@@ -92,6 +94,8 @@ export default {
             this.$root.$emit('addNewInvoice',{ newRow: true});
         },
         onYearChange(event) {
+            this.query = { year: event };
+            router.push({query: this.query});
             this.$root.$emit('yearChange',event);
         },
         onCompanyChange() {
@@ -116,7 +120,7 @@ export default {
         navigate(link) {
             if(link.route) {
                 if (this.$router.history.current.fullPath != link.route) { // avoid calling same route
-                    this.$router.push({ path: link.route });
+                    this.$router.push({ path: link.route , query: this.query || {}});
                     // this.$router.push({ path: link.route+this.selectedYear });
                 }
             } else {
