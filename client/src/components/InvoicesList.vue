@@ -194,50 +194,49 @@
       </v-dialog>
 
       <!-- SummaryDialog for supplier/Project/Group -->
-      <v-dialog v-model="summaryDialog" max-width="600px">
+      <v-dialog v-model="summaryDialog" max-width="1100px">
         <v-card>
-          <v-card-text class="margin-card">
-            <v-flex>
-              <v-container class="grey lighten-2 elevation-3">
-                <v-data-table
-                  :headers="summaryHeaders"
-                  :items="summaryFilter"
-                  disable-pagination
-                  hide-default-footer
-                  :item-class="itemRowBackground"
-                  mobile-breakpoint="350"
-                  fixed-header
-                  class="elevation-3"
-                  dense
-                >
-                  <template v-slot:top>
+          <v-flex>
+            <v-data-table
+              :headers="summaryHeaders"
+              :items="summaryFilter"
+              disable-pagination
+              hide-default-footer
+              fixed-header
+              :item-class="itemRowBackground"
+              mobile-breakpoint="0"
+              class="elevation-3"
+              dense
+              height="80vh">
+              <template v-slot:top>
+                <v-toolbar>
+                  <v-spacer />
                     <export-excel
-                        :data="summaryFilter"
-                        :fields="xlsHeders"
-                        type="xlsx"
-                        :name="summaryName.toLocaleString()"
-                        :title="summaryName"
-                        :footer="summaryTotal.toLocaleString()"
-                        class="mt-3"
-                      >
-                        <v-toolbar-title>
-                          {{ summaryName }} - {{ summaryTotal.toLocaleString() }}
-                          <v-btn small class="btn btn-danger">
-                            <v-icon>mdi-download</v-icon>
-                          </v-btn>
-                        </v-toolbar-title>
-                      </export-excel>
-                  </template>
-                  <template v-slot:[`item.total`]="{ item }">
-                    <span>{{ item.total ? item.total.toLocaleString() : "" }}</span>
-                  </template>
-                  <template v-slot:[`item.date`]="{ item }">
-                    <span> {{ item.date | formatDate }}</span>
-                  </template>
-                </v-data-table>
-              </v-container>
-            </v-flex>
-          </v-card-text>
+                      :data="summaryFilter"
+                      :fields="xlsHeders"
+                      type="xlsx"
+                      :name="summaryName.toLocaleString()"
+                      :title="summaryName"
+                      :footer="summaryTotal.toLocaleString()"
+                      class="mt-3">
+                      <v-toolbar-title>
+                        {{ summaryName }} - {{ summaryTotal.toLocaleString() }}
+                        <v-btn small class="btn btn-danger">
+                          <v-icon>mdi-download</v-icon>
+                        </v-btn>
+                      </v-toolbar-title>
+                    </export-excel>
+                  <v-spacer />
+                </v-toolbar>
+              </template>
+              <template v-slot:[`item.total`]="{ item }">
+                <span>{{ item.total ? item.total.toLocaleString() : "" }}</span>
+              </template>
+              <template v-slot:[`item.date`]="{ item }">
+                <span> {{ item.date | formatDate }}</span>
+              </template>
+            </v-data-table>
+          </v-flex>
         </v-card>
       </v-dialog>
 
@@ -306,10 +305,12 @@ export default {
 			summaryName: "",
       expanded: [],
 			summaryHeaders: [
-				{ text: "Total", value: "total", align: "right" },
-				{ text: "Description", value: "description", align: "right" },
-				{ text: "Project", value: "project", align: "right" },
-				{ text: "Date", value: "date", align: "right"},
+				{ text: "Remarks", value: "remark", align: "right", class: "hdr-styles"},
+				{ text: "Total", value: "total", align: "right", class: "hdr-styles" },
+				{ text: "Description", value: "description", align: "right", class: "hdr-styles" },
+				{ text: "Project", value: "project", align: "right", class: "hdr-styles" },
+				{ text: "Supplier", value: "supplier", align: "right", class: "hdr-styles" },
+				{ text: "Date", value: "date", align: "right", class: "hdr-styles" },
 			],
       bookHeaders: [
         { text: "Record_ID", value: "record_id", aligh: "right"},
@@ -341,7 +342,7 @@ export default {
 			msg: "",
 			isLoading: true,
 			itemToEdit: "",
-			selectedYear: 2022,
+			selectedYear: 2023,
 			selectedCompany: 'ביצועים',
       bookInfo: '',
       dateModal : false,
@@ -412,6 +413,11 @@ export default {
       this.bookDialog = true;
     },
 		async retrieveInvoices() {
+			// console.log(this.$router.options.routes)
+			if (this.$route.params.selectedYear) {
+        this.selectedYear = this.$route.params.selectedYear
+      }
+			// console.log(this.$route.params.selectedYear)
       let response = '';
 			this.isLoading = true;
       if (this.$route.params.project) {

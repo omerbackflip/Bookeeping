@@ -13,8 +13,6 @@
           mobile-breakpoint="0"
           height="80vh"
           class="elevation-3 mt-0"
-          :loading="isLoading"
-          loading-text="Loading... Please wait"
           loader-height="20"
           dense
         >
@@ -40,82 +38,31 @@
 
 <script>
 import Vue from "vue";
-import moment from "moment";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import { INVOICE_MODEL, TABLE_MODEL, } from "../constants/constants";
 
 Vue.use(excel);
 
-Vue.filter("formatDate", function (value) {
-	if (value) {
-		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
-		return moment(String(value)).format("DD/MM/YYYY");
-	}
-});
-
 export default {
 	// name: "summary-list",
 	data() {
 		return {
 			Invoices: [],
-			companyName: [],
 			projectName: [],
-			supplierName: [],
-			invoiceID: 0,
 			dialog: false,
-      bookDialog: false,
-			summaryDialog: false,
-      summaryTotal: 0,
-			summaryFilter: [],
-			summaryName: "",
-      expanded: [],
 			summaryHeaders: [
 				{ text: "Total", value: "total", class: "hdr-styles", align: "right" },
 				{ text: "Project", value: "project", class: "hdr-styles", align: "right" },
 			],
-			exportExcel: false,
 			search: "",
 			headers: [],
-      paymentDateDialog: false,
-			xlsHeders: {
-				חברה: "company",
-				פרויקט: "project",
-				תאור: "description",
-				סכום: "amount",
-				"מע-מ": "vat",
-				"סה-כ": "total",
-				קיבוץ: "group",
-				תאריך: "date",
-				ספק: "supplier",
-				חשבונית: "invoiceId",
-				excelRecID: "excelRecID",
-				הערה: "remark",
-				נשלח: "published",
-			},
 			invoice: [],
-			msg: "",
-			isLoading: true,
-			itemToEdit: "",
-			selectedYear: 2022,
-			selectedCompany: 'ביצועים',
-      bookInfo: '',
-      dateModal : false,
 		};
 	},
 
 	methods: {
-
-		isMobile() {
-			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-				return true;
-			} else {
-				return false;
-			}
-		},
-
 		async retrieveInvoices() {
-			this.isLoading = true;
 			const response = await apiService.getMany({
 				model: INVOICE_MODEL,
 			});
@@ -128,14 +75,12 @@ export default {
           return({...item1, total:totalProject})
         })  
 			}
-      this.isLoading = false;
 		},
 
 		loadTable: async function (table_id, tableName) {
 			try {
 				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
 				if (response) {
-					// this[tableName] = response.data.map((item) => item.description);
 					this[tableName] = response.data.map((item) => {
             return {project: item.description}
           });
@@ -168,10 +113,6 @@ export default {
   max-width: auto;
   margin: auto;
   cursor: pointer;
-}
-
-.bg-green {
-  background-color: lightgreen !important;
 }
 
 .mobile-headers {

@@ -19,7 +19,7 @@
 			dense>
 			<template v-slot:top>
 				<v-toolbar flat>
-					<v-toolbar-title> Total Records {{books.length.toLocaleString()}} </v-toolbar-title>
+					<v-toolbar-title> {{selectedYear}} - {{books.length.toLocaleString()}} </v-toolbar-title>
 					<v-spacer></v-spacer>
 					<v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
 					<v-spacer></v-spacer>
@@ -170,7 +170,7 @@ export default {
 			},
 			fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
-			selectedYear: 2022,
+			selectedYear: '2023',
 			selectedCompany: 'ביצועים',
 			value: 50,
 			searchedBooks: [],
@@ -202,6 +202,9 @@ export default {
 		},
 
 		async retrieveBooks() {
+			// console.log(this.$router.options.routes)
+			// console.log(this.$route)
+			// this.selectedYear = this.$route.params.selectedYear
 			this.isLoading = true;
 			const response = await apiService.getMany({
 				model: BOOKS_MODEL,

@@ -49,7 +49,7 @@ export const NEW_INVOICE = {
 
 export const navItems = [
     {icon: 'home', text: 'Invoice List', route: '/'},
-    {icon: 'dashboard', text: 'Book List', route: '/bookingList'},
+    {icon: 'dashboard', text: 'Book List', route: '/bookingList/' },
     {icon: 'event', text: 'Table List', route: '/tableList'},
     {icon: 'folder', text: 'Import INVOICEs', route: null , onClick: 'toggleModal'},
     {icon: 'gavel', text: 'Import BOOKs', route: null , onClick: 'toggleBook'},

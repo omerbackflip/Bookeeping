@@ -14,9 +14,10 @@
                             <v-icon>mdi-plus</v-icon>
                         </v-btn>
                         <v-select class="year-input" 
+                            v-model="selectedYear"
                             :items="[2019, 2020, 2021, 2022, 2023]"
                             @change="onYearChange"
-                            :value="2022"
+                            :value="2023"
                             dense
                             solo
                             elevation="3"
@@ -83,6 +84,7 @@ export default {
                 { title: 'Clear ExcelRecID', onClick: this.onMenuItemClick },
             ],
             toggleCompany : 'ביצועים',
+            selectedYear: 2023,
         }
     },
     methods:{
@@ -112,9 +114,10 @@ export default {
             }
         }, 
         navigate(link) {
-            if(link && link.route) {
-                if (this.$router.history.current.fullPath != link.route) {
+            if(link.route) {
+                if (this.$router.history.current.fullPath != link.route) { // avoid calling same route
                     this.$router.push({ path: link.route });
+                    // this.$router.push({ path: link.route+this.selectedYear });
                 }
             } else {
                 this[link.onClick]();
