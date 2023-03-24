@@ -2,6 +2,7 @@ const db = require("../models");
 const Invoice = db.invoices;
 const Book = db.books;
 const Table = db.tables;
+const Revenue = db.revenues;
 const csv = require('csvtojson')
 var fs = require('fs');
 
@@ -77,7 +78,36 @@ exports.saveBooksBulk = async (req, res) => {
 	} catch (error) {
 		console.log(error)
 		res.status(500).send({
-			message: "Error saving bulk of Invoices"
+			message: "Error saving bulk of Books"
+		});
+	}
+};
+
+exports.saveRevenuesBulk = async (req, res) => {
+	if (!req.body) {
+		return res.status(400).send({
+			message: "Data of bulk to update can not be empty!"
+		});
+	}
+
+	try {
+        await Promise.all([Revenue.deleteMany()]);
+		let data = await csv().fromFile(`uploads/${req.file.filename}`);
+		if (data) {
+			const result = await Revenue.insertMany(data, { ordered: true });
+			unLinkFile(`uploads/${req.file.filename}`);
+			if (result) {
+				return res.send({
+					success: true,
+					message: `Total ${result.length} REVENUES successfully Imported`
+				})
+			}
+		}
+
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error saving bulk of Revenues"
 		});
 	}
 };

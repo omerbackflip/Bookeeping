@@ -30,7 +30,7 @@
 
 				<v-card-actions>
 					<v-spacer></v-spacer>
-					<v-btn color="primary" text @click="toggleDialog()"> Close </v-btn>
+					<v-btn color="primary" text @click="closeImportDialog()"> Close </v-btn>
 					<v-btn :disabled = "!file" color="primary" text @click="submitFile()"> Submit </v-btn>
 				</v-card-actions>
 			</v-card>
@@ -53,7 +53,7 @@ import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
 
 export default {
 	props: {
-		openImportModal: Boolean,
+		// openImportModal: Boolean,
 		setImportModal: Function,
 		importData:[],
 	},
@@ -67,7 +67,7 @@ export default {
 		};
 	},
 	methods: {
-		toggleDialog() {
+		closeImportDialog() {
 			this.setImportModal(false);
 		},
 		setFile(file) {
@@ -88,12 +88,15 @@ export default {
 							response = await SpecificServiceEndPoints.saveBooksBulk(this.file,this.company,this.importYear) ;
 						} else alert("company or year does not fits")
 						break
+					case "REVENUES" :
+						response = await SpecificServiceEndPoints.saveRevenuesBulk(this.file)
+						break
 					default : alert("switch/case statment not resolved")
 				}
 				if (response.data && response.data.success) {
 					this.message = "CSV Data successfully imported";
 					setTimeout(() => {
-						this.toggleDialog();
+						this.closeImportDialog();
 					}, 3500);
 					window.location.reload();
 				}
@@ -104,7 +107,8 @@ export default {
 		},
 	},
 	mounted() {
-		this.dialog = this.openImportModal;
+		// this.dialog = this.openImportModal;
+		this.dialog = true;
 	}
 };
 </script>

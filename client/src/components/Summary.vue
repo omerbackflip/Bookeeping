@@ -4,9 +4,9 @@
       <v-flex>
         <v-data-table
           :headers="summaryHeaders"
-          :items="projectName"
+          :items="projectList"
           :search="search"
-          @click:row="projectList"
+          @click:row="projectInvoices"
           disable-pagination
           hide-default-footer
           fixed-header
@@ -27,6 +27,15 @@
           <template v-slot:[`item.total`]="{ item }">
             <span> {{ item.total ? item.total.toLocaleString() : '' }}</span>
           </template>
+          <template v-slot:[`item.revenue`]="{ item }">
+            <span> {{ item.revenue ? item.revenue.toLocaleString() : '' }}</span>
+          </template>
+          <template v-slot:[`item.balance`]="{ item }">
+            <span> {{ item.revenue ? (item.revenue - item.total).toLocaleString() : '' }}</span>
+          </template>
+          <template v-slot:[`item.profit`]="{ item }">
+            <span> {{ item.revenue ? ((item.revenue-item.total)/item.revenue*75).toFixed(0) + '%': '' }}</span>
+          </template>
         </v-data-table>
       </v-flex>
 
@@ -40,7 +49,7 @@
 import Vue from "vue";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
-import { INVOICE_MODEL, TABLE_MODEL, } from "../constants/constants";
+import { INVOICE_MODEL, TABLE_MODEL, REVENUE_MODEL } from "../constants/constants";
 
 Vue.use(excel);
 
@@ -49,10 +58,14 @@ export default {
 	data() {
 		return {
 			Invoices: [],
-			projectName: [],
+			Revenues: [],
+			projectList: [],
 			dialog: false,
 			summaryHeaders: [
-				{ text: "Total", value: "total", class: "hdr-styles", align: "right" },
+				{ text: "Profit", value: "profit", class: "hdr-styles", align: "right" },
+				{ text: "Balance", value: "balance", class: "hdr-styles", align: "right" },
+				{ text: "Revenue", value: "revenue", class: "hdr-styles", align: "right" },
+				{ text: "Expances", value: "total", class: "hdr-styles", align: "right" },
 				{ text: "Project", value: "project", class: "hdr-styles", align: "right" },
 			],
 			search: "",
@@ -62,17 +75,29 @@ export default {
 	},
 
 	methods: {
-		async retrieveInvoices() {
-			const response = await apiService.getMany({
+		async mainSummary() {
+			let response = await apiService.getMany({
 				model: INVOICE_MODEL,
 			});
 			if (response && response.data) {
 				this.Invoices = response.data;
-        this.projectName = this.projectName.map((item1) => {
+        this.projectList = this.projectList.map((item1) => {
           let totalProject = this.Invoices.filter((item2) => {
             return item2.project === item1.project
           }).reduce ((currSum,item3) => {return item3.total + currSum},0)
           return({...item1, total:totalProject})
+        })  
+			}
+      let response1 = await apiService.getMany({
+				model: REVENUE_MODEL,
+			});
+      if (response1 && response1.data) {
+				this.Revenues = response1.data;
+        this.projectList = this.projectList.map((item1) => {
+          let totalRevenue = this.Revenues.filter((item2) => {
+            return item2.project === item1.project
+          }).reduce ((currSum,item3) => {return item3.amount + currSum},0)
+          return({...item1, revenue:totalRevenue})
         })  
 			}
 		},
@@ -90,15 +115,15 @@ export default {
 			}
 		},
 
-    projectList(row) {
+    projectInvoices(row) {
 			this.$router.push({ name: "invoices-list", params: { project: row.project } });
 		},
 
 	},
 
 	async mounted() {
-		await this.loadTable(2, "projectName");
-		this.retrieveInvoices();
+		await this.loadTable(2, "projectList");
+		this.mainSummary();
 	},
 	
   watch: {
@@ -110,7 +135,7 @@ export default {
 <style scoped>
 .list {
   text-align: left;
-  max-width: auto;
+  max-width: 50%;
   margin: auto;
   cursor: pointer;
 }

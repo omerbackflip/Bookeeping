@@ -1,6 +1,7 @@
 export const BOOKS_MODEL = 'books';
 export const INVOICE_MODEL = 'invoices';
 export const TABLE_MODEL = 'tables';
+export const REVENUE_MODEL = 'revenues';
 
 export const INVOICE_MOBILE_HEADERS = [
     { text: "G",            value: "group",         class: "hdr-styles",  groupable: false, align: "right"},	
@@ -51,8 +52,11 @@ export const navItems = [
     {icon: 'home', text: 'Invoice List', route: '/'},
     {icon: 'dashboard', text: 'Book List', route: '/bookingList/' },
     {icon: 'event', text: 'Table List', route: '/tableList'},
-    {icon: 'folder', text: 'Import INVOICEs', route: null , onClick: 'toggleModal'},
-    {icon: 'gavel', text: 'Import BOOKs', route: null , onClick: 'toggleBook'},
+    // {icon: 'folder', text: 'Import INVOICEs', route: null , onClick: 'toggleModal'},
+    {icon: 'folder', text: 'Import INVOICEs', route: null, import: 'INVOICES', onClick: 'runModal'},
+    // {icon: 'gavel', text: 'Import BOOKs', route: null , onClick: 'toggleBook'},
+    {icon: 'gavel', text: 'Import BOOKs', route: null, import: 'BOOKS', onClick: 'runModal'},
+    {icon: 'gavel', text: 'Import REVENUEs', route: null, import: 'REVENUES', onClick: 'runModal'},
     {icon: 'widgets', text: 'Synergy List', route: '/synergyList'},
     {icon: 'widgets', text: 'Summary', route: '/Summary'},
 ]

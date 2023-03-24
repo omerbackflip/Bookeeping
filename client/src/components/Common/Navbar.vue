@@ -10,7 +10,7 @@
                             <v-btn value="ביצועים" elevation="3" small >ביצועים</v-btn>
                             <v-btn value="יזמות"   elevation="3" small > יזמות </v-btn>
                         </v-btn-toggle>
-                        <v-btn small @click="callAddNewInvoice" elevation="3" class="mt-1 ml-5">
+                        <v-btn small @click="callAddNewInvoice" elevation="3" class="mt-1">
                             <v-icon>mdi-plus</v-icon>
                         </v-btn>
                         <v-select class="year-input" 
@@ -25,7 +25,7 @@
                     </span>
                     <v-menu offset-y>
                         <template v-slot:activator="{ on, attrs }">
-                            <v-btn icon v-bind="attrs" v-on="on" class="float-right">
+                            <v-btn icon v-bind="attrs" v-on="on">
                                 <v-icon>mdi-dots-vertical</v-icon>
                             </v-btn>
                         </template>
@@ -36,11 +36,6 @@
                                 </v-list-item-title>
                             </v-list-item>
                         </v-list>
-                        <!-- <v-list>
-                            <v-list-item v-for="link in navItems" :key="link.text" router @click="navigate(link)">
-                                <v-list-item-title>{{link.text}}</v-list-item-title>
-                            </v-list-item>
-                        </v-list> -->
                     </v-menu>
                 </div>
             </template>
@@ -58,7 +53,7 @@
             </v-list>
         </v-navigation-drawer>
         <template v-if="openImportModal">
-            <ImportCSV :openImportModal="openImportModal" :setImportModal="toggleModal" :importData="importData"/>
+            <ImportCSV :setImportModal="closeModal" :importData="importData"/>
         </template>
     </nav>
 </template>
@@ -93,22 +88,37 @@ export default {
         callAddNewInvoice() {
             this.$root.$emit('addNewInvoice',{ newRow: true});
         },
+
         onYearChange(event) {
             this.query = { year: event };
             router.push({query: this.query});
             this.$root.$emit('yearChange',event);
         },
+
         onCompanyChange() {
             this.$root.$emit('companyChange',this.toggleCompany);
         },
-        toggleModal() {
-            this.importData = "INVOICES";
-            this.openImportModal = !this.openImportModal;
+
+        closeModal() {
+            this.openImportModal = false;
         },
-        toggleBook() {
-            this.importData = "BOOKS";
-            this.openImportModal = !this.openImportModal;
+
+        runModal(importData) {
+            console.log(importData)
+            switch (importData) {
+                case 'INVOICES' :
+                    this.importData = "INVOICES";
+                    break;
+                case 'BOOKS' :
+                    this.importData = "BOOKS";
+                    break;
+                case 'REVENUES' :
+                    this.importData = "REVENUES";
+                    break;
+            }
+            this.openImportModal = true;
         },
+
         onMenuItemClick(index) {
             switch (index) {
                 case 0 : this.$root.$emit('removeAllItems',false);  break;
@@ -117,13 +127,14 @@ export default {
                 case 3 : this.$root.$emit('clearExcelRecID',false);  break; 
             }
         }, 
+
         navigate(link) {
             if(link.route) {
                 if (this.$router.history.current.fullPath != link.route) { // avoid calling same route
                     this.$router.push({ path: link.route , query: this.query || {}});
                 }
             } else {
-                this[link.onClick]();
+                this[link.onClick](link.import);
             }
         },
 
@@ -161,7 +172,7 @@ export default {
     .year-input{
         /* padding: 0px; */
         /* margin-top: 7px; */
-        margin-left: 13px;
+        margin-left: 0.3rem;
         width: -webkit-min-content;
         width: -moz-min-content;
         /* width: min-content; */

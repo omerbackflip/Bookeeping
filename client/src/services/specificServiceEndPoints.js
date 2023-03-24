@@ -24,6 +24,16 @@ class SpecificServiceEndPoints {
     });
   }
 
+  async saveRevenuesBulk(bulk) {
+    var formData = new FormData(); // FormData is being used because need to transfer file to server
+    formData.append("file", bulk);
+    return await axios.post(`${baseUrl}/specific/save-revenues-bulk`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+
   async batchBookInvoice() {
     return await axios.post(`${baseUrl}/specific/batch-book-invoice`);
   }

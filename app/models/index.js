@@ -9,5 +9,6 @@ db.url = dbConfig.url;
 db.invoices = require("./invoice.model.js")(mongoose);
 db.books = require("./book.model.js")(mongoose);
 db.tables = require("./table.model.js")(mongoose);
+db.revenues = require("./revenue.model.js")(mongoose);
 
 module.exports = db; 
