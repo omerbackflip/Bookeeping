@@ -135,7 +135,7 @@ export default {
 <style scoped>
 .list {
   text-align: left;
-  max-width: 50%;
+  max-width: 100%;
   margin: auto;
   cursor: pointer;
 }
