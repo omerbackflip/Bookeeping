@@ -87,6 +87,7 @@
             </v-checkbox>
           </template>
         </v-data-table>
+        <v-btn v-if="$route.params.project" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
       </v-flex>
 
       <!-- Add New/Update row dialog -->
@@ -103,33 +104,36 @@
               <v-form ref="form">
                 <v-row>
                   <v-col cols="6" sm="6" md="4">
-                    <v-combobox v-model="invoice.company" :items="companyName" label="Company" dense></v-combobox>
+                    <v-combobox v-model="invoice.company" :items="companyName" label="חברה" dense></v-combobox>
                   </v-col>
                   <v-col cols="6" sm="6" md="4">
-                    <v-combobox v-model="invoice.project" :items="projectName" label="Project" dense></v-combobox>
+                    <v-combobox v-model="invoice.project" :items="projectName" label="פרויקט" dense></v-combobox>
                   </v-col>
                   <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.description" label="Description" required></v-text-field>
+                    <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.amount" type="number" label="Amount" required></v-text-field>
+                  <v-col cols="12" sm="12" md="12">
+                    <v-text-field v-model="invoice.description" label="תאור" reverse></v-text-field>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.vat" type="number" label="Vat" ></v-text-field>
+                  <v-col cols="3" sm="3" md="3">
+                    <v-text-field v-model="invoice.amount" type="number" label="סכום" required></v-text-field>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.total" type="number" label="Total" required></v-text-field>
+                  <v-col cols="3" sm="3" md="3">
+                    <v-text-field v-model="invoice.vat" type="number" label="מע'מ" ></v-text-field>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.year" type="number" label="Year"></v-text-field>
+                  <v-col cols="3" sm="3" md="3">
+                    <v-text-field v-model="invoice.total" type="number" label="סה'כ" required></v-text-field>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.group" type="number" label="Group" required></v-text-field>
+                  <v-col cols="3" sm="3" md="3">
+                    <v-text-field v-model="invoice.year" type="number" label="שנה"></v-text-field>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
+                  <v-col cols="3" sm="3" md="3">
+                    <v-text-field v-model="invoice.group" type="number" label="קובץ" required></v-text-field>
+                  </v-col>
+                  <v-col cols="3" sm="3" md="3">
                     <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="invoice.date" persistent width="290px">
                       <template v-slot:activator="{ on, attrs }">
-                        <v-text-field v-model="invoice.date" label="Date" readonly v-bind="attrs" v-on="on">
+                        <v-text-field v-model="invoice.date" label="תאריך" readonly v-bind="attrs" v-on="on">
                         </v-text-field>
                       </template>
                       <v-date-picker v-model="invoice.date" scrollable>
@@ -139,24 +143,21 @@
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
-                    <v-combobox v-model="invoice.supplier" :items="supplierName" label="Supplier" dense></v-combobox>
+                  <v-col cols="3" sm="3" md="3">
+                    <v-text-field v-model="invoice.invoiceId" label="חשבונית"></v-text-field>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
-                    <v-text-field v-model="invoice.invoiceId" label="Invoice Id"></v-text-field>
-                  </v-col>
-                  <v-col cols="6" sm="6" md="4">
+                  <v-col cols="3" sm="3" md="3">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="6" md="12">
-                    <v-text-field v-model="invoice.remark" label="Remark"></v-text-field>
+                  <v-col cols="12" sm="12" md="12">
+                    <v-text-field v-model="invoice.remark" label="הערה" reverse></v-text-field>
                   </v-col>
                 </v-row>
               </v-form>
             </v-container>
           </v-card-text>
           <div class="payments-wrapper">
-              <h3>Payments</h3>
+              <h5>Payments</h5>
               <v-container>
                   <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
                       <v-row>
@@ -207,7 +208,7 @@
               mobile-breakpoint="0"
               class="elevation-3"
               dense
-              height="80vh">
+              height="70vh">
               <template v-slot:top>
                 <v-toolbar>
                   <v-spacer />
@@ -536,7 +537,7 @@ export default {
 			this.$refs.form.reset();
 		},
 
-    // getMany invoice data before open dialog for edit
+    // get invoice data before open dialog for edit
 		async getInvoiceForEdit(item) {
 			if (item._id) {
 				this.invoiceID = item._id;
@@ -718,9 +719,9 @@ th > i {
 }
 
 .payments-wrapper{
-    border: 10px solid #85a7ff;
-    margin: 20px;
-    padding: 20px;
+    border: 3px solid #85a7ff;
+    margin: 10px;
+    padding: 5px;
 }
 
 .date-text{
