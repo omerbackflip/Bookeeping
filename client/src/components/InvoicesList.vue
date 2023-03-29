@@ -59,7 +59,9 @@
           <template v-slot:[`item.amount`]="{ item }">
             <div class="amount-width d-grid">
               <span>{{ item.amount ? item.amount.toLocaleString() : "" }}</span>
-              <span v-if="isMobile()"> {{ item.supplier }} </span>
+              <td @click.stop>
+                <span v-if="isMobile()" @click="getSummary('supplier', item.supplier)" class="summary"> {{ item.supplier }} </span>
+              </td>
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
@@ -79,7 +81,7 @@
           </template>
           <template v-slot:[`item.group`]="{ item }">
             <td @click.stop>
-              <span @click="getSummary('group', item.group)" style="margin-left: 0.7rem">{{ item.group }}</span>
+              <span @click="getSummary('group', item.group)" class="summary" style="margin-left: 0.7rem">{{ item.group }}</span>
             </td>
           </template>
           <template v-slot:[`item.published`]="{ item }">
@@ -94,7 +96,7 @@
       <v-dialog v-model="dialog" >
         <v-card>
           <v-card-title>
-            <span class="text-h5">{{ invoiceID ? "Update - " + invoiceID  : "Add New" }}</span>
+            <span class="text-h5">{{ invoiceID ? "Update" : "Add New" }}</span>
             <v-spacer></v-spacer>
             <v-btn v-show="invoiceID" @click="invoiceID=null"> Copy </v-btn>
           </v-card-title>
@@ -114,7 +116,7 @@
                   <v-col cols="4">
                     <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                   </v-col>
-                  <v-col cols="12">
+                  <v-col cols="12" class="no-padding">
                     <v-text-field v-model="invoice.description" label="תאור" reverse></v-text-field>
                   </v-col>
                   <v-col cols="3">
@@ -151,7 +153,7 @@
                   <v-col cols="3">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
                   </v-col>
-                  <v-col cols="12">
+                  <v-col cols="12" class="no-padding">
                     <v-text-field v-model="invoice.remark" label="הערה" reverse></v-text-field>
                   </v-col>
                 </v-row>
@@ -681,6 +683,13 @@ export default {
   /* margin: -25px; */
   padding-top: 20px !important;
 }
+
+.v-card__text{
+  padding-bottom: 0px !important;
+  padding-left: 0px !important;
+  padding-right: 0px !important;
+}
+
 th > i {
   display: none !important;
 }
@@ -718,8 +727,8 @@ th > i {
 
 .payments-wrapper{
     border: 3px solid #85a7ff;
-    margin: 10px;
-    padding: 5px;
+    margin-left: 5px !important;
+    margin-right: 5px !important;
 }
 
 .date-text{
@@ -767,5 +776,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .sreach-width {
   width: 4rem;
   margin-top: 1.5rem !important;
+}
+.no-padding {
+  padding-top: 0px !important;
+  padding-bottom: 0px !important;
 }
 </style>
