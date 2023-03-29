@@ -94,7 +94,9 @@
       <v-dialog v-model="dialog" >
         <v-card>
           <v-card-title>
-            <span class="text-h5">{{ invoiceID ? "Update" : "Add New" }}</span>
+            <span class="text-h5">{{ invoiceID ? "Update - " + invoiceID  : "Add New" }}</span>
+            <v-spacer></v-spacer>
+            <v-btn v-show="invoiceID" @click="invoiceID=null"> Copy </v-btn>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -103,34 +105,34 @@
               </p>
               <v-form ref="form">
                 <v-row>
-                  <v-col cols="6" sm="6" md="4">
+                  <v-col cols="4">
                     <v-combobox v-model="invoice.company" :items="companyName" label="חברה" dense></v-combobox>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
+                  <v-col cols="4">
                     <v-combobox v-model="invoice.project" :items="projectName" label="פרויקט" dense></v-combobox>
                   </v-col>
-                  <v-col cols="6" sm="6" md="4">
+                  <v-col cols="4">
                     <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                   </v-col>
-                  <v-col cols="12" sm="12" md="12">
+                  <v-col cols="12">
                     <v-text-field v-model="invoice.description" label="תאור" reverse></v-text-field>
                   </v-col>
-                  <v-col cols="3" sm="3" md="3">
+                  <v-col cols="3">
                     <v-text-field v-model="invoice.amount" type="number" label="סכום" required></v-text-field>
                   </v-col>
-                  <v-col cols="3" sm="3" md="3">
+                  <v-col cols="3">
                     <v-text-field v-model="invoice.vat" type="number" label="מע'מ" ></v-text-field>
                   </v-col>
-                  <v-col cols="3" sm="3" md="3">
+                  <v-col cols="3">
                     <v-text-field v-model="invoice.total" type="number" label="סה'כ" required></v-text-field>
                   </v-col>
-                  <v-col cols="3" sm="3" md="3">
+                  <v-col cols="3">
                     <v-text-field v-model="invoice.year" type="number" label="שנה"></v-text-field>
                   </v-col>
-                  <v-col cols="3" sm="3" md="3">
+                  <v-col cols="3">
                     <v-text-field v-model="invoice.group" type="number" label="קובץ" required></v-text-field>
                   </v-col>
-                  <v-col cols="3" sm="3" md="3">
+                  <v-col cols="3">
                     <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="invoice.date" persistent width="290px">
                       <template v-slot:activator="{ on, attrs }">
                         <v-text-field v-model="invoice.date" label="תאריך" readonly v-bind="attrs" v-on="on">
@@ -143,13 +145,13 @@
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
-                  <v-col cols="3" sm="3" md="3">
+                  <v-col cols="3">
                     <v-text-field v-model="invoice.invoiceId" label="חשבונית"></v-text-field>
                   </v-col>
-                  <v-col cols="3" sm="3" md="3">
+                  <v-col cols="3">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
                   </v-col>
-                  <v-col cols="12" sm="12" md="12">
+                  <v-col cols="12">
                     <v-text-field v-model="invoice.remark" label="הערה" reverse></v-text-field>
                   </v-col>
                 </v-row>
@@ -184,11 +186,11 @@
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn small @click="invoiceID ? updateInvoice() : saveNewInvoice()">
-              {{ invoiceID ? "Update" : "Create" }}
+              {{ invoiceID ? "Update" : "Save New" }}
             </v-btn>
             <v-btn small v-show="!invoiceID" class="mx-3" @click="clearForm"> Clear </v-btn>
             <v-spacer></v-spacer>
-            <v-icon color="red" @click="deleteOne(invoice.id, invoice.description)">mdi-delete</v-icon>
+            <v-icon v-show="invoiceID" color="red" @click="deleteOne(invoice.id, invoice.description)">mdi-delete</v-icon>
             <v-icon color="red" @click="dialog = false">mdi-close-box</v-icon>
           </v-card-actions>
         </v-card>
@@ -497,10 +499,6 @@ export default {
 			try {
 				const response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
 				if (response) {
-          // await SpecificServiceEndPoints.addPaymentsToInvoice(
-          //       response.data.id,     // 1st param -> projectId
-          //       {checkID: 123, payment: 123, date: new Date()} // 2nd param -> payments List
-          // );
 					this.invoice.id = response.data.id;
 					this.refreshList();
 					this.clearForm();
