@@ -1,10 +1,5 @@
 <template>
   <div class="list row">
-    <!-- <div class="input-group mb-3 mt-3">
-      <input type="text" class="form-control" placeholder="Search..." v-model="searchStr"/>
-      <v-btn @click="searchSTR" class="ml-2 mr-2"> Search </v-btn>
-    </div>  -->
-    <!-- <AddInvoice></AddInvoice> -->
     <v-layout row wrap>
       <v-flex xs12 md4>
         <v-text-field

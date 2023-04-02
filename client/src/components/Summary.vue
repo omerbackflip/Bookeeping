@@ -15,10 +15,13 @@
           class="elevation-3 mt-0"
           loader-height="20"
           dense
-        >
+          single-expand
+          :expanded.sync="expanded"
+          item-key="project"
+          show-expand>
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title> Total Invoices - {{Invoices.length.toLocaleString()}} </v-toolbar-title>
+              <v-toolbar-title> Total Payments - {{invoices.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
               <v-spacer></v-spacer>
@@ -36,8 +39,86 @@
           <template v-slot:[`item.profit`]="{ item }">
             <span> {{ item.revenue ? ((item.revenue-item.total)/item.revenue*75).toFixed(0) + '%': '' }}</span>
           </template>
+          <template v-slot:[`item.count`]="{ item }">
+            <span> {{(item.payedList.length || '')}}</span>
+          </template>
+          <template v-slot:expanded-item="{ headers, item }">
+            <td :colspan="headers.length">
+							<v-data-table 
+								:headers="revHeaders"
+								:items="item.payedList"
+								dense
+								disable-pagination
+								hide-default-footer
+								mobile-breakpoint="0"
+                @click:row="getRevenueForEdit"
+                class="expanded-datatable">
+                <template v-slot:top>
+                  <v-toolbar flat>
+                    <v-btn @click="getRevenueForEdit(item)" x-small> Add Revenue</v-btn>
+                  </v-toolbar>
+                </template>
+								<template v-slot:[`item.amount`]="{ item }">
+									<span>{{ item.amount ? item.amount.toLocaleString() : 0 }} </span>
+								</template>
+                <template v-slot:[`item.date`]="{ item }">
+                  <span> {{ item.date | formatDate }}</span>
+                </template>
+              </v-data-table>
+            </td>
+          </template>
         </v-data-table>
       </v-flex>
+
+      <v-dialog v-model="dialog" >
+        <v-card>
+          <v-card-title>
+            <span class="text-h5">{{ revenueItem._id ? "Update" : "Add New" }}</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-form ref="form">
+                <v-row>
+                  <v-col cols="3" >
+                    <v-text-field v-model="revenueItem.project" label="Project" ></v-text-field>
+                  </v-col>
+                  <v-col cols="3">
+                    <v-text-field v-model="revenueItem.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
+                  </v-col>
+                  <v-col cols="3">
+                    <v-text-field v-model="revenueItem.amount" label="סכום" @focus="$event.target.select()"></v-text-field>
+                  </v-col>
+                  <v-col cols="3">
+                    <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="revenueItem.date" persistent width="290px">
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field v-model="revenueItem.date" label="תאריך" readonly v-bind="attrs" v-on="on">
+                        </v-text-field>
+                      </template>
+                      <v-date-picker v-model="revenueItem.date" scrollable>
+                        <v-spacer></v-spacer>
+                        <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
+                        <v-btn text color="primary" @click="$refs.dialog.save(revenueItem.date)"> OK </v-btn>
+                      </v-date-picker>
+                    </v-dialog>
+                  </v-col>
+                  <v-col cols="12">
+                    <v-text-field v-model="revenueItem.description" label="תאור" reverse></v-text-field>
+                  </v-col>
+                </v-row>
+              </v-form>
+            </v-container>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn @click="saveRevenue()"> {{revenueItem._id ? "Update" : "Save New"}} </v-btn>
+            <!-- <v-btn small class="mx-3" @click="clearForm"> Clear </v-btn> -->
+            <v-spacer></v-spacer>
+            <v-icon v-show="revenueItem" color="red" >mdi-delete</v-icon>
+            <v-icon color="red" @click="dialog = false">mdi-close-box</v-icon>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
 
     </v-layout>
   </div>
@@ -47,57 +128,73 @@
 
 <script>
 import Vue from "vue";
+import moment from "moment";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import { INVOICE_MODEL, TABLE_MODEL, REVENUE_MODEL } from "../constants/constants";
 
 Vue.use(excel);
-
+Vue.filter("formatDate", function (value) {
+	if (value) {
+		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
+		return moment(String(value)).format("DD/MM/YYYY");
+	}
+});
 export default {
-	// name: "summary-list",
 	data() {
 		return {
-			Invoices: [],
-			Revenues: [],
+			invoices: [],
+			revenues: [],
 			projectList: [],
 			dialog: false,
 			summaryHeaders: [
+				{ text: "Count", value: "count", class: "hdr-styles", align: "right" },
 				{ text: "Profit", value: "profit", class: "hdr-styles", align: "right" },
 				{ text: "Balance", value: "balance", class: "hdr-styles", align: "right" },
 				{ text: "Revenue", value: "revenue", class: "hdr-styles", align: "right" },
 				{ text: "Expances", value: "total", class: "hdr-styles", align: "right" },
 				{ text: "Project", value: "project", class: "hdr-styles", align: "right" },
 			],
+      revHeaders: [
+				{ text: "Amount", value: "amount", align: "right" },
+				{ text: "Date", value: "date", align: "right" },
+				{ text: "Description", value: "description", align: "right" },
+				{ text: "Invoice", value: "invoiceId", align: "right" },
+      ],
 			search: "",
 			headers: [],
-			invoice: [],
+      expanded: [],
+      revenueItem: {},
+      dateModal : false,
 		};
 	},
 
 	methods: {
 		async mainSummary() {
-			let response = await apiService.getMany({
-				model: INVOICE_MODEL,
-			});
-			if (response && response.data) {
-				this.Invoices = response.data;
-        this.projectList = this.projectList.map((item1) => {
-          let totalProject = this.Invoices.filter((item2) => {
+			let response = await apiService.getMany({model: INVOICE_MODEL});
+			if (response.data) {
+				this.invoices = response.data; // put all invoices data in invoices
+        this.projectList = this.projectList.map((item1) => { // add to projectList the total for each project
+          let totalProject = this.invoices.filter((item2) => {
             return item2.project === item1.project
           }).reduce ((currSum,item3) => {return item3.total + currSum},0)
-          return({...item1, total:totalProject})
+          return({...item1, total:totalProject}) // concatinate the totalProject
         })  
 			}
-      let response1 = await apiService.getMany({
-				model: REVENUE_MODEL,
-			});
-      if (response1 && response1.data) {
-				this.Revenues = response1.data;
+      response = await apiService.getMany({model: REVENUE_MODEL});
+      if (response.data) {
+				this.revenues = response.data; // put all revenues data in revenues
         this.projectList = this.projectList.map((item1) => {
-          let totalRevenue = this.Revenues.filter((item2) => {
+          let totalRevenue = this.revenues.filter((item2) => { // add to projectList the total revenue for each project
             return item2.project === item1.project
           }).reduce ((currSum,item3) => {return item3.amount + currSum},0)
-          return({...item1, revenue:totalRevenue})
+          let payedList = this.revenues.filter((item4) => { // also add array of list of revenues for each project
+            return item4.project === item1.project
+          }).map((item5) => {
+            item5.date = moment(item5.date).format('YYYY-MM-DD'); // set the date format to be readbale
+            return item5
+          })
+          return({...item1, revenue:totalRevenue, payedList}) // concatinate the totalRevenue and list of payed projects
         })  
 			}
 		},
@@ -119,6 +216,37 @@ export default {
 			this.$router.push({ name: "invoices-list", params: { project: row.project } });
 		},
 
+    // get Revenue data before open dialog for edit
+		async getRevenueForEdit(item) {
+      this.revenueItem = {}
+			item.total ? this.revenueItem.project = item.project : this.revenueItem = item; 
+      this.revenueItem.date = moment(this.revenueItem.date).format('YYYY-MM-DD');
+			this.dialog = true;
+    },
+
+    // clearForm() {
+		// 	this.$refs.form.reset();
+		// },
+
+        // this is called from the update dialog
+		async saveRevenue() {
+			try {
+        let response = ''
+        this.revenueItem._id ? 
+            response = await apiService.update(this.revenueItem._id, this.revenueItem, { model: REVENUE_MODEL }) 
+              : 
+            response = await apiService.create( this.revenueItem, { model: REVENUE_MODEL }) 
+				if (response) {
+					this.dialog = false;
+				}
+			} catch (error) {
+				this.msg = JSON.stringify(error.message);
+				setTimeout(() => {
+					this.msg = "";
+				}, 3000);
+				console.log(error);
+			}
+		},
 	},
 
 	async mounted() {
@@ -137,7 +265,6 @@ export default {
   text-align: left;
   max-width: 100%;
   margin: auto;
-  cursor: pointer;
 }
 
 .mobile-headers {
@@ -203,6 +330,7 @@ th > i {
   cursor: pointer;
   text-decoration: underline;
   color: blue;
+  cursor: pointer;
 }
 
 .theme--light.v-data-table > .v-data-table__wrapper > table > thead > tr > th {
@@ -258,7 +386,11 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .v-toolbar__title {
     font-size: 1rem;
 }
-.v-text-field {
-  width: 4rem;
+
+.expanded-datatable{
+	width: 100%;
+  margin: 12px;
+  border: 10px solid #98e983;
+	cursor: pointer;
 }
 </style>

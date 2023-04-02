@@ -120,19 +120,19 @@
                     <v-text-field v-model="invoice.description" label="תאור" reverse></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.amount" type="number" label="סכום" required></v-text-field>
+                    <v-text-field @input="onAmountChange" v-model="invoice.amount" label="סכום" required @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.vat" type="number" label="מע'מ" ></v-text-field>
+                    <v-text-field v-model="invoice.vat" label="מע'מ" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.total" type="number" label="סה'כ" required></v-text-field>
+                    <v-text-field @input="onTotalChange" v-model="invoice.total" label="סה'כ" required @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.year" type="number" label="שנה"></v-text-field>
+                    <v-text-field v-model="invoice.year" label="שנה" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.group" type="number" label="קובץ" required></v-text-field>
+                    <v-text-field v-model="invoice.group" label="קובץ" required @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
                     <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="invoice.date" persistent width="290px">
@@ -148,10 +148,10 @@
                     </v-dialog>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.invoiceId" label="חשבונית"></v-text-field>
+                    <v-text-field v-model="invoice.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.excelRecID" label="ExcelRecID"></v-text-field>
+                    <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="12" class="no-padding">
                     <v-text-field v-model="invoice.remark" label="הערה" reverse></v-text-field>
@@ -161,15 +161,15 @@
             </v-container>
           </v-card-text>
           <div class="payments-wrapper">
-              <h5>Payments</h5>
+              <h6>Payments</h6>
               <v-container>
                   <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
                       <v-row>
                           <v-col cols="4" sm="3">
-                              <v-text-field label="checkID" v-model="inv.checkID" ></v-text-field>
+                              <v-text-field label="checkID" v-model="inv.checkID" @focus="$event.target.select()"></v-text-field>
                           </v-col>
                           <v-col cols="4" sm="3">
-                              <v-text-field label="Payment" v-model="inv.payment" ></v-text-field>
+                              <v-text-field label="Payment" v-model="inv.payment" @focus="$event.target.select()"></v-text-field>
                           </v-col>
                           <v-col cols="4" sm="3">
                             <div class="input-container">
@@ -181,7 +181,7 @@
                           </v-col>
                       </v-row>
                   </div>                    
-                  <v-btn @click="addPaymentRow" class="primary" small><v-icon small >mdi-plus</v-icon></v-btn>					
+                  <v-btn @click="addPaymentRow" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>					
               </v-container>
           </div>
 
@@ -282,7 +282,8 @@ import moment from "moment";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
-import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE } from "../constants/constants";
+import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, 
+          TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE, VAT_PERCENTAGE } from "../constants/constants";
 
 Vue.use(excel);
 
@@ -581,8 +582,31 @@ export default {
 
     addPaymentRow() {
 			this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
-      console.log(this.invoice)
 		},
+
+    onAmountChange() {
+      let { amount } = this.invoice;
+      if(amount && amount >= 0) {
+          this.invoice.vat = ((parseFloat(amount) * VAT_PERCENTAGE)/100)
+          this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
+      } else {
+          this.invoice.amount = 0;
+          this.invoice.vat = 0;
+          this.invoice.total = 0;
+      }
+    },
+
+    onTotalChange() {
+      let { total } = this.invoice;
+      if(total && total >= 0) {
+          this.invoice.amount = (parseFloat(total)/(1+VAT_PERCENTAGE/100)).toFixed(0);
+          this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
+      } else {
+          this.invoice.amount = 0;
+          this.invoice.vat = 0;
+          this.invoice.total = 0;
+      }
+    }
 	},
 
 	async mounted() {
