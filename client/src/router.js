@@ -32,5 +32,10 @@ export default new Router({
       name: "summary",
       component: () => import("./components/Summary")
     },
+    {
+      path: "/revenueList",
+      name: "revenueList",
+      component: () => import("./components/RevenueList")
+    },
   ]
 });

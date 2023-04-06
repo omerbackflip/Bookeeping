@@ -168,7 +168,6 @@ export default {
 				bs_item_name: "",
 				bs_group_name: "",
 			},
-			fldRules: [(v) => !!v || "Field is required"],
 			isLoading: true,
 			selectedYear: '2023',
 			selectedCompany: 'ביצועים',
@@ -237,25 +236,12 @@ export default {
 			this.$router.push({ name: "invoice-details", params: { id: id } });
 		},
 
-		onSearch(search) {
-			if(!search) {
-				this.searchedBooks = [];
-				return;
-			}
-			this.books.forEach(book => {
-				return Object.keys(book).map(key => {
-					if(book[key] === search) {
-						this.searchedBooks.push(book);
-					} 
-				});
-			});
-		},
 		async getSummary(summaryField, summaryItem) {
 			let response = "";
 			switch (summaryField) {
 				case 'cust':
 					// fatch all paymanets for this project cross years.
-					response = await apiService.getMany({model: BOOKS_MODEL, cust_lname: summaryItem})
+					response = await apiService.getMany({model: BOOKS_MODEL, cust_lname: summaryItem , company: this.selectedCompany})
 					this.summaryFilter = response.data
 					break;
 				default : break;

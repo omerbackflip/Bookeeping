@@ -60,4 +60,5 @@ export const navItems = [
     {icon: 'folder', text: 'Import REVENUEs', route: null, import: 'REVENUES', onClick: 'runModal'},
     {icon: 'widgets', text: 'Synergy List', route: '/synergyList'},
     {icon: 'widgets', text: 'Summary', route: '/Summary'},
+    {icon: 'widgets', text: 'Revenues', route: '/RevenueList'},
 ]
