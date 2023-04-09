@@ -18,7 +18,6 @@
           single-expand
           :expanded.sync="expanded"
           item-key="project">
-          <!-- show-expand> -->
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title> Total Invoices - {{invoices.length.toLocaleString()}} </v-toolbar-title>
@@ -74,55 +73,6 @@
           </template>
         </v-data-table>
       </v-flex>
-
-      <!-- <v-dialog v-model="dialog" >
-        <v-card>
-          <v-card-title>
-            <span class="text-h5">{{ revenueItem._id ? "Update" : "Add New" }}</span>
-            <v-spacer></v-spacer>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-              <v-form ref="form">
-                <v-row>
-                  <v-col cols="3" >
-                    <v-text-field v-model="revenueItem.project" label="Project" ></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field v-model="revenueItem.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field v-model="revenueItem.amount" label="סכום" @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="revenueItem.date" persistent width="290px">
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field v-model="revenueItem.date" label="תאריך" readonly v-bind="attrs" v-on="on">
-                        </v-text-field>
-                      </template>
-                      <v-date-picker v-model="revenueItem.date" scrollable>
-                        <v-spacer></v-spacer>
-                        <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
-                        <v-btn text color="primary" @click="$refs.dialog.save(revenueItem.date)"> OK </v-btn>
-                      </v-date-picker>
-                    </v-dialog>
-                  </v-col>
-                  <v-col cols="12">
-                    <v-text-field v-model="revenueItem.description" label="תאור" reverse></v-text-field>
-                  </v-col>
-                </v-row>
-              </v-form>
-            </v-container>
-          </v-card-text>
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn @click="saveRevenue()"> {{revenueItem._id ? "Update" : "Save New"}} </v-btn>
-            <v-spacer></v-spacer>
-            <v-icon v-show="revenueItem" color="red" >mdi-delete</v-icon>
-            <v-icon color="red" @click="dialog = false">mdi-close-box</v-icon>
-          </v-card-actions>
-        </v-card>
-      </v-dialog> -->
 
       <revenue-form ref="revenueForm"/>
       <confirm-dialog ref="confirm"/>
@@ -224,30 +174,6 @@ export default {
 
     projectInvoices(row) {
 			this.$router.push({ name: "invoices-list", params: { project: row.project } });
-		},
-
-    // clearForm() {
-		// 	this.$refs.form.reset();
-		// },
-
-    // this is called from the update dialog
-		async saveRevenue() {
-			try {
-        let response = ''
-        this.revenueItem._id ? 
-            response = await apiService.update(this.revenueItem._id, this.revenueItem, { model: REVENUE_MODEL }) 
-              : 
-            response = await apiService.create( this.revenueItem, { model: REVENUE_MODEL }) 
-				if (response) {
-					this.dialog = false;
-				}
-			} catch (error) {
-				this.msg = JSON.stringify(error.message);
-				setTimeout(() => {
-					this.msg = "";
-				}, 3000);
-				console.log(error);
-			}
 		},
 
     clickRow(item,event) {

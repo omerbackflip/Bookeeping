@@ -16,6 +16,11 @@
 			loading-text="Loading... Please wait"
 			loader-height="20"
 			mobile-breakpoint="0"
+			@input="selectRow()"
+			show-select
+			single-select
+			item-key="_id"
+			v-model="selected"
 			dense>
 			<template v-slot:top>
 				<v-toolbar flat>
@@ -183,6 +188,7 @@ export default {
 				{ text: "Asmacta1", value: "asmacta1", align: "right" },
 				{ text: "Date", value: "asmchta_date", align: "right"},
 			],
+			selected: [],
 		};
 	},
 
@@ -253,6 +259,10 @@ export default {
 			if (!this.summaryDialog) {
 				this.summaryDialog = true;
 			}
+		},
+
+		selectRow() {
+			this.selected[0] ? this.$emit('findMatch', this.selected[0]) : ''
 		},
 	},
 

@@ -17,6 +17,11 @@
           loading-text="Loading... Please wait"
           loader-height="20"
           @click:row="getInvoiceForEdit"
+          @input="selectRow()"
+          show-select
+          single-select
+          item-key="_id"
+          v-model="selected"
           dense>
           <template v-slot:top>
             <v-toolbar flat>
@@ -85,8 +90,9 @@
             </td>
           </template>
           <template v-slot:[`item.published`]="{ item }">
-            <v-checkbox v-model="item.published" @click="updateOne(item)">
-            </v-checkbox>
+            <td @click.stop>
+              <v-checkbox v-model="item.published" @click="updateOne(item)"></v-checkbox>
+            </td>
           </template>
         </v-data-table>
         <v-btn v-if="$route.params.project" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
@@ -352,6 +358,7 @@ export default {
 			selectedCompany: 'ביצועים',
       bookInfo: '',
       dateModal : false,
+      selected: [],
 		};
 	},
 
@@ -515,7 +522,7 @@ export default {
 				console.log(error);
 			}
 		},
-    // this is called from the update dialog
+    // this is called from the update dialog or from updateInvoice from Synergy
 		async updateInvoice() {
 			try {
 				const response = await apiService.update(this.invoiceID, this.invoice, { model: INVOICE_MODEL });
@@ -606,7 +613,11 @@ export default {
           this.invoice.vat = 0;
           this.invoice.total = 0;
       }
-    }
+    },
+
+    selectRow() {
+      this.selected[0] ? this.$emit('lookForMatch', this.selected[0]) : ''
+    },
 	},
 
 	async mounted() {
@@ -645,7 +656,15 @@ export default {
     
     this.$root.$on("clearExcelRecID", () => {
       this.batchClearExcelRecID();
-    })
+    });
+
+    // this is called from SynergyList for update match
+    this.$root.$on("invoiceUpdate", (invoice) => {
+      this.invoiceID = invoice._id
+      delete invoice._id
+			this.invoice = invoice
+      this.updateInvoice()
+		});
 	},
 	
   watch: {

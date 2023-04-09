@@ -1,52 +1,26 @@
 <template>
     <div>
 		<div class="max-height-50">
-			<invoice-list/>
+			<invoice-list v-on:lookForMatch="searchedInvoice = ($event)" />
 		</div>
-
-		<div class="max-height-50 mt-2">
-			<booking-list ref="bookingRef"/>
-			<!-- <v-fab-transition>
-				<v-btn
-					color="pink"
-					dark
-					@click="dialog=true"
-					class="fab-button-placement"
-					absolute
-					bottom
-					right
-					fab
-				>
-					<v-icon>mdi-magnify</v-icon>
-				</v-btn>
-			</v-fab-transition>
-			<v-btn @click="search = ''; searchSubmit();" class="clear-search">Clear search</v-btn> -->
+		<div class="max-height-50 mt-1">
+			<booking-list v-on:findMatch="findedBook = ($event)" />
 		</div>
-
-		<!-- <v-dialog
-          v-model="dialog"
-          max-width="500px"
-        >
-          <v-card>
-            <v-card-text>
-              <v-text-field v-model="search" label="Search booking list ..."></v-text-field>
-            </v-card-text>
-
-            <v-card-actions>
-              <v-spacer></v-spacer>
-
-              <v-btn
-                text
-                color="primary"
-                @click="searchSubmit"
-              >
-                Submit
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-dialog> -->
-
-	</div>		  
+		<div style="text-align: start; margin-left: 3rem;" >
+			<v-btn x-small @click="updateExcelRecId"> update </v-btn>
+			<td class="newWidth"> invoice: <b>{{ searchedInvoice.invoiceId}}</b> </td>
+			<td class="newWidth"> description: <b>{{searchedInvoice.description}}</b> </td>
+			<td class="newWidth"> Date: <b>{{ searchedInvoice.date | formatDate }}</b> </td>
+			<td class="newWidth"> Amount: <b>{{ searchedInvoice.amount }}</b> </td>
+			<td class="newWidth"> ExcelRecID: <b>{{ searchedInvoice.excelRecID }}</b> </td>
+			<v-spacer></v-spacer>
+			<td class="newWidth"> Asmacta1: <b>{{ findedBook.asmacta1 }}</b> </td>
+			<td class="newWidth"> Pratim: <b>{{ findedBook.pratim }}</b> </td>
+			<td class="newWidth"> Date: <b>{{ findedBook.asmchta_date | formatDate }}</b> </td>
+			<td class="newWidth"> record_schum: <b>{{ findedBook.record_schum }}</b> </td>
+			<td class="newWidth"> record_id: <b>{{ findedBook.record_id }}</b> </td>
+		</div>
+	</div>
 </template>
 
 <script>
@@ -58,15 +32,17 @@ export default {
 	components: { 'invoice-list': InvoicesListVue, 'booking-list': BookingListVue },
 	data() {
 		return {
-			dialog: false,
-			search: ''
+			searchedInvoice: '',
+			findedBook: '',
 		}
 	},
 	methods: {
-		searchSubmit() {
-			this.$refs.bookingRef.onSearch(this.search);
-			this.dialog = false;
-			this.search = '';
+		async updateExcelRecId() {
+			this.searchedInvoice.excelRecID = this.findedBook.record_id;
+			this.searchedInvoice.invoiceId = this.findedBook.asmacta1;
+			console.log (this.searchedInvoice)
+            await this.$root.$emit('invoiceUpdate',this.searchedInvoice);
+
 		}
 	}
 };
@@ -78,22 +54,12 @@ export default {
 	max-height: 50%;
 }
 
-.mt-4{
-	margin-top: 13px;
-}
-.clear-search{
-	font-size: 12px !important;
-    background: cornflowerblue !important;
-    height: 20px !important;
-    color: white !important;
-    top: 17px;
-    float: right;
-    margin-right: 32px;
-}
-
 div.max-height-50 > div > div > div.flex > div > div {
-	height: 40vh !important;
+	height: 35vh !important;
 	width: 200vh !important;
+}
+.newWidth {
+	width: 20rem
 }
 
 </style>
