@@ -17,7 +17,7 @@
 			loader-height="20"
 			mobile-breakpoint="0"
 			@input="selectRow()"
-			show-select
+			:show-select="showSelect"
 			single-select
 			item-key="_id"
 			v-model="selected"
@@ -121,6 +121,7 @@ Vue.filter("formatDate", function (value) {
 
 export default {
 	name: "booking-list",
+	props: ['showSelect'],
 	// components: { VueVirtualTable },
 	data() {
 		return {
@@ -262,7 +263,8 @@ export default {
 		},
 
 		selectRow() {
-			this.selected[0] ? this.$emit('findMatch', this.selected[0]) : ''
+			// this.selected[0] ? this.$emit('findMatch', this.selected[0]) : ''
+			this.$emit('findMatch', this.selected[0] || '') 
 		},
 	},
 

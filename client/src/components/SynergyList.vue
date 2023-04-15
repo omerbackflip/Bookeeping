@@ -1,24 +1,24 @@
 <template>
     <div>
 		<div class="max-height-50">
-			<invoice-list v-on:lookForMatch="searchedInvoice = ($event)" />
+			<invoice-list :showSelect=true v-on:lookForMatch="invoiceMerge = $event" />
 		</div>
 		<div class="max-height-50 mt-1">
-			<booking-list v-on:findMatch="findedBook = ($event)" />
+			<booking-list :showSelect=true v-on:findMatch="bookMerge = $event" />
 		</div>
 		<div style="text-align: start; margin-left: 3rem;" >
-			<v-btn x-small @click="updateExcelRecId"> update </v-btn>
-			<td class="newWidth"> invoice: <b>{{ searchedInvoice.invoiceId}}</b> </td>
-			<td class="newWidth"> description: <b>{{searchedInvoice.description}}</b> </td>
-			<td class="newWidth"> Date: <b>{{ searchedInvoice.date | formatDate }}</b> </td>
-			<td class="newWidth"> Amount: <b>{{ searchedInvoice.amount }}</b> </td>
-			<td class="newWidth"> ExcelRecID: <b>{{ searchedInvoice.excelRecID }}</b> </td>
+			<v-btn v-show="invoiceMerge && bookMerge" x-small @click="updateExcelRecId"> update </v-btn>
+			<td style="width: 15rem"> Date: <b>{{ invoiceMerge.date | formatDate }}</b> </td>
+			<td style="width: 30rem"> description: <b>{{invoiceMerge.description}}</b> </td>
+			<td style="width: 15rem"> Amount: <b>{{ invoiceMerge.amount }}</b> </td>
+			<td style="width: 15rem"> invoice: <b>{{ invoiceMerge.invoiceId}}</b> </td>
+			<td style="width: 15rem"> ExcelRecID: <b>{{ invoiceMerge.excelRecID }}</b> </td>
 			<v-spacer></v-spacer>
-			<td class="newWidth"> Asmacta1: <b>{{ findedBook.asmacta1 }}</b> </td>
-			<td class="newWidth"> Pratim: <b>{{ findedBook.pratim }}</b> </td>
-			<td class="newWidth"> Date: <b>{{ findedBook.asmchta_date | formatDate }}</b> </td>
-			<td class="newWidth"> record_schum: <b>{{ findedBook.record_schum }}</b> </td>
-			<td class="newWidth"> record_id: <b>{{ findedBook.record_id }}</b> </td>
+			<td style="width: 15rem"> Date: <b>{{ bookMerge.asmchta_date | formatDate }}</b> </td>
+			<td style="width: 30rem"> Pratim: <b>{{ bookMerge.pratim }}</b> </td>
+			<td style="width: 15rem"> record_schum: <b>{{ bookMerge.record_schum }}</b> </td>
+			<td style="width: 15rem"> Asmacta1: <b>{{ bookMerge.asmacta1 }}</b> </td>
+			<td style="width: 15rem"> record_id: <b>{{ bookMerge.record_id }}</b> </td>
 		</div>
 	</div>
 </template>
@@ -32,16 +32,16 @@ export default {
 	components: { 'invoice-list': InvoicesListVue, 'booking-list': BookingListVue },
 	data() {
 		return {
-			searchedInvoice: '',
-			findedBook: '',
+			invoiceMerge: '',
+			bookMerge: '',
 		}
 	},
 	methods: {
 		async updateExcelRecId() {
-			this.searchedInvoice.excelRecID = this.findedBook.record_id;
-			this.searchedInvoice.invoiceId = this.findedBook.asmacta1;
-			console.log (this.searchedInvoice)
-            await this.$root.$emit('invoiceUpdate',this.searchedInvoice);
+			this.invoiceMerge.excelRecID = this.bookMerge.record_id;
+			this.invoiceMerge.invoiceId = this.bookMerge.asmacta1;
+			// console.log (this.invoiceMerge)
+            await this.$root.$emit('invoiceUpdate',this.invoiceMerge);
 
 		}
 	}

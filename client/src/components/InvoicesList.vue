@@ -18,7 +18,7 @@
           loader-height="20"
           @click:row="getInvoiceForEdit"
           @input="selectRow()"
-          show-select
+          :show-select="showSelect"
           single-select
           item-key="_id"
           v-model="selected"
@@ -302,6 +302,7 @@ Vue.filter("formatDate", function (value) {
 
 export default {
 	name: "invoices-list",
+  props: ['showSelect'],
 	data() {
 		return {
 			Invoices: [],
@@ -616,7 +617,8 @@ export default {
     },
 
     selectRow() {
-      this.selected[0] ? this.$emit('lookForMatch', this.selected[0]) : ''
+      // this.selected[0] ? this.$emit('lookForMatch', this.selected[0]) : ''
+      this.$emit('lookForMatch', this.selected[0] || '')
     },
 	},
 
@@ -645,7 +647,6 @@ export default {
 			this.removeAllInvoices();
 		});
 
-	
     this.$root.$on("bookMarge", () => {
 			this.batchBookInvoice();
 		});
@@ -664,6 +665,7 @@ export default {
       delete invoice._id
 			this.invoice = invoice
       this.updateInvoice()
+      this.selected = []
 		});
 	},
 	
