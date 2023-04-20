@@ -216,7 +216,8 @@
               fixed-header
               :item-class="itemRowBackground"
               mobile-breakpoint="0"
-              class="elevation-3"
+              @click:row="getInvoiceForEdit"
+              class="elevation-3 list"
               dense
               height="70vh">
               <template v-slot:top>
