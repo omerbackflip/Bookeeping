@@ -3,7 +3,7 @@
     <v-layout>
       <v-flex>
         <v-data-table
-          :headers="summaryHeaders"
+          :headers="getHeaders()"
           :items="projectList"
           :search="search"
           @click:row="clickRow"
@@ -23,12 +23,11 @@
               <v-toolbar-title> Total Invoices - {{invoices.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
-              <v-spacer></v-spacer>
             </v-toolbar>
           </template>
           <template v-slot:[`item.project`]="{ item }">
-            <td @click.stop>
-            <span @click="projectInvoices (item)" class="link"> {{ item.project }}</span>
+            <td @click.stop class="link" >
+              <span @click="projectInvoices (item)"> {{ item.project }}</span>
             </td>
           </template>
           <template v-slot:[`item.total`]="{ item }">
@@ -90,7 +89,7 @@ import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
-import { INVOICE_MODEL, TABLE_MODEL, REVENUE_MODEL } from "../constants/constants";
+import { INVOICE_MODEL, TABLE_MODEL, REVENUE_MODEL, SUMMARY_WEB_HEADERS, SUMMARY_MOBILE_HEADERS } from "../constants/constants";
 
 Vue.use(excel);
 Vue.filter("formatDate", function (value) {
@@ -107,18 +106,11 @@ export default {
 			revenues: [],
 			projectList: [],
 			dialog: false,
-			summaryHeaders: [
-				{ text: "חשבוניות", value: "count", class: "hdr-styles", align: "right" },
-				{ text: "רווחיות", value: "profit", class: "hdr-styles", align: "right" },
-				{ text: "הפרשים", value: "balance", class: "hdr-styles", align: "right" },
-				{ text: "הכנסות", value: "revenue", class: "hdr-styles", align: "right" },
-				{ text: "הוצאות", value: "total", class: "hdr-styles", align: "right" },
-				{ text: "פרויקט", value: "project", class: "hdr-styles", align: "right" },
-			],
+
       revHeaders: [
 				{ text: "Amount", value: "amount", align: "right" },
 				{ text: "Date", value: "date", align: "right" },
-				{ text: "Description", value: "description", align: "right" },
+				// { text: "Description", value: "description", align: "right" },
 				{ text: "Invoice", value: "invoiceId", align: "right" },
       ],
 			search: "",
@@ -192,6 +184,21 @@ export default {
       this.mainSummary();
 		},
 
+		getHeaders() {
+			if (this.isMobile()) {
+				return SUMMARY_MOBILE_HEADERS;
+			} else {
+				return SUMMARY_WEB_HEADERS;
+			}
+		},
+
+    isMobile() {
+			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+				return true;
+			} else {
+				return false;
+			}
+		},
 	},
 
 	async mounted() {
@@ -216,6 +223,7 @@ export default {
   cursor: pointer;
   text-decoration: underline;
   color: blue;
+  float: right;
 }
 
 input[type="date"]::-webkit-calendar-picker-indicator {
@@ -231,9 +239,14 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     width: auto;
 }
 
+.v-toolbar__title {
+    font-size: 1rem;
+    white-space: pre-wrap;
+}
+
 .expanded-datatable{
 	width: 100%;
-  margin: 12px;
+  margin-bottom: 12px;
   border: 5px solid #98e983;
 	cursor: pointer;
 }

@@ -8,8 +8,23 @@ export const INVOICE_MOBILE_HEADERS = [
     { text: "G",            value: "group",         class: "hdr-styles",  groupable: false, align: "right"},	
     { text: "Date",         value: "date",          class: "mobile-headers",  groupable: false},	
     { text: "Description",  value: "description",   class: "mobile-headers",  groupable: false,   align: "right"},
-    { text: "Amount",       value: "amount",        class: "mobile-headers",  groupable: false,   align: "right"},
+    { text: "Amount",       value: "amount",        class: "mobile-headers",  groupable: false,   align: "right", width: "4%"},
     // { text: "Act.",         value: "actions",           class: " mobile-headers",                   groupable: false}
+];
+
+export const SUMMARY_WEB_HEADERS = [
+    { text: "תשלומים", value: "count", class: "hdr-styles", align: "right" },
+    { text: "רווחיות", value: "profit", class: "hdr-styles", align: "right" },
+    { text: "הפרשים", value: "balance", class: "hdr-styles", align: "right" },
+    { text: "הכנסות", value: "revenue", class: "hdr-styles", align: "right" },
+    { text: "הוצאות", value: "total", class: "hdr-styles", align: "right" },
+    { text: "פרויקט", value: "project", class: "hdr-styles", align: "right" },
+];
+
+export const SUMMARY_MOBILE_HEADERS = [
+    { text: "הכנסות", value: "revenue", class: "hdr-styles", align: "right" },
+    { text: "הוצאות", value: "total", class: "hdr-styles", align: "right" },
+    { text: "פרויקט", value: "project", class: "hdr-styles", align: "right" },
 ];
 
 export const INVOICE_WEB_HEADERS = [

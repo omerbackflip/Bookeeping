@@ -59,14 +59,14 @@
           <template v-slot:[`item.description`]="{ item }">
             <div class="description-width">
               <span> {{ item.description }}</span>
+              <td @click.stop>
+                <span v-if="isMobile()" @click="getSummary('supplier', item.supplier)" class="summary"> {{ item.supplier }} </span>
+              </td>
             </div>
           </template>
           <template v-slot:[`item.amount`]="{ item }">
             <div class="amount-width d-grid">
               <span>{{ item.amount ? item.amount.toLocaleString() : "" }}</span>
-              <td @click.stop>
-                <span v-if="isMobile()" @click="getSummary('supplier', item.supplier)" class="summary"> {{ item.supplier }} </span>
-              </td>
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
@@ -160,7 +160,7 @@
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="12" class="no-padding">
-                    <v-text-field v-model="invoice.remark" label="הערה" reverse></v-text-field>
+                    <v-textarea v-model="invoice.remark" label="הערה" reverse auto-grow rows="1" style="text-align-last: right;"></v-textarea>
                   </v-col>
                 </v-row>
               </v-form>
@@ -750,6 +750,7 @@ th > i {
 }
 .description-width {
   width: 100% !important;
+  text-align: -webkit-right;
 }
 
 .text-start > .v-data-table__expand-icon {
