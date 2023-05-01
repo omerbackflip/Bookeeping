@@ -24,11 +24,14 @@ module.exports = mongoose => {
     { timestamps: true }
   );
 
-  schema.method("toJSON", function() {
-    const { __v, _id, ...object } = this.toObject();
-    object.id = _id;
-    return object;
-  });
+  schema.index({ year: 1});
+  schema.index({ company: 1});
+
+  // schema.method("toJSON", function() {
+  //   const { __v, _id, ...object } = this.toObject();
+  //   object.id = _id;
+  //   return object;
+  // });
 
   const Invoice = mongoose.model("invoice", schema);
   return Invoice;

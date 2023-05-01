@@ -4,7 +4,7 @@
       <v-flex>
         <v-data-table
           :headers="getHeaders()"
-          :items="Invoices"
+          :items="invoiceList"
           :search="search"
           disable-pagination
           hide-default-footer
@@ -25,12 +25,12 @@
           dense>
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title> {{$route.params.project ? $route.params.project : selectedYear}} - {{Invoices.length.toLocaleString()}} </v-toolbar-title>
+              <v-toolbar-title> {{$route.params.project ? $route.params.project : selectedYear}} - {{invoiceList.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
               <v-spacer></v-spacer>
               <export-excel
-                :data="Invoices"
+                :data="invoiceList"
                 :fields="xlsHeders"
                 type="xlsx"
                 name="all-data"
@@ -40,6 +40,7 @@
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
+              <v-btn @click="exportAll">Export All</v-btn>
             </v-toolbar>
           </template>
           <template v-slot:[`item.date`]="{ item }">
@@ -123,7 +124,7 @@
                     <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                   </v-col>
                   <v-col cols="12" class="no-padding">
-                    <v-text-field v-model="invoice.description" label="תאור" reverse></v-text-field>
+                    <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
                     <v-text-field @input="onAmountChange" v-model="invoice.amount" label="סכום" required @focus="$event.target.select()"></v-text-field>
@@ -135,7 +136,7 @@
                     <v-text-field @input="onTotalChange" v-model="invoice.total" label="סה'כ" required @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.year" label="שנה" @focus="$event.target.select()"></v-text-field>
+                    <v-text-field v-model="invoice.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
                     <v-text-field v-model="invoice.group" label="קובץ" required @focus="$event.target.select()"></v-text-field>
@@ -146,7 +147,7 @@
                         <v-text-field v-model="invoice.date" label="תאריך" readonly v-bind="attrs" v-on="on">
                         </v-text-field>
                       </template>
-                      <v-date-picker v-model="invoice.date" scrollable>
+                      <v-date-picker @input="onDateChange" v-model="invoice.date" scrollable>
                         <v-spacer></v-spacer>
                         <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
                         <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)"> OK </v-btn>
@@ -154,13 +155,13 @@
                     </v-dialog>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field v-model="invoice.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
+                    <v-text-field v-model="invoice.year" label="שנה" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="12" class="no-padding">
-                    <v-textarea v-model="invoice.remark" label="הערה" reverse auto-grow rows="1" style="text-align-last: right;"></v-textarea>
+                    <v-textarea v-model="invoice.remark" label="הערה" auto-grow rows="1" @focus="$event.target.select()"></v-textarea>
                   </v-col>
                 </v-row>
               </v-form>
@@ -306,7 +307,7 @@ export default {
   props: ['showSelect'],
 	data() {
 		return {
-			Invoices: [],
+			invoiceList: [],
 			companyName: [],
 			projectName: [],
 			supplierName: [],
@@ -349,8 +350,9 @@ export default {
 				ספק: "supplier",
 				חשבונית: "invoiceId",
 				excelRecID: "excelRecID",
-				הערה: "remark",
+				הערה: "remark", 
 				נשלח: "published",
+        year: "year"
 			},
 			invoice: [],
 			msg: "",
@@ -433,7 +435,7 @@ export default {
         this.selectedYear = this.$route.query.year
       }
 
-    let response = '';
+      let response = '';
 			this.isLoading = true;
       if (this.$route.params.project) {
         response = await apiService.getMany({
@@ -448,7 +450,8 @@ export default {
         });
       }
 			if (response && response.data) {
-				this.Invoices = response.data;
+				this.invoiceList = response.data;
+        this.invoiceList.sort((a, b) => b.group - a.group);
 				this.isLoading = false;
 			}
 		},
@@ -617,10 +620,26 @@ export default {
       }
     },
 
+    onDateChange() {
+      this.invoice.year = new Date((this.invoice.date)).getFullYear();
+    },
+
     selectRow() {
       // this.selected[0] ? this.$emit('lookForMatch', this.selected[0]) : ''
       this.$emit('lookForMatch', this.selected[0] || '')
     },
+
+    async exportAll() {
+      let response = '';
+			this.isLoading = true;
+      response = await apiService.getMany({ model: INVOICE_MODEL });
+			if (response && response.data) {
+				this.invoiceList = response.data;
+        this.invoiceList.sort((a, b) => b.group - a.group);
+				this.isLoading = false;
+			}
+    }
+
 	},
 
 	async mounted() {
@@ -827,5 +846,6 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .no-padding {
   padding-top: 0px !important;
   padding-bottom: 0px !important;
+  text-align-last: end;
 }
 </style>
