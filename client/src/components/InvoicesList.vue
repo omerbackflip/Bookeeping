@@ -512,6 +512,7 @@ export default {
 
 		saveNewInvoice: async function () {
 			try {
+        delete this.invoice._id; // in case of "copy", remove the _id
 				const response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
 				if (response) {
 					this.invoice.id = response.data.id;
