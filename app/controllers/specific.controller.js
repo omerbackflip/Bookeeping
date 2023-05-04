@@ -30,7 +30,7 @@ exports.saveInvoicesBulk = async (req, res) => {
 		const suppliers = uniqueSuppliers.map(item => {return { 'table_id' : '3' , 'description' : item}});
 		await Table.insertMany(suppliers, { ordered: true });
 
-		data = data.map(item => item.published === 'T' ? { ...item, published: true } : { ...item, published: false });
+		data = data.map(item => item.published === 'TRUE' ? { ...item, published: true } : { ...item, published: false });
 		if (data) {
 			const result = await Invoice.insertMany(data, { ordered: true });
 			unLinkFile(`uploads/${req.file.filename}`);

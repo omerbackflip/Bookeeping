@@ -5,6 +5,7 @@
             <v-spacer></v-spacer>
             <template>
                 <div class="mt-2 text-center d-flex">
+                    <!-- {{ url }} -->
                     <span class="d-content">
                         <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
                             <v-btn value="ביצועים" elevation="3" small >ביצועים</v-btn>
@@ -63,7 +64,8 @@
 <script>
 import ImportCSV from '../ImportCSV.vue';
 import { navItems } from '../../constants/constants';
-import router from '../../router';
+// import router from '../../router';
+// import url from "../../../../app/config/db.config"
 
 export default {
     components: { ImportCSV },
@@ -82,6 +84,7 @@ export default {
             ],
             toggleCompany : 'ביצועים',
             selectedYear: 2023,
+            // url: url,
         }
     },
     methods:{
@@ -90,8 +93,8 @@ export default {
         },
 
         onYearChange(event) {
-            this.query = { year: event };
-            router.push({query: this.query});
+            // this.query = { year: event };
+            // router.push({query: this.query});
             this.$root.$emit('yearChange',event);
         },
 
@@ -104,7 +107,7 @@ export default {
         },
 
         runModal(importData) {
-            console.log(importData)
+            // console.log(importData)
             switch (importData) {
                 case 'INVOICES' :
                     this.importData = "INVOICES";

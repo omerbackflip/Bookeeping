@@ -25,7 +25,7 @@
           dense>
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title> {{$route.params.project ? $route.params.project : selectedYear}} - {{invoiceList.length.toLocaleString()}} </v-toolbar-title>
+              <v-toolbar-title> {{header}} - {{invoiceList.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
               <v-spacer></v-spacer>
@@ -40,7 +40,7 @@
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
-              <v-btn @click="exportAll">Export All</v-btn>
+              <v-btn @click="exportAll" x-small class="mx-3">Export All</v-btn>
             </v-toolbar>
           </template>
           <template v-slot:[`item.date`]="{ item }">
@@ -363,6 +363,7 @@ export default {
       bookInfo: '',
       dateModal : false,
       selected: [],
+      header: '',
 		};
 	},
 
@@ -434,7 +435,6 @@ export default {
 			if (this.$route.query.year) {
         this.selectedYear = this.$route.query.year
       }
-
       let response = '';
 			this.isLoading = true;
       if (this.$route.params.project) {
@@ -442,12 +442,14 @@ export default {
           model: INVOICE_MODEL,
           project: this.$route.params.project,
         });
+        this.header = this.$route.params.project
       } else {
         response = await apiService.getMany({
           model: INVOICE_MODEL,
           year: this.selectedYear,
           company: this.selectedCompany,
         });
+        this.header = this.selectedYear + ' ' + this.selectedCompany
       }
 			if (response && response.data) {
 				this.invoiceList = response.data;
@@ -637,6 +639,7 @@ export default {
 			if (response && response.data) {
 				this.invoiceList = response.data;
         this.invoiceList.sort((a, b) => b.group - a.group);
+        this.header = 'All Invoices '
 				this.isLoading = false;
 			}
     }
@@ -696,7 +699,7 @@ export default {
 		},
     selectedCompany() {
 			this.retrieveInvoices();
-      this.refreshList();
+      // this.refreshList();
 		},
 	},
 };
@@ -839,6 +842,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 }
 .v-toolbar__title {
     font-size: 1rem;
+    direction: rtl;
 }
 .sreach-width {
   width: 4rem;

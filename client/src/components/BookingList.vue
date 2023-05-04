@@ -24,7 +24,7 @@
 			dense>
 			<template v-slot:top>
 				<v-toolbar flat>
-					<v-toolbar-title> {{selectedYear}} - {{books.length.toLocaleString()}} </v-toolbar-title>
+					<v-toolbar-title> {{header}} - {{books.length.toLocaleString()}} </v-toolbar-title>
 					<v-spacer></v-spacer>
 					<v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
 					<v-spacer></v-spacer>
@@ -190,6 +190,7 @@ export default {
 				{ text: "Date", value: "asmchta_date", align: "right"},
 			],
 			selected: [],
+			header: '',
 		};
 	},
 
@@ -218,6 +219,7 @@ export default {
 			if (response && response.data) {
 				this.books = response.data;
 			}
+			this.header = this.selectedYear + ' ' + this.selectedCompany
 			this.isLoading = false;
 		},
 
