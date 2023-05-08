@@ -32,7 +32,6 @@ exports.createItem = async (model,payload) => {
 },
 exports.deleteItem = async (model,query) => {
     try {
-        // return await model.remove(query);
         return await model.deleteMany(query);
     } catch (error) {
         console.log(error)

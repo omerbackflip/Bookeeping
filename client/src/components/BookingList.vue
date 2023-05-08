@@ -4,7 +4,7 @@
       <v-flex>
         <v-data-table
 			:headers="headers"
-			:items="books"
+			:items="bookList"
 			:search="search"
 			disable-pagination
 			hide-default-footer
@@ -24,7 +24,7 @@
 			dense>
 			<template v-slot:top>
 				<v-toolbar flat>
-					<v-toolbar-title> {{header}} - {{books.length.toLocaleString()}} </v-toolbar-title>
+					<v-toolbar-title> {{header}} - {{bookList.length.toLocaleString()}} </v-toolbar-title>
 					<v-spacer></v-spacer>
 					<v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
 					<v-spacer></v-spacer>
@@ -125,7 +125,7 @@ export default {
 	// components: { VueVirtualTable },
 	data() {
 		return {
-			books: [],
+			bookList: [],
 			currInvoice: null,
 			currentIndex: -1,
 			search: "",
@@ -217,7 +217,7 @@ export default {
 				company: this.selectedCompany,
 			});
 			if (response && response.data) {
-				this.books = response.data;
+				this.bookList = response.data;
 			}
 			this.header = this.selectedYear + ' ' + this.selectedCompany
 			this.isLoading = false;
@@ -230,7 +230,7 @@ export default {
 		},
 
 		removeAllBooks() {
-			if (window.confirm(`Are you sure you want to delete all items of ${this.selectedYear} ?`)) {
+			if (window.confirm(`Are you sure you want to delete all BOOKING of ${this.selectedYear} ?`)) {
 				apiService.deleteAll({ model: BOOKS_MODEL, year: this.selectedYear })
 				.then(() => {
 					this.refreshList();
@@ -275,6 +275,7 @@ export default {
 		this.$root.$on("yearChange", (year) => {
 			this.selectedYear = year;
 		});
+
 		this.$root.$on("companyChange", (company) => {
 			this.selectedCompany = company;
 		});

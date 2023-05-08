@@ -5,7 +5,7 @@ export const REVENUE_MODEL = 'revenues';
 export const VAT_PERCENTAGE = 17;
 
 export const INVOICE_MOBILE_HEADERS = [
-    { text: "G",            value: "group",         class: "hdr-styles",  groupable: false, align: "right"},	
+    // { text: "G",            value: "group",         class: "hdr-styles",  groupable: false, align: "right"},	
     { text: "Date",         value: "date",          class: "mobile-headers",  groupable: false},	
     { text: "Description",  value: "description",   class: "mobile-headers",  groupable: false,   align: "right"},
     { text: "Amount",       value: "amount",        class: "mobile-headers",  groupable: false,   align: "right", width: "4%"},

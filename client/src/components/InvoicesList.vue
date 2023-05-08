@@ -40,11 +40,14 @@
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
-              <v-btn @click="exportAll" x-small class="mx-3">Export All</v-btn>
+              <v-btn @click="exportAll" x-small class="mx-3">All</v-btn>
             </v-toolbar>
           </template>
           <template v-slot:[`item.date`]="{ item }">
-            <span> {{ item.date | formatDate }}</span>
+            <span style="margin-left: 0.5rem"> {{ item.date | formatDate }}</span>
+            <td @click.stop>
+              <span v-if="isMobile()" @click="getSummary('group', item.group)" class="summary" style="margin-left: 1.9rem">{{ item.group }}</span>
+            </td>
           </template>
           <template v-slot:[`item.total`]="{ item }">
             <v-tooltip bottom>
@@ -199,7 +202,7 @@
             </v-btn>
             <v-btn small v-show="!invoiceID" class="mx-3" @click="clearForm"> Clear </v-btn>
             <v-spacer></v-spacer>
-            <v-icon v-show="invoiceID" color="red" @click="deleteOne(invoice.id, invoice.description)">mdi-delete</v-icon>
+            <v-icon v-show="invoiceID" color="red" @click="deleteOne(invoiceID, invoice.description)">mdi-delete</v-icon>
             <v-icon color="red" @click="dialog = false">mdi-close-box</v-icon>
           </v-card-actions>
         </v-card>
@@ -325,7 +328,9 @@ export default {
 				{ text: "Description", value: "description", align: "right", class: "hdr-styles" },
 				{ text: "Project", value: "project", align: "right", class: "hdr-styles" },
 				{ text: "Supplier", value: "supplier", align: "right", class: "hdr-styles" },
+				{ text: "Invoice", value: "invoiceId", align: "right", class: "hdr-styles" },
 				{ text: "Date", value: "date", align: "right", class: "hdr-styles" },
+				{ text: "G", value: "group", align: "right", class: "hdr-styles" },
 			],
       bookHeaders: [
         { text: "Record_ID", value: "record_id", aligh: "right"},
@@ -474,7 +479,7 @@ export default {
 		},
 
 		async removeAllInvoices() {
-			if (window.confirm(`Are you sure you want to delete all items of year ${this.selectedYear} ?`)) {
+			if (window.confirm(`Are you sure you want to delete all INVOICES of year ${this.selectedYear} ?`)) {
 				const response = await apiService.deleteAll({model: INVOICE_MODEL,year: Number(this.selectedYear),});
 				if (response) {
 					this.refreshList();
@@ -667,7 +672,6 @@ export default {
 		});
 
 		this.$root.$on("removeAllItems", () => {
-			// setTimeout(100);
 			this.removeAllInvoices();
 		});
 
@@ -699,7 +703,6 @@ export default {
 		},
     selectedCompany() {
 			this.retrieveInvoices();
-      // this.refreshList();
 		},
 	},
 };

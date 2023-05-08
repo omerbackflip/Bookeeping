@@ -4,7 +4,7 @@
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
             <v-spacer></v-spacer>
             <template>
-                <div class="mt-2 text-center d-flex">
+                <div v-if="showControl" class="mt-2 text-center d-flex">
                     <!-- {{ url }} -->
                     <span class="d-content">
                         <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
@@ -24,13 +24,13 @@
                             elevation="3"
                         ></v-select>
                     </span>
-                    <v-menu offset-y>
+                    <v-menu v-if="this.$route.name==='invoices-list'" offset-y>
                         <template v-slot:activator="{ on, attrs }">
                             <v-btn icon v-bind="attrs" v-on="on">
                                 <v-icon>mdi-dots-vertical</v-icon>
                             </v-btn>
                         </template>
-                        <v-list v-show="isInvoices">
+                        <v-list>
                             <v-list-item v-for="(item, index) in items" :key="index">
                                 <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
                                     {{item.title}}
@@ -151,11 +151,22 @@ export default {
 
     },
     computed: {
-        isInvoices() {
-            return this.$route.name === 'invoices-list';
-        },
-        isBookingList() {
-            return this.$route.name === 'bookingList';
+        // isInvoices() {
+        //     return this.$route.name === 'invoices-list';
+        // },
+        // isBookingList() {
+        //     return this.$route.name === 'bookingList';
+        // },
+        showControl() {
+            let show = false
+            switch (this.$route.name) {
+                case 'invoices-list': 
+                case 'bookingList': 
+                case 'synergyList': 
+                    show = true;
+                    break;
+            }
+            return show;
         }
     }
 }

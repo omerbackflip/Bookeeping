@@ -241,7 +241,7 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 
 .v-toolbar__title {
     font-size: 1rem;
-    white-space: pre-wrap;
+    white-space: pre-line;
 }
 
 .expanded-datatable{

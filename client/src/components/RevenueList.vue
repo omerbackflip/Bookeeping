@@ -17,13 +17,13 @@
           dense>
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title> Total Revenues - {{revenueList.length.toLocaleString()}} </v-toolbar-title>
+              <v-toolbar-title> Count - {{revenueList.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
               <v-spacer></v-spacer>
               <v-btn @click="updateRevenue()" small class="mt-3">
 								<v-icon class="nav-icon" small >mdi-plus</v-icon>
-								Add Revenue
+								Add 
 							</v-btn>
             </v-toolbar>
           </template>
@@ -220,4 +220,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   border: 5px solid #98e983;
 	cursor: pointer;
 }
+
+.v-toolbar__title {
+    font-size: 1rem;
+    white-space: pre-line;
+}
+
 </style>
