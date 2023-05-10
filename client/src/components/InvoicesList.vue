@@ -54,7 +54,7 @@
               <template v-slot:activator="{ on }">
                 <span v-on="on">{{ item.total ? item.total.toLocaleString() : "" }}</span>
               </template>
-              <span>{{ item.pratim }}-{{ Number(item.record_schum).toLocaleString() }}-{{ item.cust_lname }}</span>
+              <span>This is Hint</span>
             </v-tooltip>
           </template>
           <template v-slot:[`item.vat`]="{ item }">
@@ -372,6 +372,7 @@ export default {
 		};
 	},
 
+          /* eslint-disable */
 	methods: {
 		getHeaders() {
 			if (this.isMobile()) {

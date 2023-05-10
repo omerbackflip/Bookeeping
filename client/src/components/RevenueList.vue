@@ -25,6 +25,18 @@
 								<v-icon class="nav-icon" small >mdi-plus</v-icon>
 								Add 
 							</v-btn>
+
+              <export-excel
+                :data="revenueList"
+                type="xlsx"
+                name="all-revenues"
+                title="All Revenues"
+                footer="This is footer">
+                <v-btn x-small class="btn btn-danger">
+                  <v-icon small>mdi-download</v-icon>
+                </v-btn>
+              </export-excel>
+
             </v-toolbar>
           </template>
           <template v-slot:[`item.amount`]="{ item }">
