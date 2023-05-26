@@ -49,6 +49,10 @@ class SpecificServiceEndPoints {
   async addPaymentsToInvoice(invoiceId,paymentList) {
 		return await axios.put(`${baseUrl}/specific/add-payments-to-invoice/${invoiceId}`, paymentList);
 	}
+
+  async getDbInfo() {
+		return await axios.get(`${baseUrl}/specific/get-database-info`);
+	}
 }
 
 export default new SpecificServiceEndPoints();

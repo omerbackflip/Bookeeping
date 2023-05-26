@@ -2,10 +2,17 @@
     <nav>
         <v-app-bar app dark>
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
+            <div :class="local ? 'bckg-red' :''">
+                <div v-if="isMobile()">
+                    {{local ? 'L' : 'P'}}
+                </div>
+                <div v-else>
+                    {{local ? 'Local' : 'Prod'}}
+                </div>
+            </div>
             <v-spacer></v-spacer>
             <template>
                 <div v-if="showControl" class="mt-2 text-center d-flex">
-                    <!-- {{ url }} -->
                     <span class="d-content">
                         <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
                             <v-btn value="ביצועים" elevation="3" small >ביצועים</v-btn>
@@ -64,8 +71,7 @@
 <script>
 import ImportCSV from '../ImportCSV.vue';
 import { navItems } from '../../constants/constants';
-// import router from '../../router';
-// import url from "../../../../app/config/db.config"
+import SpecificServiceEndPoints from "../../services/specificServiceEndPoints";
 
 export default {
     components: { ImportCSV },
@@ -84,7 +90,7 @@ export default {
             ],
             toggleCompany : 'ביצועים',
             selectedYear: 2023,
-            // url: url,
+            local: false,
         }
     },
     methods:{
@@ -149,7 +155,24 @@ export default {
             }
         },
 
+        async getDatabaseInformation() {
+            try {
+                const response = await SpecificServiceEndPoints.getDbInfo();
+                if(response && response.data && response.data.success) {
+                    this.local = response.data.local;
+                }
+            } catch (error) {
+                console.log(error);
+
+            }
+        }
+
     },
+
+    mounted() {
+        this.getDatabaseInformation();
+    },
+
     computed: {
         // isInvoices() {
         //     return this.$route.name === 'invoices-list';
@@ -215,6 +238,10 @@ export default {
     }
     .mobile-search{
         margin: 8px 0 4px 3px !important; 
+    }
+    .bckg-red {
+        background-color: red;
+        /* -webkit-writing-mode: vertical-rl */
     }
 
 </style>

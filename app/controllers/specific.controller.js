@@ -5,6 +5,7 @@ const Table = db.tables;
 const Revenue = db.revenues;
 const csv = require('csvtojson')
 var fs = require('fs');
+const { url } = require("../config/db.config");
 
 exports.saveInvoicesBulk = async (req, res) => {
 	if (!req.body) {
@@ -222,6 +223,16 @@ exports.addPaymentsToInvoice = async(req,res) => {
 		res.status(500).send({ message: "Error updating PROJECT with associated suppliers", error });
     }
 }
+
+exports.getDbInfo = (req,res) => {
+	try {
+		const local = url.includes('localhost'); //retuens true/false
+		return res.send({ success: true, local});
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({ message: "Error getting db info", error });
+	}
+};
 
 function unLinkFile(path) {
 	fs.unlinkSync(path);
