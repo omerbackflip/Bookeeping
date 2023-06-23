@@ -179,7 +179,8 @@ export default {
     },
 
     async updateRevenue(item) {
-			let newRevenue = item ? false : true;
+      // if item.payedList exsit - this is called for create new Revevue
+			let newRevenue = item.payedList ? true : false;
 			await this.$refs.revenueForm.open(item, newRevenue);
       this.mainSummary();
 		},

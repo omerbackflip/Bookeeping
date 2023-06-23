@@ -55,7 +55,7 @@ export const NEW_INVOICE = {
         vat: null,
         total: null,
         group: "",
-        date: null,
+        date: new Date(),
         supplier: "",
         invoiceId: "",
         remark: "",
@@ -76,4 +76,5 @@ export const navItems = [
     {icon: 'widgets', text: 'Synergy List', route: '/synergyList'},
     {icon: 'widgets', text: 'Summary', route: '/Summary'},
     {icon: 'widgets', text: 'Revenues', route: '/RevenueList'},
+    {icon: 'widgets', text: 'Forcast Payments', route: '/ForecastPayment'},
 ]

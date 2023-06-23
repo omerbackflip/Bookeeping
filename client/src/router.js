@@ -37,5 +37,10 @@ export default new Router({
       name: "revenueList",
       component: () => import("./components/RevenueList")
     },
+    {
+      path: "/forecastPayment",
+      name: "forecastPayment",
+      component: () => import("./components/ForecastPayment")
+    },
   ]
 });

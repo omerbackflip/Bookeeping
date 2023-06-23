@@ -1,17 +1,9 @@
 <template>
   <div class="list row">
     <v-layout row wrap>
-      <v-flex xs12 md4>
-        <v-text-field
-          v-model="search"
-          append-icon="mdi-magnify"
-          label="חיפוש"
-          single-line
-          hide-details
-        ></v-text-field>
+      <v-flex xs12 md6 mt-5>
         <v-data-table :headers="headers" 
                       :items="tableID"
-                      :search="search"
                       disable-pagination
                       hide-default-footer
                       fixed-header
@@ -21,6 +13,21 @@
                       class="elevation-3"
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
+          <template v-slot:top>
+            <v-toolbar>
+              <v-row>
+                <v-col cols="5">
+                  <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="חיפוש"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              </v-toolbar>           
+          </template>
           <template v-slot:[`item.actions`]="{ item }"> 
             <!-- <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon> -->
             <div>
@@ -60,24 +67,37 @@
         </v-data-table>
       </v-flex>
 
-
-
-
-
       <!-- SECOND TABLE -->
-
-      <v-flex xs12 md4 mt-3>
-        <div class="title"> {{ tableTitle ? tableTitle : 'Title' }} </div>
+      <v-flex xs12 md6 mt-5>
         <v-data-table :headers="headers" 
                       :items="tableCode"
                       disable-pagination
                       dense
+                      :search="search"
                       hide-default-footer
                       fixed-header
                       height="75vh"
                       class="elevation-3"
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
+          <template v-slot:top>
+            <v-toolbar>
+              <v-row>
+                <v-col cols="5">
+                  <v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="חיפוש"
+                    single-line
+                    hide-details
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="5">
+                  <v-text-field v-model="tableTitle">  {{tableTitle}} </v-text-field>
+                </v-col>
+              </v-row>
+            </v-toolbar>           
+          </template>
           <template v-slot:[`item.actions`]="{ item }"> 
             <!-- <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon> -->
             <div>

@@ -103,12 +103,12 @@
       </v-flex>
 
       <!-- Add New/Update row dialog -->
-      <v-dialog v-model="dialog" >
+      <!-- <v-dialog v-model="dialog" >
         <v-card>
           <v-card-title>
             <span class="text-h5">{{ invoiceID ? "Update" : "Add New" }}</span>
             <v-spacer></v-spacer>
-            <v-btn v-show="invoiceID" @click="invoiceID=null"> Copy </v-btn>
+            <v-btn v-show="invoiceID" @click="invoiceID=null ; invoice.published=false"> Copy </v-btn>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -206,7 +206,7 @@
             <v-icon color="red" @click="dialog = false">mdi-close-box</v-icon>
           </v-card-actions>
         </v-card>
-      </v-dialog>
+      </v-dialog> -->
 
       <!-- SummaryDialog for supplier/Project/Group -->
       <v-dialog v-model="summaryDialog" max-width="1100px">
@@ -236,10 +236,11 @@
                       :footer="summaryTotal.toLocaleString()"
                       class="mt-3">
                       <v-toolbar-title>
-                        {{ summaryName }} - {{ summaryTotal.toLocaleString() }}
+                        <div> <span>{{ summaryName }} - {{ summaryTotal.toLocaleString() }}  </span>
+                        <span>{{ summaryBudget ? ' ------------ Budget - '  + summaryBudget.toLocaleString(): ''}}</span>
                         <v-btn small class="btn btn-danger">
                           <v-icon>mdi-download</v-icon>
-                        </v-btn>
+                        </v-btn></div>
                       </v-toolbar-title>
                     </export-excel>
                   <v-spacer />
@@ -255,6 +256,8 @@
           </v-flex>
         </v-card>
       </v-dialog>
+
+      <invoice-form ref="invoiceForm"/>
 
       <v-dialog v-model="bookDialog" max-width="600px">
         <v-card>
@@ -295,7 +298,7 @@ import apiService from "../services/apiService";
 import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
 import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, 
           TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE, VAT_PERCENTAGE } from "../constants/constants";
-
+import invoiceForm from "./InvoiceForm.vue"
 Vue.use(excel);
 
 Vue.filter("formatDate", function (value) {
@@ -308,6 +311,7 @@ Vue.filter("formatDate", function (value) {
 export default {
 	name: "invoices-list",
   props: ['showSelect'],
+	components: { invoiceForm },
 	data() {
 		return {
 			invoiceList: [],
@@ -319,6 +323,7 @@ export default {
       bookDialog: false,
 			summaryDialog: false,
       summaryTotal: 0,
+      summaryBudget: 0,
 			summaryFilter: [],
 			summaryName: "",
       expanded: [],
@@ -394,6 +399,9 @@ export default {
           // fatch all paymanets for this supplier cross years.
           response = await apiService.getMany({model: INVOICE_MODEL,supplier: summaryItem})
           this.summaryFilter = response.data
+          // get the busget of this supplier
+          response = await apiService.getMany({model: TABLE_MODEL, table_id: 3, description: summaryItem})
+          this.summaryBudget = response.data[0].table_code
           break;
         case 'group':
           // fatch all paymanets for this group cross years.
@@ -418,15 +426,15 @@ export default {
 				return false;
 			}
 		},
-		async deleteOne(id, description) {
-			if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
-				const response = await apiService.deleteOne({model: INVOICE_MODEL,id});
-				if (response) {
-					this.dialog = false;
-					this.refreshList();
-				}
-			}
-		},
+		// async deleteOne(id, description) {
+		// 	if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
+		// 		const response = await apiService.deleteOne({model: INVOICE_MODEL,id});
+		// 		if (response) {
+		// 			this.dialog = false;
+		// 			this.refreshList();
+		// 		}
+		// 	}
+		// },
     async retriveBookData(item){
       const response = await apiService.getMany({ model: BOOKS_MODEL,
                                               // record_id:item.excelRecID,
@@ -518,48 +526,48 @@ export default {
 			}
 		},
 
-		saveNewInvoice: async function () {
-			try {
-        delete this.invoice._id; // in case of "copy", remove the _id
-				const response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
-				if (response) {
-					this.invoice.id = response.data.id;
-					this.refreshList();
-					this.clearForm();
-					this.dialog = false;
-				}
-			} catch (error) {
-				this.msg = JSON.stringify(error.message);
-				setTimeout(() => {
-					this.msg = "";
-				}, 3000);
-				console.log(error);
-			}
-		},
+		// saveNewInvoice: async function () {
+		// 	try {
+    //     delete this.invoice._id; // in case of "copy", remove the _id
+		// 		const response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
+		// 		if (response) {
+		// 			this.invoice.id = response.data.id;
+		// 			this.refreshList();
+		// 			this.clearForm();
+		// 			this.dialog = false;
+		// 		}
+		// 	} catch (error) {
+		// 		this.msg = JSON.stringify(error.message);
+		// 		setTimeout(() => {
+		// 			this.msg = "";
+		// 		}, 3000);
+		// 		console.log(error);
+		// 	}
+		// },
     // this is called from the update dialog or from updateInvoice from Synergy
-		async updateInvoice() {
-			try {
-				const response = await apiService.update(this.invoiceID, this.invoice, { model: INVOICE_MODEL });
-				if (response) {
-					this.refreshList();
-					this.clearForm();
-					this.invoiceID = 0;
-					this.dialog = false;
-				}
-			} catch (error) {
-				this.msg = JSON.stringify(error.message);
-				setTimeout(() => {
-					this.msg = "";
-				}, 3000);
-				console.log(error);
-			}
-		},
+		// async updateInvoice() {
+		// 	try {
+		// 		const response = await apiService.update(this.invoiceID, this.invoice, { model: INVOICE_MODEL });
+		// 		if (response) {
+		// 			this.refreshList();
+		// 			this.clearForm();
+		// 			this.invoiceID = 0;
+		// 			this.dialog = false;
+		// 		}
+		// 	} catch (error) {
+		// 		this.msg = JSON.stringify(error.message);
+		// 		setTimeout(() => {
+		// 			this.msg = "";
+		// 		}, 3000);
+		// 		console.log(error);
+		// 	}
+		// },
 
 		clearForm() {
 			this.$refs.form.reset();
 		},
 
-    // get invoice data before open dialog for edit
+    // get invoice data before call to invoiceForm for edit
 		async getInvoiceForEdit(item) {
 			if (item._id) {
 				this.invoiceID = item._id;
@@ -574,7 +582,8 @@ export default {
             });
           }
 				}
-				this.dialog = true;
+				// this.dialog = true;
+			  await this.$refs.invoiceForm.open(this.invoice, false);
 			}
 		},
 
@@ -658,10 +667,11 @@ export default {
 		await this.loadTable(2, "projectName");
 		await this.loadTable(3, "supplierName");
 
-    this.$root.$on("addNewInvoice", () => {
-			this.dialog = true;
+    this.$root.$on("addNewInvoice", async () => {
+			// this.dialog = true;
 			this.invoiceID = 0;
       this.invoice = NEW_INVOICE;
+      await this.$refs.invoiceForm.open(this.invoice, true);
 		});
 
     this.$root.$on("yearChange", (year) => {
@@ -689,13 +699,13 @@ export default {
     });
 
     // this is called from SynergyList for update match
-    this.$root.$on("invoiceUpdate", (invoice) => {
-      this.invoiceID = invoice._id
-      delete invoice._id
-			this.invoice = invoice
-      this.updateInvoice()
-      this.selected = []
-		});
+    // this.$root.$on("invoiceUpdate", (invoice) => {
+    //   this.invoiceID = invoice._id
+    //   delete invoice._id
+		// 	this.invoice = invoice
+    //   this.updateInvoice()
+    //   this.selected = []
+		// });
 	},
 	
   watch: {

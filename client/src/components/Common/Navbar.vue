@@ -7,20 +7,17 @@
                     {{local ? 'L' : 'P'}}
                 </div>
                 <div v-else>
-                    {{local ? 'Local' : 'Prod'}}
+                    {{local ? 'LocalHost' : 'Production'}}
                 </div>
             </div>
             <v-spacer></v-spacer>
             <template>
                 <div v-if="showControl" class="mt-2 text-center d-flex">
-                    <span class="d-content">
+                    <!-- <span class="d-content"> -->
                         <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
                             <v-btn value="ביצועים" elevation="3" small >ביצועים</v-btn>
                             <v-btn value="יזמות"   elevation="3" small > יזמות </v-btn>
                         </v-btn-toggle>
-                        <v-btn small @click="callAddNewInvoice" elevation="3" class="mt-1">
-                            <v-icon>mdi-plus</v-icon>
-                        </v-btn>
                         <v-select class="year-input" 
                             v-model="selectedYear"
                             :items="[2019, 2020, 2021, 2022, 2023]"
@@ -30,21 +27,26 @@
                             solo
                             elevation="3"
                         ></v-select>
-                    </span>
-                    <v-menu v-if="this.$route.name==='invoices-list'" offset-y>
-                        <template v-slot:activator="{ on, attrs }">
-                            <v-btn icon v-bind="attrs" v-on="on">
-                                <v-icon>mdi-dots-vertical</v-icon>
-                            </v-btn>
-                        </template>
-                        <v-list>
-                            <v-list-item v-for="(item, index) in items" :key="index">
-                                <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
-                                    {{item.title}}
-                                </v-list-item-title>
-                            </v-list-item>
-                        </v-list>
-                    </v-menu>
+                    <!-- </span> -->
+                    <div v-if="this.$route.name==='invoices-list'">
+                        <v-btn small @click="callAddNewInvoice">
+                                <v-icon>mdi-plus</v-icon>
+                        </v-btn>
+                        <v-menu offset-y>
+                            <template v-slot:activator="{ on, attrs }">
+                                <v-btn icon v-bind="attrs" v-on="on">
+                                    <v-icon>mdi-dots-vertical</v-icon>
+                                </v-btn>
+                            </template>
+                            <v-list>
+                                <v-list-item v-for="(item, index) in items" :key="index">
+                                    <v-list-item-title class="cursor-pointer" @click="onMenuItemClick(index)">
+                                        {{item.title}}
+                                    </v-list-item-title>
+                                </v-list-item>
+                            </v-list>
+                        </v-menu>
+                    </div>
                 </div>
             </template>
         </v-app-bar>

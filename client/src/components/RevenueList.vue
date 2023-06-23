@@ -138,25 +138,25 @@ export default {
 		// 	this.$refs.form.reset();
 		// },
 
-        // this is called from the update dialog
-		async saveRevenue() {
-			try {
-        let response = ''
-        this.revenueItem._id ? 
-            response = await apiService.update(this.revenueItem._id, this.revenueItem, { model: REVENUE_MODEL }) 
-              : 
-            response = await apiService.create( this.revenueItem, { model: REVENUE_MODEL }) 
-				if (response) {
-					this.dialog = false;
-				}
-			} catch (error) {
-				this.msg = JSON.stringify(error.message);
-				setTimeout(() => {
-					this.msg = "";
-				}, 3000);
-				console.log(error);
-			}
-		},
+    // this is called from the update dialog
+		// async saveRevenue() {
+		// 	try {
+    //     let response = ''
+    //     this.revenueItem._id ? 
+    //         response = await apiService.update(this.revenueItem._id, this.revenueItem, { model: REVENUE_MODEL }) 
+    //           : 
+    //         response = await apiService.create( this.revenueItem, { model: REVENUE_MODEL }) 
+		// 		if (response) {
+		// 			this.dialog = false;
+		// 		}
+		// 	} catch (error) {
+		// 		this.msg = JSON.stringify(error.message);
+		// 		setTimeout(() => {
+		// 			this.msg = "";
+		// 		}, 3000);
+		// 		console.log(error);
+		// 	}
+		// },
 
     clickRow(item,event) {
       if(event.isExpanded) {

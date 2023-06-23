@@ -26,9 +26,11 @@
 <script>
 import BookingListVue from './BookingList.vue';
 import InvoicesListVue from './InvoicesList.vue';
+import { INVOICE_MODEL } from "../constants/constants";
+import apiService from "../services/apiService";
 
 export default {
-	// name:"Synergy list",
+	// name:"Synergy-list",
 	components: { 'invoice-list': InvoicesListVue, 'booking-list': BookingListVue },
 	data() {
 		return {
@@ -40,8 +42,8 @@ export default {
 		async updateExcelRecId() {
 			this.invoiceMerge.excelRecID = this.bookMerge.record_id;
 			this.invoiceMerge.invoiceId = this.bookMerge.asmacta1;
-			// console.log (this.invoiceMerge)
-            await this.$root.$emit('invoiceUpdate',this.invoiceMerge);
+			await apiService.update(this.invoiceMerge._id, this.invoiceMerge, { model: INVOICE_MODEL });
+            // await this.$root.$emit('invoiceUpdate',this.invoiceMerge);
 
 		}
 	}
