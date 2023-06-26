@@ -1,3 +1,4 @@
 node_modules
 uploads
 app/config/db.config.js
+.env

@@ -77,6 +77,7 @@ export default {
 				{ text: "Date", value: "date", class: "hdr-styles", align: "right" },
 				{ text: "Payment", value: "payment", class: "hdr-styles", align: "right" },
 				{ text: "checkID", value: "checkID", class: "hdr-styles", align: "right" },
+				{ text: "Supplier", value: "supplier", class: "hdr-styles", align: "right" },
 			],
 			invoice: [],
 		};
@@ -91,7 +92,8 @@ export default {
         }).map((item1) => {
           item1.payments.forEach((item2) => { // forEach invoice pickup the payments
             // this.paymentList.push(item2)      // and structure the paymentList
-            this.paymentList.push({ID:item1._id, checkID:item2.checkID, date:item2.date, payment:item2.payment})      // and structure the paymentList
+            this.paymentList.push({ID:item1._id, supplier:item1.supplier, 
+                                  checkID:item2.checkID, date:item2.date, payment:item2.payment}) // and structure the paymentList
           })
         })
         // now weed-out the duplicate payments with same chechID
