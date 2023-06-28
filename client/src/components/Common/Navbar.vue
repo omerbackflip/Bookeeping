@@ -74,12 +74,14 @@
 import ImportCSV from '../ImportCSV.vue';
 import { navItems } from '../../constants/constants';
 import SpecificServiceEndPoints from "../../services/specificServiceEndPoints";
+import { isMobile } from '../../constants/constants';
 
 export default {
     components: { ImportCSV },
     data() {
         return {
             navItems,
+            isMobile,
             query: null,
             drawer: false,
             openImportModal: false,
@@ -146,14 +148,6 @@ export default {
                 }
             } else {
                 this[link.onClick](link.import);
-            }
-        },
-
-        isMobile() {
-            if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-                return true;
-            } else {
-                return false;
             }
         },
 

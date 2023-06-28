@@ -90,6 +90,7 @@ import apiService from "../services/apiService";
 import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
 import { INVOICE_MODEL, TABLE_MODEL, REVENUE_MODEL, SUMMARY_WEB_HEADERS, SUMMARY_MOBILE_HEADERS } from "../constants/constants";
+import { isMobile } from '../constants/constants';
 
 Vue.use(excel);
 Vue.filter("formatDate", function (value) {
@@ -102,6 +103,7 @@ export default {
 	components: { RevenueForm, ConfirmDialog },
 	data() {
 		return {
+      isMobile,
 			invoices: [],
 			revenues: [],
 			projectList: [],
@@ -190,14 +192,6 @@ export default {
 				return SUMMARY_MOBILE_HEADERS;
 			} else {
 				return SUMMARY_WEB_HEADERS;
-			}
-		},
-
-    isMobile() {
-			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-				return true;
-			} else {
-				return false;
 			}
 		},
 	},

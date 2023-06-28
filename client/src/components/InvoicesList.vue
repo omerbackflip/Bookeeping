@@ -299,6 +299,7 @@ import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
 import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, 
           TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE, VAT_PERCENTAGE } from "../constants/constants";
 import invoiceForm from "./InvoiceForm.vue"
+import { isMobile } from '../constants/constants';
 Vue.use(excel);
 
 Vue.filter("formatDate", function (value) {
@@ -314,6 +315,7 @@ export default {
 	components: { invoiceForm },
 	data() {
 		return {
+      isMobile,
 			invoiceList: [],
 			companyName: [],
 			projectName: [],
@@ -417,14 +419,6 @@ export default {
       if (!this.summaryDialog) {
         this.summaryDialog = true;
       }
-		},
-
-		isMobile() {
-			if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-				return true;
-			} else {
-				return false;
-			}
 		},
 		// async deleteOne(id, description) {
 		// 	if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {

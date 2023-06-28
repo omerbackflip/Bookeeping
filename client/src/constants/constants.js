@@ -78,3 +78,11 @@ export const navItems = [
     {icon: 'widgets', text: 'Revenues', route: '/RevenueList'},
     {icon: 'widgets', text: 'Forcast Payments', route: '/ForecastPayment'},
 ]
+
+export const isMobile = () => {
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        return true;
+    } else {
+        return false;
+    }
+}
