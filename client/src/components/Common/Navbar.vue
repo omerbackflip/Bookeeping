@@ -29,8 +29,8 @@
                         ></v-select>
                     <!-- </span> -->
                     <div v-if="this.$route.name==='invoices-list'">
-                        <v-btn small @click="callAddNewInvoice">
-                                <v-icon>mdi-plus</v-icon>
+                        <v-btn x-small @click="callAddNewInvoice">
+                                <v-icon small>mdi-plus</v-icon>
                         </v-btn>
                         <v-menu offset-y>
                             <template v-slot:activator="{ on, attrs }">
@@ -72,9 +72,8 @@
 
 <script>
 import ImportCSV from '../ImportCSV.vue';
-import { navItems } from '../../constants/constants';
+import { navItems, isMobile } from '../../constants/constants';
 import SpecificServiceEndPoints from "../../services/specificServiceEndPoints";
-import { isMobile } from '../../constants/constants';
 
 export default {
     components: { ImportCSV },
@@ -205,13 +204,13 @@ export default {
     .year-input{
         /* padding: 0px; */
         /* margin-top: 7px; */
-        margin-left: 0.3rem;
+        margin: 0.3rem;
         width: -webkit-min-content;
-        width: -moz-min-content;
+        /* width: -moz-min-content; */
         /* width: min-content; */
         color: white;
         font-size: 12px;
-        height: 42px;
+        /* height: 42px; */
         box-shadow: none;
     }
     .search-wrapper{
@@ -239,7 +238,11 @@ export default {
         background-color: red;
         /* -webkit-writing-mode: vertical-rl */
     }
-
+    /* ::v-deep .v-toolbar__content {
+        padding-left: 2px;
+        padding-right: 2px;
+        inline-size: max-content !important;
+    } */
 </style>
 
 

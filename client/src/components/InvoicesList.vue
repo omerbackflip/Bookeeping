@@ -29,6 +29,7 @@
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
               <v-spacer></v-spacer>
+              <v-col style="text-align-last: center;">
               <export-excel
                 :data="invoiceList"
                 :fields="xlsHeders"
@@ -41,6 +42,7 @@
                 </v-btn>
               </export-excel>
               <v-btn @click="exportAll" x-small class="mx-3">All</v-btn>
+            </v-col>
             </v-toolbar>
           </template>
           <template v-slot:[`item.date`]="{ item }">
@@ -600,9 +602,9 @@ export default {
 			return classes;
 		},
 
-    removePaymentRec(index) {
-			this.invoice.payments.splice(index, 1);
-		},
+    // removePaymentRec(index) {
+		// 	this.invoice.payments.splice(index, 1);
+		// },
 
     addPaymentRow() {
 			this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
@@ -851,6 +853,8 @@ input[type="date"]::-webkit-calendar-picker-indicator {
 .v-toolbar__title {
     font-size: 1rem;
     direction: rtl;
+    white-space: pre-wrap;
+    text-align: center;
 }
 .sreach-width {
   width: 4rem;

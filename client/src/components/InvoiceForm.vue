@@ -228,6 +228,11 @@ export default {
         onDateChange() {
           this.invoice.year = new Date((this.invoice.date)).getFullYear();
         },
+
+    removePaymentRec(index) {
+			this.invoice.payments.splice(index, 1);
+		},
+
     },
 
     async mounted(){
