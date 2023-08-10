@@ -9,9 +9,6 @@
           </v-card-title>
           <v-card-text>
             <v-container>
-              <!-- <p v-show="msg">
-                {{ msg }}
-              </p> -->
               <v-form ref="form">
                 <v-row>
                   <v-col cols="4">
@@ -73,18 +70,21 @@
               <v-container>
                   <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
                       <v-row>
-                          <v-col cols="4" sm="3">
+                          <v-col cols="3">
                               <v-text-field label="checkID" v-model="inv.checkID" @focus="$event.target.select()"></v-text-field>
                           </v-col>
-                          <v-col cols="4" sm="3">
+                          <v-col cols="3">
                               <v-text-field label="Payment" v-model="inv.payment" @focus="$event.target.select()"></v-text-field>
                           </v-col>
-                          <v-col cols="4" sm="3">
+                          <v-col cols="3">
                             <div class="input-container">
                               <input v-model="inv.date" type="date" />
                             </div>
                           </v-col>
-                          <v-col cols="3">
+                          <v-col cols="1" style="align-self: flex-end;">
+                              <v-checkbox v-model="inv.redeemed"></v-checkbox>
+                          </v-col>
+                          <v-col cols="2" style="align-self: center;">
                               <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small >mdi-delete</v-icon></v-btn>
                           </v-col>
                       </v-row>
@@ -121,125 +121,128 @@ Vue.filter("formatDate", function (value) {
 export default {
     name: "invoice-form",
     data() {
-        return {
-            // invoice: {},
-			dialogInvForm: false,
-            resolve: null,      // What is this for ?
-			showMessage: false,
-            isNewInvoice: false,
-			message: '',
-            options: {
-                color: "grey lighten-3",
-                width: 500,
-                zIndex: 200,
-            },
-            dateModal : false,
-			invoiceID: 0,
-			companyName: [], // need to fatch refdata
-			projectName: [],
-			supplierName: [],
-			invoice: [],
-        };
+      return {
+        dialogInvForm: false,
+        resolve: null,      // What is this for ?
+        showMessage: false,
+        isNewInvoice: false,
+        message: '',
+        options: {
+          color: "grey lighten-3",
+          width: 500,
+          zIndex: 200,
+        },
+        dateModal : false,
+        invoiceID: 0,
+        companyName: [], // need to fatch refdata
+        projectName: [],
+        supplierName: [],
+        invoice: [],
+      };
     },
+
     methods: {
-        open(invoice, isNewInvoice) {
-            this.isNewInvoice = isNewInvoice;
-            this.invoice = invoice 
-            this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD');
-            this.dialogInvForm = true;
-            return new Promise((resolve) => {
-                this.resolve = resolve;
-            });
-        },
+      open(invoice, isNewInvoice) {
+        this.isNewInvoice = isNewInvoice;
+        this.invoice = invoice 
+        this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD');
+        this.dialogInvForm = true;
+        return new Promise((resolve) => {
+          this.resolve = resolve;
+        });
+      },
 
-        copyToNew() {
-            this.isNewInvoice = true
-            this.invoice._id = null
-            this.invoice.published = false
-        },
+      copyToNew() {
+        this.isNewInvoice = true
+        this.invoice._id = null
+        this.invoice.published = false
+      },
 
-        saveInvoice: async function () {
-			try {
-                let response = ''
-                if (this.isNewInvoice)  {
-                    response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
-                } else {
-                    response = await apiService.update(this.invoice._id, this.invoice, { model: INVOICE_MODEL });
-                } 
-                if (response) this.dialogInvForm = false;
+      saveInvoice: async function () {
+        try {
+          let response = ''
+          if (this.isNewInvoice)  {
+            response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
+          } else {
+            response = await apiService.update(this.invoice._id, this.invoice, { model: INVOICE_MODEL });
+          } 
+          if (response) this.dialogInvForm = false;
+          location.reload();
+        } catch (error) {
+          this.msg = JSON.stringify(error.message);
+          setTimeout(() => {
+            this.msg = "";
+          }, 3000);
+          console.log(error);
+        }
+      },
 
-			} catch (error) {
-				this.msg = JSON.stringify(error.message);
-				setTimeout(() => {
-					this.msg = "";
-				}, 3000);
-				console.log(error);
-			}
-		},
-		async deleteOne(id, description) {
-			if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
-				const response = await apiService.deleteOne({model: INVOICE_MODEL,id});
-				if (response) {
-					this.dialogInvForm = false;
-				}
-			}
-		},
-        onAmountChange() {
-            let { amount } = this.invoice;
-            if(amount && amount >= 0) {
-                this.invoice.vat = ((parseFloat(amount) * VAT_PERCENTAGE)/100)
-                this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
-            } else {
-                this.invoice.amount = 0;
-                this.invoice.vat = 0;
-                this.invoice.total = 0;
-            }
-        },
+      async deleteOne(id, description) {
+        if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
+          const response = await apiService.deleteOne({model: INVOICE_MODEL,id});
+          if (response) {
+            this.dialogInvForm = false;
+          }
+        }
+      },
 
-        onTotalChange() {
-            let { total } = this.invoice;
-            if(total && total >= 0) {
-                this.invoice.amount = (parseFloat(total)/(1+VAT_PERCENTAGE/100)).toFixed(0);
-                this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
-            } else {
-                this.invoice.amount = 0;
-                this.invoice.vat = 0;
-                this.invoice.total = 0;
-            }
-        },
+      onAmountChange() {
+        let { amount } = this.invoice;
+        if(amount && amount >= 0) {
+          this.invoice.vat = ((parseFloat(amount) * VAT_PERCENTAGE)/100)
+          this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
+        } else {
+          this.invoice.amount = 0;
+          this.invoice.vat = 0;
+          this.invoice.total = 0;
+        }
+      },
 
-        addPaymentRow() {
-			this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
-		},
+      onTotalChange() {
+        let { total } = this.invoice;
+        if(total && total >= 0) {
+          this.invoice.amount = (parseFloat(total)/(1+VAT_PERCENTAGE/100)).toFixed(0);
+          this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
+        } else {
+          this.invoice.amount = 0;
+          this.invoice.vat = 0;
+          this.invoice.total = 0;
+        }
+      },
 
-        clearForm() {
-			this.$refs.form.reset();
-		},
-        loadTable: async function (table_id, tableName) {
-			try {
-				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-				if (response) {
-					this[tableName] = response.data.map((code) => code.description);
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		},
-        onDateChange() {
-          this.invoice.year = new Date((this.invoice.date)).getFullYear();
-        },
+      addPaymentRow() {
+        this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
+      },
 
-    removePaymentRec(index) {
-			this.invoice.payments.splice(index, 1);
-		},
+      clearForm() {
+        this.$refs.form.reset();
+      },
+
+      loadTable: async function (table_id, tableName) {
+        try {
+          const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
+          if (response) {
+            this[tableName] = response.data.map((code) => code.description);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      },
+
+      onDateChange() {
+        this.invoice.year = new Date((this.invoice.date)).getFullYear();
+      },
+
+      removePaymentRec(index) {
+        this.invoice.payments.splice(index, 1);
+      },
 
     },
 
     async mounted(){
-		await this.loadTable(1, "companyName");
-		await this.loadTable(2, "projectName");
-		await this.loadTable(3, "supplierName");
-
+      await this.loadTable(1, "companyName");
+      await this.loadTable(2, "projectName");
+      await this.loadTable(3, "supplierName");
     }
 };
 </script>

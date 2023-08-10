@@ -56,7 +56,7 @@
               <template v-slot:activator="{ on }">
                 <span v-on="on">{{ item.total ? item.total.toLocaleString() : "" }}</span>
               </template>
-              <span>This is Hint</span>
+              <span>Budget - </span>
             </v-tooltip>
           </template>
           <template v-slot:[`item.vat`]="{ item }">
@@ -238,11 +238,11 @@
                       :footer="summaryTotal.toLocaleString()"
                       class="mt-3">
                       <v-toolbar-title>
-                        <div> <span>{{ summaryName }} - {{ summaryTotal.toLocaleString() }}  </span>
-                        <span>{{ summaryBudget ? ' ------------ Budget - '  + summaryBudget.toLocaleString(): ''}}</span>
-                        <v-btn small class="btn btn-danger">
-                          <v-icon>mdi-download</v-icon>
-                        </v-btn></div>
+                        <div>
+                          <span>{{ summaryName }} - {{ summaryTotal.toLocaleString() }}  </span>
+                          <span v-if="summaryBudget">{{ ' ------------ תקציב - '  + summaryBudget.toLocaleString()}}</span>
+                          <v-btn small class="btn btn-danger"> <v-icon>mdi-download</v-icon> </v-btn>
+                        </div>
                       </v-toolbar-title>
                     </export-excel>
                   <v-spacer />

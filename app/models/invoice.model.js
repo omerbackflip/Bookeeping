@@ -19,6 +19,7 @@ module.exports = mongoose => {
 				checkID: {type: Number , default: 0},
 				payment: {type: Number , default: 0},	
         date: Date,
+        redeemed: Boolean,
 			}],
     },
     { timestamps: true }

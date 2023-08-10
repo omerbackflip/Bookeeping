@@ -37,6 +37,9 @@
           <template v-slot:[`item.date`]="{ item }">
             <span> {{ item.date | formatDate }}</span>
           </template>
+          <template v-slot:[`item.redeemed`]="{ item }">
+            <v-checkbox v-model="item.redeemed" disabled></v-checkbox>
+          </template>
          </v-data-table>
       </v-flex>
 
@@ -78,6 +81,8 @@ export default {
 				{ text: "Payment", value: "payment", class: "hdr-styles", align: "right" },
 				{ text: "checkID", value: "checkID", class: "hdr-styles", align: "right" },
 				{ text: "Supplier", value: "supplier", class: "hdr-styles", align: "right" },
+				{ text: "Project", value: "project", class: "hdr-styles", align: "right" },
+				{ text: "Redeemed", value: "redeemed", class: "hdr-styles", align: "right" },
 			],
 			invoice: [],
 		};
@@ -91,9 +96,8 @@ export default {
             return (item.payments.length > 0) // filter only invoices with payments
         }).map((item1) => {
           item1.payments.forEach((item2) => { // forEach invoice pickup the payments
-            // this.paymentList.push(item2)      // and structure the paymentList
-            this.paymentList.push({ID:item1._id, supplier:item1.supplier, 
-                                  checkID:item2.checkID, date:item2.date, payment:item2.payment}) // and structure the paymentList
+            this.paymentList.push({ID:item1._id, supplier:item1.supplier, project: item1.project,
+                                  checkID:item2.checkID, date:item2.date, payment:item2.payment, redeemed:item2.redeemed}) // and structure the paymentList
           })
         })
         // now weed-out the duplicate payments with same chechID
@@ -120,6 +124,7 @@ export default {
 				}
 				// this.dialog = true;
         await this.$refs.invoiceForm.open(this.invoice, false);
+        // this.getPayments();
 			}
 		},
   },
