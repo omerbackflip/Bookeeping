@@ -106,6 +106,11 @@ export default {
         this.paymentList = this.paymentList.filter((value, index, self) =>
             index === self.findIndex((t) => ( t.checkID === value.checkID))
         )
+        this.paymentList = this.paymentList.sort((a,b) => { // now sort the list by redeeme date
+          if (a.date > b.date) {
+            return -1
+          }
+        })
 			}
 		},
 
