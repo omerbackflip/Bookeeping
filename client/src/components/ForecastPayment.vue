@@ -131,10 +131,7 @@ export default {
       let pymt_id = item.pymt_id
       let payment = {checkID: item.checkID, payment: item.payment, date: item.date, redeemed: item.redeemed}
 
-      const	response = await SpecificServiceEndPoints.updatePaymentInInvoice(pymt_id, payment) ;
-      if (response) {
-        window.location.reload();
-      }
+      await SpecificServiceEndPoints.updatePaymentInInvoice(pymt_id, payment) ;
 		},
   },
 
