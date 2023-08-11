@@ -46,8 +46,13 @@ class SpecificServiceEndPoints {
     return await axios.post(`${baseUrl}/specific/batch-clear-ExcelRecID`, {'year':year});
   }
 
-  async addPaymentsToInvoice(invoiceId,paymentList) {
-		return await axios.put(`${baseUrl}/specific/add-payments-to-invoice/${invoiceId}`, paymentList);
+  // looks like this is not in used.. !
+  // async addPaymentsToInvoice(invoiceId,paymentList) {
+	// 	return await axios.put(`${baseUrl}/specific/add-payments-to-invoice/${invoiceId}`, paymentList);
+	// }
+
+  async updatePaymentInInvoice(objIdOfPayment,payment) {
+		return await axios.put(`${baseUrl}/specific/update-payment-in-invoice/${objIdOfPayment}`, payment);
 	}
 
   async getDbInfo() {

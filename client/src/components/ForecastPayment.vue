@@ -38,7 +38,9 @@
             <span> {{ item.date | formatDate }}</span>
           </template>
           <template v-slot:[`item.redeemed`]="{ item }">
-            <v-checkbox v-model="item.redeemed" disabled></v-checkbox>
+            <td @click.stop>
+              <v-checkbox v-model="item.redeemed" @click="updateOne(item)"></v-checkbox>
+            </td>
           </template>
          </v-data-table>
       </v-flex>
@@ -51,13 +53,12 @@
   </div>
 </template>
 
-
-
 <script>
 import Vue from "vue";
 import moment from "moment";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
+import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
 import ConfirmDialog from './Common/ConfirmDialog.vue';
 import { INVOICE_MODEL } from "../constants/constants";
 import invoiceForm from "./InvoiceForm.vue"
@@ -96,8 +97,9 @@ export default {
             return (item.payments.length > 0) // filter only invoices with payments
         }).map((item1) => {
           item1.payments.forEach((item2) => { // forEach invoice pickup the payments
-            this.paymentList.push({ID:item1._id, supplier:item1.supplier, project: item1.project,
-                                  checkID:item2.checkID, date:item2.date, payment:item2.payment, redeemed:item2.redeemed}) // and structure the paymentList
+            this.paymentList.push({_id:item1._id, supplier:item1.supplier, project: item1.project,
+                                  checkID:item2.checkID, date:item2.date, payment:item2.payment, // and structure the paymentList
+                                  redeemed:item2.redeemed, pymt_id:item2._id})  // the need for pymt_id is for update toggle in this screen
           })
         })
         // now weed-out the duplicate payments with same chechID
@@ -109,10 +111,8 @@ export default {
 
     // get invoice data before call to invoiceForm for edit
 		async getInvoiceForEdit(item) {
-			if (item.ID) {
-				// this.invoiceID = item.ID;
-				const response = await apiService.getById(item.ID, { model: INVOICE_MODEL });
-				// const response = await apiService.getById("6413f03e3a77dfaf6a052718", { model: INVOICE_MODEL });
+			if (item._id) {
+				const response = await apiService.getById(item._id, { model: INVOICE_MODEL });
 				if (response && response.data) {
 					this.invoice = response.data; 
           this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD');
@@ -122,10 +122,19 @@ export default {
             });
           }
 				}
-				// this.dialog = true;
         await this.$refs.invoiceForm.open(this.invoice, false);
-        // this.getPayments();
 			}
+		},
+
+    // called @click on toggle "redeemed" field
+		async updateOne(item) {
+      let pymt_id = item.pymt_id
+      let payment = {checkID: item.checkID, payment: item.payment, date: item.date, redeemed: item.redeemed}
+
+      const	response = await SpecificServiceEndPoints.updatePaymentInInvoice(pymt_id, payment) ;
+      if (response) {
+        window.location.reload();
+      }
 		},
   },
 
