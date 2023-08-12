@@ -422,15 +422,7 @@ export default {
         this.summaryDialog = true;
       }
 		},
-		// async deleteOne(id, description) {
-		// 	if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
-		// 		const response = await apiService.deleteOne({model: INVOICE_MODEL,id});
-		// 		if (response) {
-		// 			this.dialog = false;
-		// 			this.refreshList();
-		// 		}
-		// 	}
-		// },
+
     async retriveBookData(item){
       const response = await apiService.getMany({ model: BOOKS_MODEL,
                                               // record_id:item.excelRecID,
@@ -440,27 +432,40 @@ export default {
       this.bookInfo = response.data;
       this.bookDialog = true;
     },
+
 		async retrieveInvoices() {
-			// console.log(this.$router.options.routes)
+			// console.log(this.$route.params)
 			if (this.$route.query.year) {
         this.selectedYear = this.$route.query.year
       }
       let response = '';
 			this.isLoading = true;
-      if (this.$route.params.project) {
-        response = await apiService.getMany({
-          model: INVOICE_MODEL,
-          project: this.$route.params.project,
-        });
-        this.header = this.$route.params.project
-      } else {
-        response = await apiService.getMany({
-          model: INVOICE_MODEL,
-          year: this.selectedYear,
-          company: this.selectedCompany,
-        });
-        this.header = this.selectedYear + ' ' + this.selectedCompany
+      const screen = this.$route.params
+      switch (true) {
+        case ('project' in screen):
+          response = await apiService.getMany({
+            model: INVOICE_MODEL,
+            project: this.$route.params.project,
+          });
+          this.header = this.$route.params.project
+          break;
+        case ('supplier' in screen):
+          response = await apiService.getMany({
+            model: INVOICE_MODEL,
+            supplier: this.$route.params.supplier,
+          });
+          this.header = this.$route.params.supplier
+          break;
+        default :
+          response = await apiService.getMany({
+            model: INVOICE_MODEL,
+            year: this.selectedYear,
+            company: this.selectedCompany,
+          });
+          this.header = this.selectedYear + ' ' + this.selectedCompany
+          break;     
       }
+
 			if (response && response.data) {
 				this.invoiceList = response.data;
         this.invoiceList.sort((a, b) => b.group - a.group);
@@ -521,43 +526,6 @@ export default {
 				}
 			}
 		},
-
-		// saveNewInvoice: async function () {
-		// 	try {
-    //     delete this.invoice._id; // in case of "copy", remove the _id
-		// 		const response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
-		// 		if (response) {
-		// 			this.invoice.id = response.data.id;
-		// 			this.refreshList();
-		// 			this.clearForm();
-		// 			this.dialog = false;
-		// 		}
-		// 	} catch (error) {
-		// 		this.msg = JSON.stringify(error.message);
-		// 		setTimeout(() => {
-		// 			this.msg = "";
-		// 		}, 3000);
-		// 		console.log(error);
-		// 	}
-		// },
-    // this is called from the update dialog or from updateInvoice from Synergy
-		// async updateInvoice() {
-		// 	try {
-		// 		const response = await apiService.update(this.invoiceID, this.invoice, { model: INVOICE_MODEL });
-		// 		if (response) {
-		// 			this.refreshList();
-		// 			this.clearForm();
-		// 			this.invoiceID = 0;
-		// 			this.dialog = false;
-		// 		}
-		// 	} catch (error) {
-		// 		this.msg = JSON.stringify(error.message);
-		// 		setTimeout(() => {
-		// 			this.msg = "";
-		// 		}, 3000);
-		// 		console.log(error);
-		// 	}
-		// },
 
 		clearForm() {
 			this.$refs.form.reset();
@@ -693,15 +661,6 @@ export default {
     this.$root.$on("clearExcelRecID", () => {
       this.batchClearExcelRecID();
     });
-
-    // this is called from SynergyList for update match
-    // this.$root.$on("invoiceUpdate", (invoice) => {
-    //   this.invoiceID = invoice._id
-    //   delete invoice._id
-		// 	this.invoice = invoice
-    //   this.updateInvoice()
-    //   this.selected = []
-		// });
 	},
 	
   watch: {

@@ -12,7 +12,7 @@ export const INVOICE_MOBILE_HEADERS = [
     // { text: "Act.",         value: "actions",           class: " mobile-headers",                   groupable: false}
 ];
 
-export const SUMMARY_WEB_HEADERS = [
+export const SUMMARY_PROJECT_WEB_HEADERS = [
     { text: "תשלומים", value: "count", class: "hdr-styles", align: "right" },
     { text: "רווחיות", value: "profit", class: "hdr-styles", align: "right" },
     { text: "הפרשים", value: "balance", class: "hdr-styles", align: "right" },
@@ -21,10 +21,15 @@ export const SUMMARY_WEB_HEADERS = [
     { text: "פרויקט", value: "project", class: "hdr-styles", align: "right" },
 ];
 
-export const SUMMARY_MOBILE_HEADERS = [
+export const SUMMARY_PROJECT_MOBILE_HEADERS = [
     { text: "הכנסות", value: "revenue", class: "hdr-styles", align: "right" },
     { text: "הוצאות", value: "total", class: "hdr-styles", align: "right" },
     { text: "פרויקט", value: "project", class: "hdr-styles", align: "right" },
+];
+
+export const SUMMARY_SUPPLIER_HEADERS = [
+    { text: "הוצאות", value: "total", class: "hdr-styles", align: "right" },
+    { text: "שם ספק", value: "supplier", class: "hdr-styles", align: "right" },
 ];
 
 export const INVOICE_WEB_HEADERS = [
@@ -74,7 +79,8 @@ export const navItems = [
     {icon: 'folder', text: 'Import BOOKs', route: null, import: 'BOOKS', onClick: 'runModal'},
     {icon: 'folder', text: 'Import REVENUEs', route: null, import: 'REVENUES', onClick: 'runModal'},
     {icon: 'widgets', text: 'Synergy List', route: '/synergyList'},
-    {icon: 'widgets', text: 'Summary', route: '/Summary'},
+    {icon: 'widgets', text: 'Project Summary', route: '/ProjectSummary'},
+    {icon: 'widgets', text: 'Supplier Summary', route: '/SupplierSummary'},
     {icon: 'widgets', text: 'Revenues', route: '/RevenueList'},
     {icon: 'widgets', text: 'Forcast Payments', route: '/ForecastPayment'},
 ]

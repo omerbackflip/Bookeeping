@@ -28,9 +28,14 @@ export default new Router({
       component: () => import("./components/TableList")
     },
     {
-      path: "/summary",
-      name: "summary",
-      component: () => import("./components/Summary")
+      path: "/projectsummary",
+      name: "project-summary",
+      component: () => import("./components/ProjectSummary")
+    },
+    {
+    path: "/suppliersummary",
+    name: "supplier-summary",
+    component: () => import("./components/SupplierSummary")
     },
     {
       path: "/revenueList",
