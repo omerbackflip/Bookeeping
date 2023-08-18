@@ -13,21 +13,19 @@
             <v-spacer></v-spacer>
             <template>
                 <div v-if="showControl" class="mt-2 text-center d-flex">
-                    <!-- <span class="d-content"> -->
                         <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
                             <v-btn value="ביצועים" elevation="3" small >ביצועים</v-btn>
                             <v-btn value="יזמות"   elevation="3" small > יזמות </v-btn>
                         </v-btn-toggle>
                         <v-select class="year-input" 
                             v-model="selectedYear"
-                            :items="[2019, 2020, 2021, 2022, 2023]"
+                            :items="yearList"
                             @change="onYearChange"
                             :value="2023"
                             dense
                             solo
                             elevation="3"
                         ></v-select>
-                    <!-- </span> -->
                     <div v-if="this.$route.name==='invoices-list'">
                         <v-btn x-small @click="callAddNewInvoice">
                                 <v-icon small>mdi-plus</v-icon>
@@ -74,6 +72,8 @@
 import ImportCSV from '../ImportCSV.vue';
 import { navItems, isMobile } from '../../constants/constants';
 import SpecificServiceEndPoints from "../../services/specificServiceEndPoints";
+import { TABLE_MODEL } from "../../constants/constants";
+import apiService from "../../services/apiService";
 
 export default {
     components: { ImportCSV },
@@ -93,6 +93,7 @@ export default {
             ],
             toggleCompany : 'ביצועים',
             selectedYear: 2023,
+            yearList: [],
             local: false,
         }
     },
@@ -160,21 +161,27 @@ export default {
                 console.log(error);
 
             }
-        }
+        },
+
+		loadTable: async function (table_id, tableName) {
+			try {
+				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
+				if (response) {
+					this[tableName] = response.data.map((code) => code.description);
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		},
 
     },
 
-    mounted() {
+    async mounted() {
+		await this.loadTable(4, "yearList");
         this.getDatabaseInformation();
     },
 
     computed: {
-        // isInvoices() {
-        //     return this.$route.name === 'invoices-list';
-        // },
-        // isBookingList() {
-        //     return this.$route.name === 'bookingList';
-        // },
         showControl() {
             let show = false
             switch (this.$route.name) {

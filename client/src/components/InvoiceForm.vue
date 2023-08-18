@@ -83,8 +83,6 @@
                           </v-col>
                           <v-col cols="2" style="margin-top: 0px; padding-top: 0px;">
                               <v-checkbox v-model="inv.redeemed"></v-checkbox>
-                          <!-- </v-col>
-                          <v-col cols="2" style="align-self: center;"> -->
                               <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small>mdi-delete</v-icon></v-btn>
                           </v-col>
                       </v-row>

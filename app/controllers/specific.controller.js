@@ -225,6 +225,8 @@ exports.batchClearExcelRecID = async (req, res) => {
 //     }
 // }
 
+
+// this fucntion updates exsiting specific payment (using payment._id) in specific invoice
 exports.updatePaymentInInvoice = async(req,res) => {
 	try {
 	const { objIdOfPayment } = req.params;

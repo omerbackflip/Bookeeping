@@ -104,112 +104,6 @@
         <v-btn v-if="$route.params.project" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
       </v-flex>
 
-      <!-- Add New/Update row dialog -->
-      <!-- <v-dialog v-model="dialog" >
-        <v-card>
-          <v-card-title>
-            <span class="text-h5">{{ invoiceID ? "Update" : "Add New" }}</span>
-            <v-spacer></v-spacer>
-            <v-btn v-show="invoiceID" @click="invoiceID=null ; invoice.published=false"> Copy </v-btn>
-          </v-card-title>
-          <v-card-text>
-            <v-container>
-              <p v-show="msg">
-                {{ msg }}
-              </p>
-              <v-form ref="form">
-                <v-row>
-                  <v-col cols="4">
-                    <v-combobox v-model="invoice.company" :items="companyName" label="חברה" dense></v-combobox>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-combobox v-model="invoice.project" :items="projectName" label="פרויקט" dense></v-combobox>
-                  </v-col>
-                  <v-col cols="4">
-                    <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
-                  </v-col>
-                  <v-col cols="12" class="no-padding">
-                    <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field @input="onAmountChange" v-model="invoice.amount" label="סכום" required @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field v-model="invoice.vat" label="מע'מ" @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field @input="onTotalChange" v-model="invoice.total" label="סה'כ" required @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field v-model="invoice.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field v-model="invoice.group" label="קובץ" required @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="invoice.date" persistent width="290px">
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field v-model="invoice.date" label="תאריך" readonly v-bind="attrs" v-on="on">
-                        </v-text-field>
-                      </template>
-                      <v-date-picker @input="onDateChange" v-model="invoice.date" scrollable>
-                        <v-spacer></v-spacer>
-                        <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
-                        <v-btn text color="primary" @click="$refs.dialog.save(invoice.date)"> OK </v-btn>
-                      </v-date-picker>
-                    </v-dialog>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field v-model="invoice.year" label="שנה" @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="3">
-                    <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
-                  </v-col>
-                  <v-col cols="12" class="no-padding">
-                    <v-textarea v-model="invoice.remark" label="הערה" auto-grow rows="1" @focus="$event.target.select()"></v-textarea>
-                  </v-col>
-                </v-row>
-              </v-form>
-            </v-container>
-          </v-card-text>
-          <div class="payments-wrapper">
-              <h6>Payments</h6>
-              <v-container>
-                  <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
-                      <v-row>
-                          <v-col cols="4" sm="3">
-                              <v-text-field label="checkID" v-model="inv.checkID" @focus="$event.target.select()"></v-text-field>
-                          </v-col>
-                          <v-col cols="4" sm="3">
-                              <v-text-field label="Payment" v-model="inv.payment" @focus="$event.target.select()"></v-text-field>
-                          </v-col>
-                          <v-col cols="4" sm="3">
-                            <div class="input-container">
-                              <input v-model="inv.date" type="date" />
-                            </div>
-                          </v-col>
-                          <v-col cols="3">
-                              <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small >mdi-delete</v-icon></v-btn>
-                          </v-col>
-                      </v-row>
-                  </div>                    
-                  <v-btn @click="addPaymentRow" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>					
-              </v-container>
-          </div>
-
-          <v-card-actions>
-            <v-spacer></v-spacer>
-            <v-btn small @click="invoiceID ? updateInvoice() : saveNewInvoice()">
-              {{ invoiceID ? "Update" : "Save New" }}
-            </v-btn>
-            <v-btn small v-show="!invoiceID" class="mx-3" @click="clearForm"> Clear </v-btn>
-            <v-spacer></v-spacer>
-            <v-icon v-show="invoiceID" color="red" @click="deleteOne(invoiceID, invoice.description)">mdi-delete</v-icon>
-            <v-icon color="red" @click="dialog = false">mdi-close-box</v-icon>
-          </v-card-actions>
-        </v-card>
-      </v-dialog> -->
-
       <!-- SummaryDialog for supplier/Project/Group -->
       <v-dialog v-model="summaryDialog" max-width="1100px">
         <v-card>
@@ -366,7 +260,7 @@ export default {
 				excelRecID: "excelRecID",
 				הערה: "remark", 
 				נשלח: "published",
-        year: "year"
+        year: "year",
 			},
 			invoice: [],
 			msg: "",

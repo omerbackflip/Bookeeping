@@ -28,7 +28,6 @@
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
-
             </v-toolbar>
           </template>
           <template v-slot:[`item.payment`]="{ item }">
@@ -135,9 +134,8 @@ export default {
 		async updateOne(item) {
       let pymt_id = item.pymt_id
       let payment = {checkID: item.checkID, payment: item.payment, date: item.date, redeemed: item.redeemed}
-
       await SpecificServiceEndPoints.updatePaymentInInvoice(pymt_id, payment) ;
-		},
+    },
   },
 
 
