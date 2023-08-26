@@ -14,7 +14,7 @@
             <template>
                 <div v-if="showControl" class="mt-2 text-center d-flex">
                         <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
-                            <v-btn value="ביצועים" elevation="3" small >ביצועים</v-btn>
+                            <v-btn value="ביצועים" elevation="3" small v-show="selectedYear > 2017">ביצועים</v-btn>
                             <v-btn value="יזמות"   elevation="3" small > יזמות </v-btn>
                         </v-btn-toggle>
                         <v-select class="year-input" 

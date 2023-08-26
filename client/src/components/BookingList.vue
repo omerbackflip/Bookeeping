@@ -246,6 +246,7 @@ export default {
 		},
 
 		async getSummary(summaryField, summaryItem) {
+			this.isLoading = true;
 			let response = "";
 			switch (summaryField) {
 				case 'cust':
@@ -262,6 +263,7 @@ export default {
 			if (!this.summaryDialog) {
 				this.summaryDialog = true;
 			}
+			this.isLoading = false;
 		},
 
 		selectRow() {

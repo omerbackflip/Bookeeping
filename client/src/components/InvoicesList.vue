@@ -42,6 +42,7 @@
                 </v-btn>
               </export-excel>
               <v-btn @click="exportAll" x-small class="mx-3">All</v-btn>
+              <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn>
             </v-col>
             </v-toolbar>
           </template>
@@ -286,6 +287,7 @@ export default {
 		},
 		
 		async getSummary(summaryField, summaryItem) {
+      this.isLoading = true
       let response = "";
       switch (summaryField) {
         case 'project':
@@ -315,6 +317,7 @@ export default {
       if (!this.summaryDialog) {
         this.summaryDialog = true;
       }
+      this.isLoading = false
 		},
 
     async retriveBookData(item){
@@ -455,6 +458,21 @@ export default {
 			this.itemToEdit = "";
 		},
 
+    // run this batch to update 
+    async scriptUpdate() {
+      let response = await apiService.getMany({model: INVOICE_MODEL, supplier: 'אייל'})
+      console.log(response.data)
+      if(response.data){
+        response.data.map((item) => {
+          apiService.update(
+            item._id,
+            { supplier: '' },
+            { model: INVOICE_MODEL }          
+          )
+        })
+      }
+    },
+
 		//Background of row if added to Book table
 		itemRowBackground(item) {
 			let classes = item.excelRecID ? "bg-green" : "";
@@ -524,7 +542,6 @@ export default {
 		await this.loadTable(1, "companyName");
 		await this.loadTable(2, "projectName");
 		await this.loadTable(3, "supplierName");
-
     this.$root.$on("addNewInvoice", async () => {
 			// this.dialog = true;
 			this.invoiceID = 0;

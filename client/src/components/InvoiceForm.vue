@@ -93,7 +93,7 @@
 
           <v-card-actions>
             <v-spacer></v-spacer>
-            <v-btn small @click="saveInvoice()">
+            <v-btn small @click="saveInvoice()" :loading="isLoading">
               {{ invoice._id ? "Update" : "Save New" }}
             </v-btn>
             <v-btn small v-show="!invoiceID" class="mx-3" @click="clearForm"> Clear </v-btn>
@@ -122,7 +122,7 @@ export default {
       return {
         dialogInvForm: false,
         resolve: null,      // What is this for ?
-        showMessage: false,
+        isLoading: false,
         isNewInvoice: false,
         message: '',
         options: {
@@ -158,6 +158,7 @@ export default {
 
       saveInvoice: async function () {
         try {
+          this.isLoading = true
           let response = ''
           if (this.isNewInvoice)  {
             response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
@@ -165,13 +166,14 @@ export default {
             response = await apiService.update(this.invoice._id, this.invoice, { model: INVOICE_MODEL });
           } 
           if (response) this.dialogInvForm = false;
-          location.reload();
+          // location.reload();
         } catch (error) {
           this.msg = JSON.stringify(error.message);
           setTimeout(() => {
             this.msg = "";
           }, 3000);
           console.log(error);
+          this.isLoading = false
         }
       },
 

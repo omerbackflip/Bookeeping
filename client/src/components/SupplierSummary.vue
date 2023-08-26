@@ -22,8 +22,11 @@
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
             </v-toolbar>
           </template>
-          <template v-slot:[`item.total`]="{ item }">
-            <span> {{ item.total ? item.total.toLocaleString() : '' }}</span>
+          <template v-slot:[`item.totalExclude`]="{ item }">
+            <span> {{ item.totalExclude ? item.totalExclude.toLocaleString("en",{minimumFractionDigits: 0, maximumFractionDigits: 0,}) : '' }}</span>
+          </template>
+          <template v-slot:[`item.totalInclude`]="{ item }">
+            <span> {{ item.totalInclude ? item.totalInclude.toLocaleString() : '' }}</span>
           </template>
         </v-data-table>
       </v-flex>
@@ -64,13 +67,16 @@ export default {
 			if (response.data) {
 				this.invoices = response.data; // put all invoices data in invoices
         this.supplierList = this.supplierList.map((item1) => { // add to supplierList the total for each supplier
-          let totalSupplier = this.invoices.filter((item2) => {
+          let totalInclude = this.invoices.filter((item2) => {
             return item2.supplier === item1.supplier
           }).reduce ((currSum,item3) => {return item3.total + currSum},0)
-          return({...item1, total:totalSupplier}) // concatinate the totalSupplier
+          let totalExclude = this.invoices.filter((item2) => {
+            return item2.supplier === item1.supplier
+          }).reduce ((currSum,item3) => {return item3.amount + currSum},0)
+          return({...item1, totalInclude:totalInclude, totalExclude:totalExclude}) // concatinate the totalSupplier
         })  
 			}
-		},
+		},  
 
 		loadTable: async function (table_id, tableName) {
 			try {

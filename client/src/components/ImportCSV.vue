@@ -7,19 +7,16 @@
 				</v-card-title>
 
                 <div class="radioBtn" v-show="importData==='BOOKS'">
-					<v-row>
-						<v-col>
+					<v-row class="v-row">
+						<v-col cols="3">
 							<v-radio-group v-model="company">
 								<v-radio label="ביצועים" value="ביצועים"></v-radio>
 								<v-radio label="יזמות" value="יזמות"></v-radio>
 							</v-radio-group>
 						</v-col>
-						<v-col>
-							<v-radio-group v-model="importYear">
-								<v-radio label="2020" value="2020"></v-radio>
-								<v-radio label="2021" value="2021"></v-radio>
-								<v-radio label="2022" value="2022"></v-radio>
-								<v-radio label="2023" value="2023"></v-radio>
+						<v-col cols="9">
+							<v-radio-group v-model="importYear" v-for="(item,index) in years" :key="index" class="v-radio-group">
+								<v-radio :label=item :value="item"></v-radio>
 							</v-radio-group>
 						</v-col>
 					</v-row>
@@ -50,6 +47,8 @@
 
 <script>
 import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
+import { TABLE_MODEL } from "../constants/constants";
+import apiService from "../services/apiService";
 
 export default {
 	props: {
@@ -64,6 +63,7 @@ export default {
 			dialog: false,
 			company: '',
 			importYear: '',
+			years: [],
 		};
 	},
 	methods: {
@@ -105,10 +105,34 @@ export default {
 				this.message = "Something went wrong! Please try again later!";
 			}
 		},
+		loadTable: async function (table_id, tableName) {
+        try {
+          const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
+          if (response) {
+            this[tableName] = response.data.map((code) => code.description);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+		console.log(this.years)
+      },
 	},
-	mounted() {
+	async mounted() {
 		// this.dialog = this.openImportModal;
+		await this.loadTable(4, "years");
 		this.dialog = true;
 	}
 };
 </script>
+
+<style scoped>
+.v-radio-group {
+	margin-top: 0px; 
+	padding-top: 0px;
+}
+
+.v-row {
+	margin-left: 0px;
+    margin-right: 0px;
+}
+</style>
