@@ -43,7 +43,7 @@
             <span> {{ item.revenue ? ((item.revenue-item.total)/item.revenue*75).toFixed(0) + '%': '' }}</span>
           </template>
           <template v-slot:[`item.count`]="{ item }">
-            <span> {{(item.payedList.length || '')}}</span>
+            <span> {{(item.payedList || '').length || ''}}</span>
           </template>
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length">
@@ -73,6 +73,8 @@
         </v-data-table>
       </v-flex>
 
+      <!-- <v-sparkline :value= graph line-width="1" auto-draw show-labels label-size="3" type="bar"></v-sparkline> -->
+      <apexchart type="bar" width="1000" height="1050" :options="chartOptions" :series="series"></apexchart>
       <revenue-form ref="revenueForm"/>
       <confirm-dialog ref="confirm"/>
 
@@ -91,7 +93,8 @@ import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
 import { INVOICE_MODEL, TABLE_MODEL, REVENUE_MODEL, SUMMARY_PROJECT_WEB_HEADERS, SUMMARY_PROJECT_MOBILE_HEADERS } from "../constants/constants";
 import { isMobile } from '../constants/constants';
-
+// import ApexCharts from 'apexcharts';
+import VueApexCharts from 'vue-apexcharts'
 Vue.use(excel);
 Vue.filter("formatDate", function (value) {
 	if (value) {
@@ -101,7 +104,7 @@ Vue.filter("formatDate", function (value) {
 });
 export default {
 	name: "project-summary",
-	components: { RevenueForm, ConfirmDialog },
+	components: { RevenueForm, ConfirmDialog, apexchart: VueApexCharts},
 	data() {
 		return {
       isMobile,
@@ -109,6 +112,7 @@ export default {
 			revenues: [],
 			projectList: [],
 			dialog: false,
+      graph: [],
 
       revHeaders: [
 				{ text: "Amount", value: "amount", align: "right" },
@@ -121,9 +125,65 @@ export default {
       expanded: [],
       revenueItem: {},
       dateModal : false,
+
+      series: [],
+        // {
+        //   name: 'הוצאות',
+        //   data: [44, 55, 57, 56, 61, 58, 63, 60, 66]
+        // }, {
+        //   name: 'הכנסות',
+        //   data: [76, 85, 101, 98, 87, 105, 91, 114, 94]
+        // }],
+      chartOptions: {
+        chart: {
+          type: 'bar',
+          height: 800
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '100%',
+            endingShape: 'rounded'
+          },
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          show: true,
+          width: 2,
+          colors: ['transparent']
+        },
+        xaxis: {
+          // categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
+          title: {
+            text: 'פרויקטים'
+          }
+        },
+        yaxis: {
+          title: {
+            text: '$K'
+          }
+        },
+        fill: {
+          opacity: 1
+        },
+        tooltip: {
+          y: {
+            formatter: function (val) {
+              return "$ " + val + " K"
+            }
+          }
+        }
+      },
+ 
+
+
+
 		};
 	},
 
+          /* eslint-disable */
 	methods: {
 		async mainSummary() {
 			let response = await apiService.getMany({model: INVOICE_MODEL});
@@ -152,6 +212,22 @@ export default {
           return({...item1, revenue:totalRevenue, payedList}) // concatinate the totalRevenue and list of payed projects
         })  
 			}
+      // this.graph = this.projectList.map((item) =>{
+      //   return Math.round(item.revenue/1000000 * 10) / 10
+      // })
+      let proj = this.projectList.map((item) =>{
+        return (item.project)
+      })
+      this.chartOptions = ({...this.chartOptions, xaxis:{categories: proj}})
+
+      let revs = this.projectList.map((item) =>{
+        return (Math.round(item.revenue/100)/10)
+      })
+      let exps = this.projectList.map((item) =>{
+        return (Math.round(item.total/100)/10)
+      })
+      this.series = [{name:'הכנסות', data: revs},{name:'הוצאות', data:exps}]
+      // console.log(this.series)
 		},
 
 		loadTable: async function (table_id, tableName) {
@@ -245,5 +321,9 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   margin-bottom: 12px;
   border: 5px solid #98e983;
 	cursor: pointer;
+}
+
+.text {
+  font-size: 3px;
 }
 </style>

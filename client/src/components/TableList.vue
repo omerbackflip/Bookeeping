@@ -7,7 +7,7 @@
                       disable-pagination
                       hide-default-footer
                       fixed-header
-                      height="75vh"
+                      height="70vh"
                       @click:row="filterTbl"
                       dense
                       class="elevation-3"
@@ -76,7 +76,7 @@
                       :search="search"
                       hide-default-footer
                       fixed-header
-                      height="75vh"
+                      height="70vh"
                       class="elevation-3"
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
@@ -96,6 +96,18 @@
                   <v-text-field v-model="tableTitle">  {{tableTitle}} </v-text-field>
                 </v-col>
               </v-row>
+
+              <export-excel
+                :data="tables"
+                type="xlsx"
+                name="all-tables"
+                title="All Tables"
+                footer="This is footer">
+                <v-btn x-small class="btn btn-danger">
+                  <v-icon small>mdi-download</v-icon>
+                </v-btn>
+              </export-excel>
+
             </v-toolbar>           
           </template>
           <template v-slot:[`item.actions`]="{ item }"> 
@@ -165,6 +177,10 @@
 <script>
 import { TABLE_MODEL } from '../constants/constants';
 import apiService from '../services/apiService';
+import excel from "vue-excel-export";
+import Vue from "vue";
+
+Vue.use(excel);
 
 export default {
   name: "table-list",
