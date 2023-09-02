@@ -25,8 +25,11 @@
           <template v-slot:[`item.totalExclude`]="{ item }">
             <span> {{ item.totalExclude ? item.totalExclude.toLocaleString("en",{minimumFractionDigits: 0, maximumFractionDigits: 0,}) : '' }}</span>
           </template>
-          <template v-slot:[`item.totalInclude`]="{ item }">
+          <!-- <template v-slot:[`item.totalInclude`]="{ item }">
             <span> {{ item.totalInclude ? item.totalInclude.toLocaleString() : '' }}</span>
+          </template> -->
+          <template v-slot:[`item.budget`]="{ item }">
+            <span> {{ item.budget ? item.budget.toLocaleString() : '' }}</span>
           </template>
         </v-data-table>
       </v-flex>
@@ -67,13 +70,14 @@ export default {
 			if (response.data) {
 				this.invoices = response.data; // put all invoices data in invoices
         this.supplierList = this.supplierList.map((item1) => { // add to supplierList the total for each supplier
-          let totalInclude = this.invoices.filter((item2) => {
-            return item2.supplier === item1.supplier
-          }).reduce ((currSum,item3) => {return item3.total + currSum},0)
+          // let totalInclude = this.invoices.filter((item2) => {
+          //   return item2.supplier === item1.supplier
+          // }).reduce ((currSum,item3) => {return item3.total + currSum},0)
           let totalExclude = this.invoices.filter((item2) => {
             return item2.supplier === item1.supplier
           }).reduce ((currSum,item3) => {return item3.amount + currSum},0)
-          return({...item1, totalInclude:totalInclude, totalExclude:totalExclude}) // concatinate the totalSupplier
+          return({...item1, totalExclude:totalExclude}) // concatinate the totalSupplier
+          // return({...item1, totalInclude:totalInclude, totalExclude:totalExclude}) // concatinate the totalSupplier
         })  
 			}
 		},  
@@ -83,7 +87,7 @@ export default {
 				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
 				if (response) {
 					this[tableName] = response.data.map((item) => {
-            return {supplier: item.description}
+            return {supplier: item.description, budget: item.table_code}
           });
 				}
 			} catch (error) {
@@ -116,5 +120,11 @@ export default {
   text-align: left;
   max-width: 100%;
   margin: auto;
+}
+.v-toolbar__title {
+    font-size: 1rem;
+    direction: rtl;
+    white-space: pre-wrap;
+    text-align: center;
 }
 </style>

@@ -28,8 +28,9 @@ export const SUMMARY_PROJECT_MOBILE_HEADERS = [
 ];
 
 export const SUMMARY_SUPPLIER_HEADERS = [
-    { text: "הוצאות כולל", value: "totalInclude", class: "hdr-styles", align: "right" },
+    // { text: "הוצאות כולל", value: "totalInclude", class: "hdr-styles", align: "right" },
     { text: "הוצאות ללא", value: "totalExclude", class: "hdr-styles", align: "right" },
+    { text: "תקציב", value: "budget", class: "hdr-styles", align: "right" },
     { text: "שם ספק", value: "supplier", class: "hdr-styles", align: "right" },
 ];
 
