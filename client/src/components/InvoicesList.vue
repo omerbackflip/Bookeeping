@@ -362,7 +362,6 @@ export default {
           this.header = this.selectedYear + ' ' + this.selectedCompany
           break;     
       }
-
 			if (response && response.data) {
 				this.invoiceList = response.data;
         this.invoiceList.sort((a, b) => b.group - a.group);
@@ -445,6 +444,7 @@ export default {
 				}
 				// this.dialog = true;
 			  await this.$refs.invoiceForm.open(this.invoice, false);
+		    this.retrieveInvoices();
 			}
 		},
 

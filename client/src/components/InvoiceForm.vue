@@ -156,7 +156,8 @@ export default {
         this.invoice.published = false
       },
 
-      saveInvoice: async function () {
+      // saveInvoice: async function () {
+      async saveInvoice() {
         try {
           this.isLoading = true
           let response = ''
@@ -168,6 +169,7 @@ export default {
           if (response) {
             this.dialogInvForm = false;
             this.isLoading =  false;
+            this.resolve(true);
           }
         } catch (error) {
           this.msg = JSON.stringify(error.message);

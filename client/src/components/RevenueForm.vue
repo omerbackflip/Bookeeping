@@ -76,7 +76,7 @@ export default {
                     this.dialog = false;
                     this.showMessage = false;
                     this.resolve(true);
-                }, 2000);
+                }, 600);
 
 			} catch (error) {
 				console.log(error);
