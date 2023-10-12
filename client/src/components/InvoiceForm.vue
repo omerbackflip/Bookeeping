@@ -165,8 +165,10 @@ export default {
           } else {
             response = await apiService.update(this.invoice._id, this.invoice, { model: INVOICE_MODEL });
           } 
-          if (response) this.dialogInvForm = false;
-          // location.reload();
+          if (response) {
+            this.dialogInvForm = false;
+            this.isLoading =  false;
+          }
         } catch (error) {
           this.msg = JSON.stringify(error.message);
           setTimeout(() => {
