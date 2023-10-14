@@ -310,6 +310,10 @@ export default {
           break;
         default : break;
       }
+
+      // this was added to align the view of "date" to exclude time.
+      this.summaryFilter = this.removeTimeFromDate(this.summaryFilter)
+
       this.summaryName = summaryItem;
       this.summaryTotal = this.summaryFilter.reduce((currentTotal, item) =>{
         return item.total + currentTotal
@@ -364,6 +368,8 @@ export default {
       }
 			if (response && response.data) {
 				this.invoiceList = response.data;
+        // this was added to align the view of "date" to exclude time.
+        this.invoiceList = this.removeTimeFromDate(this.invoiceList)
         this.invoiceList.sort((a, b) => b.group - a.group);
 				this.isLoading = false;
 			}
@@ -379,6 +385,19 @@ export default {
 				console.log(error);
 			}
 		},
+
+    // function taking list of invoices and format date to exclude time
+    removeTimeFromDate: function (invoiceToDate) {
+      invoiceToDate = invoiceToDate.map((item) =>{ 
+        item.date = moment(item.date).format('YYYY-MM-DD');
+        item.payments = item.payments.map((item1) => {
+          item1.date = moment(item1.date).format('YYYY-MM-DD');
+          return item1
+        })
+        return item
+      })
+      return invoiceToDate
+    }, 
 
 		refreshList() {
 			this.retrieveInvoices();
@@ -430,19 +449,7 @@ export default {
     // get invoice data before call to invoiceForm for edit
 		async getInvoiceForEdit(item) {
 			if (item._id) {
-				this.invoiceID = item._id;
-				const response = await apiService.getById(item._id, { model: INVOICE_MODEL });
-				// const response = await apiService.getById("6413f03e3a77dfaf6a052718", { model: INVOICE_MODEL });
-				if (response && response.data) {
-					this.invoice = response.data; 
-          this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD');
-          if(this.invoice.payments && this.invoice.payments.length) {
-            this.invoice.payments.map(payment => {
-              payment.date = moment(payment.date).format('YYYY-MM-DD')
-            });
-          }
-				}
-				// this.dialog = true;
+        this.invoice = item
 			  await this.$refs.invoiceForm.open(this.invoice, false);
 		    this.retrieveInvoices();
 			}
@@ -460,16 +467,17 @@ export default {
 
     // run this batch to update 
     async scriptUpdate() {
-      let response = await apiService.getMany({model: INVOICE_MODEL, supplier: 'אייל'})
-      console.log(response.data)
-      if(response.data){
-        response.data.map((item) => {
-          apiService.update(
-            item._id,
-            { supplier: '' },
-            { model: INVOICE_MODEL }          
-          )
-        })
+      if (window.confirm("Change supplier xxx to yyy")) {
+        let response = await apiService.getMany({model: INVOICE_MODEL, supplier: 'אייל'})
+        if(response.data){
+          response.data.map((item) => {
+            apiService.update(
+              item._id,
+              { supplier: '' },
+              { model: INVOICE_MODEL }          
+            )
+          })
+        }
       }
     },
 
@@ -529,6 +537,7 @@ export default {
       response = await apiService.getMany({ model: INVOICE_MODEL });
 			if (response && response.data) {
 				this.invoiceList = response.data;
+        this.invoiceList = this.removeTimeFromDate(this.invoiceList)
         this.invoiceList.sort((a, b) => b.group - a.group);
         this.header = 'All Invoices '
 				this.isLoading = false;
