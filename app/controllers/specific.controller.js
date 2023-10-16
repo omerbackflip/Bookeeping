@@ -6,6 +6,7 @@ const Revenue = db.revenues;
 const csv = require('csvtojson')
 var fs = require('fs');
 const { url } = require("../config/db.config");
+const { version } = require("../config/db.config");
 
 exports.saveInvoicesBulk = async (req, res) => {
 	if (!req.body) {
@@ -245,7 +246,7 @@ exports.updatePaymentInInvoice = async(req,res) => {
 exports.getDbInfo = (req,res) => {
 	try {
 		const local = url.includes('localhost'); //retuens true/false
-		return res.send({ success: true, local});
+		return res.send({ success: true, local, version});
 	} catch (error) {
 		console.log(error)
 		res.status(500).send({ message: "Error getting db info", error });

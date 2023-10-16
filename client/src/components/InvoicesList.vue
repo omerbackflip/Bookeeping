@@ -63,6 +63,9 @@
           <template v-slot:[`item.vat`]="{ item }">
             <span> {{ item.vat ? item.vat.toLocaleString() : "" }}</span>
           </template>
+          <template v-slot:[`item.payments[0].payment`]="{ item }">
+            <span> {{ item.payments[0] ? item.payments[0].payment.toLocaleString() : '' }}</span>
+          </template>
           <template v-slot:[`item.description`]="{ item }">
             <div class="description-width">
               <span> {{ item.description }}</span>

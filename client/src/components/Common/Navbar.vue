@@ -2,13 +2,14 @@
     <nav>
         <v-app-bar app dark>
             <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
-            <div :class="local ? 'bckg-red' :''">
+            <div :class="local ? 'bckg-red' :''" style="font-size: x-small;">
                 <div v-if="isMobile()">
                     {{local ? 'L' : 'P'}}
                 </div>
                 <div v-else>
                     {{local ? 'LocalHost' : 'Production'}}
                 </div>
+            &nbsp; {{ version }}
             </div>
             <v-spacer></v-spacer>
             <template>
@@ -95,6 +96,7 @@ export default {
             selectedYear: 2023,
             yearList: [],
             local: false,
+            version: '',
         }
     },
     methods:{
@@ -156,6 +158,7 @@ export default {
                 const response = await SpecificServiceEndPoints.getDbInfo();
                 if(response && response.data && response.data.success) {
                     this.local = response.data.local;
+                    this.version = response.data.version;
                 }
             } catch (error) {
                 console.log(error);
