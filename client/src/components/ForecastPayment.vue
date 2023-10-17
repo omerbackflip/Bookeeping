@@ -28,6 +28,7 @@
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
+              <v-btn  x-small class="mx-3">All</v-btn>
             </v-toolbar>
           </template>
           <template v-slot:[`item.payment`]="{ item }">
@@ -70,13 +71,16 @@ Vue.filter("formatDate", function (value) {
 	}
 });
 export default {
+	name: "forecastPayment",
 	components: { ConfirmDialog, invoiceForm },
 	data() {
 		return {
 			invoices: [],
 			paymentList: [],
+			selectedCompany: 'ביצועים',
 			dialog: false,
 			summaryHeaders: [
+				{ text: "Company", value: "company", class: "hdr-styles", align: "right" },
 				{ text: "Date", value: "date", class: "hdr-styles", align: "right" },
 				{ text: "Payment", value: "payment", class: "hdr-styles", align: "right" },
 				{ text: "checkID", value: "checkID", class: "hdr-styles", align: "right" },
@@ -90,13 +94,14 @@ export default {
 
 	methods: {
 		async getPayments() {
-      const response = await apiService.getMany({model: INVOICE_MODEL});
+      this.paymentList = []
+      const response = await apiService.getMany({model: INVOICE_MODEL, company: this.selectedCompany});
       if (response.data) {
         response.data.filter((item) => {
             return (item.payments.length > 0) // filter only invoices with payments
         }).map((item1) => {
           item1.payments.forEach((item2) => { // forEach invoice pickup the payments
-            this.paymentList.push({_id:item1._id, supplier:item1.supplier, project: item1.project,
+            this.paymentList.push({_id:item1._id, supplier:item1.supplier, project: item1.project, company: item1.company,
                                   checkID:item2.checkID, date:item2.date, payment:item2.payment, // and structure the paymentList
                                   redeemed:item2.redeemed, pymt_id:item2._id})  // the need for pymt_id is for update toggle in this screen
           })
@@ -139,12 +144,18 @@ export default {
   },
 
 
-	async mounted() {
+	mounted() {
 		this.getPayments();
+    this.$root.$on("companyChange", (company) => {
+			this.selectedCompany = company;
+		});
+
 	},
 	
   watch: {
-
+    selectedCompany() {
+			this.getPayments();
+		},
 	},
 };
 </script>

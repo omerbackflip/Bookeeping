@@ -244,7 +244,7 @@ export default {
 		},
 
     projectInvoices(row) {
-			this.$router.push({ name: "invoices-list", params: { project: row.project } });
+			this.$router.push({ name: "invoicesList", params: { project: row.project } });
 		},
 
     clickRow(item,event) {

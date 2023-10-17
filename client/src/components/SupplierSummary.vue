@@ -96,7 +96,7 @@ export default {
 		},
 
     clickRow(row) {
-			this.$router.push({ name: "invoices-list", params: { supplier: row.supplier } });
+			this.$router.push({ name: "invoicesList", params: { supplier: row.supplier } });
     },
 
 		getHeaders() {

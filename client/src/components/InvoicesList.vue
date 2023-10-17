@@ -210,7 +210,7 @@ Vue.filter("formatDate", function (value) {
 });
 
 export default {
-	name: "invoices-list",
+	name: "invoicesList",
   props: ['showSelect'],
 	components: { invoiceForm },
 	data() {
@@ -558,6 +558,7 @@ export default {
 			// this.dialog = true;
 			this.invoiceID = 0;
       this.invoice = NEW_INVOICE;
+      this.invoice.date = moment(new Date()).format('YYYY-MM-DD')
       await this.$refs.invoiceForm.open(this.invoice, true);
 		});
 

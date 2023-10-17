@@ -9,7 +9,7 @@ export default new Router({
     {
       path: "/",
       alias: "/invoices/:selectedYear",
-      name: "invoices-list",
+      name: "invoicesList",
       component: () => import("./components/InvoicesList")
     },
     {

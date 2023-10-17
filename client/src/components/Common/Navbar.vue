@@ -27,7 +27,7 @@
                             solo
                             elevation="3"
                         ></v-select>
-                    <div v-if="this.$route.name==='invoices-list'">
+                    <div v-if="this.$route.name==='invoicesList'">
                         <v-btn x-small @click="callAddNewInvoice">
                                 <v-icon small>mdi-plus</v-icon>
                         </v-btn>
@@ -188,9 +188,10 @@ export default {
         showControl() {
             let show = false
             switch (this.$route.name) {
-                case 'invoices-list': 
+                case 'invoicesList': 
                 case 'bookingList': 
                 case 'synergyList': 
+                case 'forecastPayment': 
                     show = true;
                     break;
             }
