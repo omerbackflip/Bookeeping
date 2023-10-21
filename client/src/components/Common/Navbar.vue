@@ -145,7 +145,7 @@ export default {
 
         navigate(link) {
             if(link.route) {
-                if (this.$router.history.current.fullPath != link.route) { // avoid calling same route
+                if (this.$route.path != link.route) { // avoid calling same route
                     this.$router.push({ path: link.route , query: this.query || {}});
                 }
             } else {

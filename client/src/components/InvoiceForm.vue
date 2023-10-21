@@ -265,5 +265,10 @@ export default {
 .v-input--checkbox {
   margin-top: 0px !important;
 }
+.payments-wrapper{
+    border: 3px solid #85a7ff;
+    margin-left: 5px !important;
+    margin-right: 5px !important;
+}
 
 </style>

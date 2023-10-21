@@ -1,11 +1,11 @@
 <template>
 	<div class="text-center">
-		<v-dialog v-model="dialog" width="500">
+		<v-dialog v-model="dialog" width="500" persistent>
 			<v-card>
 				<v-card-title class="text-h5 grey lighten-2">
 					{{ importData }}
 				</v-card-title>
-
+				<v-progress-linear :indeterminate="loading" color="cyan" height="10"></v-progress-linear>
                 <div v-show="importData==='BOOKS'">
 					<v-row class="v-row">
 						<v-col cols="9">
@@ -67,6 +67,7 @@ export default {
 			company: '',
 			importYear: '',
 			years: [],
+			loading: false,
 		};
 	},
 	methods: {
@@ -80,6 +81,7 @@ export default {
 				alert("file type MUST be csv")
 		},
 		async submitFile() {
+			this.loading = true;
 			try {
 				let response = '';
 				switch (this.importData){
@@ -87,7 +89,8 @@ export default {
 						response = await SpecificServiceEndPoints.saveInvoicesBulk(this.file)
 						break
 					case "BOOKS" :
-						if (this.file.name.includes(this.company) && this.file.name.includes(this.importYear)) {
+						if (this.company && this.file.name.includes(this.company) 
+							&& this.importYear && this.file.name.includes(this.importYear)) {
 							response = await SpecificServiceEndPoints.saveBooksBulk(this.file,this.company,this.importYear) ;
 						} else alert("company or year does not fits")
 						break
@@ -107,6 +110,7 @@ export default {
 				console.log(error);
 				this.message = "Something went wrong! Please try again later!";
 			}
+			this.loading = false;
 		},
 		loadTable: async function (table_id, tableName) {
         try {

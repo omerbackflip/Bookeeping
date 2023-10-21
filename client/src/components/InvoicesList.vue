@@ -688,12 +688,6 @@ th > i {
     white-space: nowrap;
 }
 
-.payments-wrapper{
-    border: 3px solid #85a7ff;
-    margin-left: 5px !important;
-    margin-right: 5px !important;
-}
-
 .date-text{
   font-size: 12px !important;
 }
