@@ -13,6 +13,8 @@
           mobile-breakpoint="0"
           height="80vh"
           class="elevation-3 mt-0"
+          :loading="isLoading"
+          loading-text="Loading... Please wait"
           loader-height="20"
           dense
           single-expand
@@ -125,7 +127,7 @@ export default {
       expanded: [],
       revenueItem: {},
       dateModal : false,
-
+      isLoading : false,
       series: [],
         // {
         //   name: 'הוצאות',
@@ -186,6 +188,7 @@ export default {
           /* eslint-disable */
 	methods: {
 		async mainSummary() {
+      this.isLoading = true
 			let response = await apiService.getMany({model: INVOICE_MODEL});
 			if (response.data) {
 				this.invoices = response.data; // put all invoices data in invoices
@@ -228,6 +231,7 @@ export default {
       })
       this.series = [{name:'הכנסות', data: revs},{name:'הוצאות', data:exps}]
       // console.log(this.series)
+      this.isLoading = false
 		},
 
 		loadTable: async function (table_id, tableName) {

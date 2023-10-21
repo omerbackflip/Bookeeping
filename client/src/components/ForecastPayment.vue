@@ -11,6 +11,8 @@
           mobile-breakpoint="0"
           height="80vh"
           class="elevation-3 mt-0"
+          :loading="isLoading"
+          loading-text="Loading... Please wait"
           loader-height="20"
           @click:row="getInvoiceForEdit"
           dense>
@@ -89,11 +91,13 @@ export default {
 				{ text: "Redeemed", value: "redeemed", class: "hdr-styles", align: "right" },
 			],
 			invoice: [],
+			isLoading: false,
 		};
 	},
 
 	methods: {
 		async getPayments() {
+      this.isLoading = true
       this.paymentList = []
       const response = await apiService.getMany({model: INVOICE_MODEL, company: this.selectedCompany});
       if (response.data) {
@@ -116,6 +120,7 @@ export default {
           }
         })
 			}
+      this.isLoading = false
 		},
 
     // get invoice data before call to invoiceForm for edit

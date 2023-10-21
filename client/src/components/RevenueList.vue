@@ -13,6 +13,8 @@
           mobile-breakpoint="0"
           height="80vh"
           class="elevation-3 mt-0"
+          :loading="isLoading"
+          loading-text="Loading... Please wait"
           loader-height="20"
           dense>
           <template v-slot:top>
@@ -102,15 +104,18 @@ export default {
       expanded: [],
       revenueItem: {},
       dateModal : false,
+			isLoading: false,
 		};
 	},
 
 	methods: {
 		async getRevenues() {
+      this.isLoading = true
       const response = await apiService.getMany({model: REVENUE_MODEL});
       if (response.data) {
 				this.revenueList = response.data; // put all revenueList data in revenueList
 			}
+      this.isLoading = false
 		},
 
 		loadTable: async function (table_id, tableName) {

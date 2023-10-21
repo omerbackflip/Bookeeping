@@ -13,6 +13,8 @@
           mobile-breakpoint="0"
           height="80vh"
           class="elevation-3 mt-0"
+          :loading="isLoading"
+          loading-text="Loading... Please wait"
           loader-height="20"
           dense>
           <template v-slot:top>
@@ -61,11 +63,13 @@ export default {
 			supplierList: [],
 			search: "",
 			headers: [],
+      isLoading: false,
 		};
 	},
 
 	methods: {
 		async mainSummary() {
+      this.isLoading = true
 			let response = await apiService.getMany({model: INVOICE_MODEL});
 			if (response.data) {
 				this.invoices = response.data; // put all invoices data in invoices
@@ -80,6 +84,7 @@ export default {
           // return({...item1, totalInclude:totalInclude, totalExclude:totalExclude}) // concatinate the totalSupplier
         })  
 			}
+      this.isLoading = false
 		},  
 
 		loadTable: async function (table_id, tableName) {

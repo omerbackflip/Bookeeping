@@ -8,5 +8,5 @@
 
 module.exports = {
   url: process.env.DB_CONNECTION_STRING,
-  version: 1.05,
+  version: 1.06,
 };
