@@ -6,17 +6,20 @@
 					{{ importData }}
 				</v-card-title>
 
-                <div class="radioBtn" v-show="importData==='BOOKS'">
+                <div v-show="importData==='BOOKS'">
 					<v-row class="v-row">
-						<v-col cols="3">
-							<v-radio-group v-model="company">
-								<v-radio label="ביצועים" value="ביצועים"></v-radio>
-								<v-radio label="יזמות" value="יזמות"></v-radio>
+						<v-col cols="9">
+							<!-- <v-radio-group row v-model="importYear" v-for="(item,index) in years" :key="index" class="v-radio-group"> -->
+							<v-radio-group row v-model="importYear" class="radio-group">
+								<p v-for="(item,index) in years" :key="index">
+									<v-radio :label=item :value="item"></v-radio>
+								</p>
 							</v-radio-group>
 						</v-col>
-						<v-col cols="9">
-							<v-radio-group v-model="importYear" v-for="(item,index) in years" :key="index" class="v-radio-group">
-								<v-radio :label=item :value="item"></v-radio>
+						<v-col cols="3">
+							<v-radio-group v-model="company" class="radio-group">
+								<v-radio label="ביצועים" value="ביצועים"></v-radio>
+								<v-radio label="יזמות" value="יזמות"></v-radio>
 							</v-radio-group>
 						</v-col>
 					</v-row>
@@ -114,7 +117,7 @@ export default {
         } catch (error) {
           console.log(error);
         }
-		console.log(this.years)
+		// console.log(this.years)
       },
 	},
 	async mounted() {
@@ -126,11 +129,14 @@ export default {
 </script>
 
 <style scoped>
-.v-radio-group {
+/* .v-radio-group {
 	margin-top: 0px; 
 	padding-top: 0px;
+} */
+.radio-group{
+	border-right-style: outset;
+	direction: rtl;
 }
-
 .v-row {
 	margin-left: 0px;
     margin-right: 0px;
