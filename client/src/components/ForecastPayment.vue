@@ -83,11 +83,12 @@ export default {
 			dialog: false,
 			summaryHeaders: [
 				{ text: "Company", value: "company", class: "hdr-styles", align: "right" },
-				{ text: "Date", value: "date", class: "hdr-styles", align: "right" },
-				{ text: "Payment", value: "payment", class: "hdr-styles", align: "right" },
-				{ text: "checkID", value: "checkID", class: "hdr-styles", align: "right" },
 				{ text: "Supplier", value: "supplier", class: "hdr-styles", align: "right" },
 				{ text: "Project", value: "project", class: "hdr-styles", align: "right" },
+				{ text: "Date", value: "date", class: "hdr-styles", align: "right" },
+				{ text: "Invoice", value: "invoiceId", class: "hdr-styles", align: "right" },
+				{ text: "checkID", value: "checkID", class: "hdr-styles", align: "right" },
+				{ text: "Payment", value: "payment", class: "hdr-styles", align: "right" },
 				{ text: "Redeemed", value: "redeemed", class: "hdr-styles", align: "right" },
 			],
 			invoice: [],
@@ -105,7 +106,7 @@ export default {
             return (item.payments.length > 0) // filter only invoices with payments
         }).map((item1) => {
           item1.payments.forEach((item2) => { // forEach invoice pickup the payments
-            this.paymentList.push({_id:item1._id, supplier:item1.supplier, project: item1.project, company: item1.company,
+            this.paymentList.push({_id:item1._id, supplier:item1.supplier, project: item1.project, company: item1.company, invoiceId: item1.invoiceId,
                                   checkID:item2.checkID, date:item2.date, payment:item2.payment, // and structure the paymentList
                                   redeemed:item2.redeemed, pymt_id:item2._id})  // the need for pymt_id is for update toggle in this screen
           })
@@ -137,6 +138,7 @@ export default {
           }
 				}
         await this.$refs.invoiceForm.open(this.invoice, false);
+        this.getPayments()
 			}
 		},
 

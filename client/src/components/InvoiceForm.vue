@@ -24,13 +24,15 @@
                     <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field @input="onAmountChange" v-model="invoice.amount" label="סכום" required @focus="$event.target.select()"></v-text-field>
+                    <v-text-field type="number" @input="onAmountChange" v-model="invoice.amount" label="סכום" 
+                                  required @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
                     <v-text-field v-model="invoice.vat" label="מע'מ" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field @input="onTotalChange" v-model="invoice.total" label="סה'כ" required @focus="$event.target.select()"></v-text-field>
+                    <v-text-field type="number" @input="onTotalChange" v-model="invoice.total" label="סה'כ" 
+                                  required @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
                     <v-text-field v-model="invoice.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
