@@ -24,15 +24,13 @@
                     <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field type="number" @input="onAmountChange" v-model="invoice.amount" label="סכום" 
-                                  required @focus="$event.target.select()"></v-text-field>
+                    <v-text-field @input="onAmountChange" v-model="invoice.amount" label="סכום" required @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
                     <v-text-field v-model="invoice.vat" label="מע'מ" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
-                    <v-text-field type="number" @input="onTotalChange" v-model="invoice.total" label="סה'כ" 
-                                  required @focus="$event.target.select()"></v-text-field>
+                    <v-text-field @input="onTotalChange" v-model="invoice.total" label="סה'כ" required @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
                     <v-text-field v-model="invoice.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
@@ -194,7 +192,7 @@ export default {
 
       onAmountChange() {
         let { amount } = this.invoice;
-        if(amount && amount >= 0) {
+        if(amount && amount !== 0) {
           this.invoice.vat = ((parseFloat(amount) * VAT_PERCENTAGE)/100)
           this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
         } else {
@@ -206,7 +204,7 @@ export default {
 
       onTotalChange() {
         let { total } = this.invoice;
-        if(total && total >= 0) {
+        if(total && total !== 0) {
           this.invoice.amount = (parseFloat(total)/(1+VAT_PERCENTAGE/100)).toFixed(0);
           this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
         } else {
