@@ -76,7 +76,7 @@
           </template>
           <template v-slot:[`item.amount`]="{ item }">
             <div class="amount-width d-grid">
-              <span>{{ item.amount ? item.amount.toLocaleString() : "" }}</span>
+              <span>{{ item.amount ? item.amount.toLocaleString("en", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : "" }}</span>
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
@@ -270,7 +270,7 @@ export default {
 			msg: "",
 			isLoading: true,
 			itemToEdit: "",
-			selectedYear: 2023,
+			selectedYear: 2024,
 			selectedCompany: 'ביצועים',
       bookInfo: '',
       dateModal : false,

@@ -30,7 +30,7 @@
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
-              <v-btn  x-small class="mx-3">All</v-btn>
+              <!-- <v-btn  x-small class="mx-3">All</v-btn> -->
             </v-toolbar>
           </template>
           <template v-slot:[`item.payment`]="{ item }">
