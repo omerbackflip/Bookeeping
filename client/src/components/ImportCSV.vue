@@ -75,10 +75,11 @@ export default {
 			this.setImportModal(false);
 		},
 		setFile(file) {
-			if (file.type === "text/csv")
+			if (file.name.includes(".xlsx"))
+			// if (file.type === "text/csv")
 				this.file = file; 
 			else
-				alert("file type MUST be csv")
+				alert("file type MUST be xlsx")
 		},
 		async submitFile() {
 			this.loading = true;

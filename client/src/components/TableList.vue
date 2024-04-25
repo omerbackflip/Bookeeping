@@ -71,6 +71,7 @@
       <v-flex xs12 md6 mt-5>
         <v-data-table :headers="headers" 
                       :items="tableCode"
+                      @click:row="showData"
                       disable-pagination
                       dense
                       :search="search"
@@ -168,6 +169,38 @@
           </v-form>
         </v-footer>
       </v-flex>
+
+      <v-dialog v-model="summaryDialog" max-width="1100px">
+        <v-card>
+          <v-flex>
+            <v-data-table
+              :headers="summaryHeaders"
+              :items="summaryFilter"
+              disable-pagination
+              hide-default-footer
+              fixed-header
+              mobile-breakpoint="0"
+              class="elevation-3 list"
+              dense
+              height="70vh">
+              <template v-slot:top>
+                <v-toolbar style="font-size: x-large;">
+                  Total : {{ summaryTotal.toLocaleString() }}
+                  <v-spacer></v-spacer>
+                  {{ summaryHeader }}
+                  <v-spacer></v-spacer>
+                  Count : {{ summaryFilter.length }}
+                </v-toolbar>
+              </template>
+              <template v-slot:[`item.asmchta_date`]="{ item }">
+                <span style="margin-left: 0.5rem"> {{ item.asmchta_date | formatDate }}</span>
+              </template>
+              <template v-slot:[`item.record_schum`]="{ item }">
+                <span> {{ item.record_schum.toLocaleString() }}</span>
+              </template>            </v-data-table>
+          </v-flex>
+        </v-card>
+      </v-dialog>
     </v-layout>
   </div>
 </template>
@@ -175,12 +208,20 @@
 
 
 <script>
-import { TABLE_MODEL } from '../constants/constants';
+import { BOOKS_MODEL, TABLE_MODEL } from '../constants/constants';
 import apiService from '../services/apiService';
 import excel from "vue-excel-export";
 import Vue from "vue";
+import moment from "moment";
 
 Vue.use(excel);
+
+Vue.filter("formatDate", function (value) {
+	if (value) {
+		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
+		return moment(String(value)).format("DD/MM/YYYY");
+	}
+});
 
 export default {
   name: "table-list",
@@ -205,6 +246,16 @@ export default {
         description:"",
       },
       fldRules: [v => !!v || 'Field is required'],
+      summaryHeaders:[
+        { text: "asmchta_date", value: "asmchta_date", class: 'success title'},
+        { text: "company", value: "company", class: 'success title'},
+        { text: "record_schum", value: "record_schum", class: 'success title'},
+        { text: "year", value: "year", class: 'success title'},
+      ],
+			summaryDialog: false,
+      summaryFilter:[],
+      summaryHeader: '',
+      summaryTotal: 0,
     };
   },
 
@@ -285,6 +336,28 @@ export default {
     filterTbl(row) {
       this.tableCode = this.tables.filter(item => item.table_id === row.table_code)
       this.tableTitle = row.description;
+    },
+
+    async showData (item) {
+      let response = ''
+      switch (item.table_id) {
+        case 5 :
+          response = await apiService.getMany({model:BOOKS_MODEL, asmacta1:item.table_code})
+          break;
+
+        case 6 :
+          response = await apiService.getMany({model:BOOKS_MODEL, cust_lname:item.description})
+          break;           
+      }
+      this.summaryFilter = response.data; 
+      this.summaryTotal = this.summaryFilter.reduce((currentTotal, item) => {
+        return (item.record_schum + currentTotal) },0);
+
+      if (item.table_id === 5) {
+        this.summaryTotal = this.summaryTotal/2
+      }
+      this.summaryHeader = item.description
+      this.summaryDialog = true;
     }
   },
 

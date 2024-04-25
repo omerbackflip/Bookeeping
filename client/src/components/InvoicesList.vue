@@ -31,17 +31,15 @@
               <v-spacer></v-spacer>
               <v-col style="text-align-last: center;">
               <export-excel
-                :data="invoiceList"
-                :fields="xlsHeders"
+                :fetch="fetchData"
                 type="xlsx"
                 name="all-data"
-                :title="selectedCompany + ` - ` + selectedYear"
-                footer="This is footer">
+                >
                 <v-btn x-small class="btn btn-danger">
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
-              <v-btn @click="exportAll" x-small class="mx-3">All</v-btn>
+              <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> <!-- don't need because there is "fetchData"-->
               <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn>
             </v-col>
             </v-toolbar>
@@ -127,7 +125,7 @@
               <template v-slot:top>
                 <v-toolbar>
                   <v-spacer />
-                    <export-excel
+                    <!-- <export-excel
                       :data="summaryFilter"
                       :fields="xlsHeders"
                       type="xlsx"
@@ -142,7 +140,7 @@
                           <v-btn small class="btn btn-danger"> <v-icon>mdi-download</v-icon> </v-btn>
                         </div>
                       </v-toolbar-title>
-                    </export-excel>
+                    </export-excel> -->
                   <v-spacer />
                 </v-toolbar>
               </template>
@@ -416,7 +414,7 @@ export default {
 		},
 
 		async batchBookInvoice() {
-			if (window.confirm(`Are you sure you want to merge record_id with excelRecID ?`)) {
+			if (window.confirm(`Are you sure you want to merge record_id with excelRecID (All data - run on BOOK table)?`)) {
 				const	response = await SpecificServiceEndPoints.batchBookInvoice() ;
 				if (response) {
 					this.refreshList();
@@ -426,7 +424,7 @@ export default {
 		},
 
 		async batchInvoiceBook() {
-			if (window.confirm(`Are you sure you want to merge record_id with excelRecID (All years) ?`)) {
+			if (window.confirm(`Are you sure you want to merge record_id with excelRecID (All data - run on INVOICE table) ?`)) {
 				const	response = await SpecificServiceEndPoints.batchInvoiceBook() ;
 				if (response) {
 					this.refreshList();
@@ -493,10 +491,6 @@ export default {
 			return classes;
 		},
 
-    // removePaymentRec(index) {
-		// 	this.invoice.payments.splice(index, 1);
-		// },
-
     addPaymentRow() {
 			this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
 		},
@@ -545,8 +539,25 @@ export default {
         this.header = 'All Invoices '
 				this.isLoading = false;
 			}
-    }
+    },
 
+    async fetchData(){
+        this.loading = true;
+        const response = await apiService.getMany({model:INVOICE_MODEL})
+        let data = response.data.map((item) => {
+          item.date = new Date (item.date).toLocaleDateString('en-GB')
+          return ({...item, payments: item.payments.length
+            ? item.payments.map((item1) => {
+                let redeemed = item1.redeemed ? true : false;
+                return (["checkID",item1.checkID,
+                        "date",new Date (item1.date).toLocaleDateString('en-GB'),
+                        "payment",item1.payment,
+                        "redeemed", redeemed])}) 
+            : ''})
+        })
+        this.loading = false;
+        return data;
+    },
 	},
 
 	async mounted() {

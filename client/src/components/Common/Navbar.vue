@@ -22,7 +22,7 @@
                             v-model="selectedYear"
                             :items="yearList"
                             @change="onYearChange"
-                            :value="2023"
+                            :value="2024"
                             dense
                             solo
                             elevation="3"
@@ -181,6 +181,7 @@ export default {
 
     async mounted() {
 		await this.loadTable(4, "yearList");
+        this.selectedYear = 2024;
         this.getDatabaseInformation();
     },
 
