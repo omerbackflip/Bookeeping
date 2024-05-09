@@ -251,6 +251,7 @@ export default {
         { text: "company", value: "company", class: 'success title'},
         { text: "record_schum", value: "record_schum", class: 'success title'},
         { text: "year", value: "year", class: 'success title'},
+        { text: "cust_lname", value: "cust_lname", class: 'success title'},
       ],
 			summaryDialog: false,
       summaryFilter:[],

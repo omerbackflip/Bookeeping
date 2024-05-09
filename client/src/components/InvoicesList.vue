@@ -125,7 +125,7 @@
               <template v-slot:top>
                 <v-toolbar>
                   <v-spacer />
-                    <!-- <export-excel
+                    <export-excel
                       :data="summaryFilter"
                       :fields="xlsHeders"
                       type="xlsx"
@@ -140,7 +140,7 @@
                           <v-btn small class="btn btn-danger"> <v-icon>mdi-download</v-icon> </v-btn>
                         </div>
                       </v-toolbar-title>
-                    </export-excel> -->
+                    </export-excel>
                   <v-spacer />
                 </v-toolbar>
               </template>
