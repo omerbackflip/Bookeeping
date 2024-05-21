@@ -72,6 +72,11 @@
               </td>
             </div>
           </template>
+          <template v-slot:[`item.remark`]="{ item }">
+            <div class="description-width">
+              <span> {{ item.remark }}</span>
+            </div>
+          </template>
           <template v-slot:[`item.amount`]="{ item }">
             <div class="amount-width d-grid">
               <span>{{ item.amount ? item.amount.toLocaleString("en", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : "" }}</span>
@@ -677,7 +682,8 @@ th > i {
 }
 .description-width {
   width: 100% !important;
-  text-align: -webkit-right;
+  /* text-align: -webkit-right; */
+  direction: rtl;
 }
 
 .text-start > .v-data-table__expand-icon {

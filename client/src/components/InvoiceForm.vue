@@ -58,7 +58,7 @@
                   <v-col cols="3">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
                   </v-col>
-                  <v-col cols="12" class="no-padding">
+                  <v-col cols="12" class="no-padding hebrew">
                     <v-textarea v-model="invoice.remark" label="הערה" auto-grow rows="1" @focus="$event.target.select()"></v-textarea>
                   </v-col>
                 </v-row>
@@ -271,4 +271,8 @@ export default {
     margin-right: 5px !important;
 }
 
+.hebrew {
+  direction: rtl;
+  text-align-last: right;
+}
 </style>
