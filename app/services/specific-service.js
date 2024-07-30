@@ -100,7 +100,7 @@ exports.getInvoicesToExcelExport = (invoices) => {
                 return (["checkID",payment.checkID,
                         "date",new Date (payment.date).toLocaleDateString('en-GB'),
                         "payment",payment.payment,
-                        "redeemed", redeemed])}) 
+                        "redeemed", redeemed]).toString()}).toString() 
             : ''});
         });
         return formatedInvoices;
