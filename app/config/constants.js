@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
 	ServerApp : {
 		google: {
-			invoiceFolderIds: ['1p8jMDVJYkIjoZIsg3LmyJmuDKt7j29Fb'],
+			invoiceFolderIds: ['1nB3lzLf8lgszVEXK4hcGW1LuPl6-OonU'],
 		},
 		models : {
 			invoice : 'invoices'
