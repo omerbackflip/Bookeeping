@@ -41,6 +41,7 @@
               </export-excel>
               <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> <!-- don't need because there is "fetchData"-->
               <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn>
+              <v-btn @click="upload2GDrive" x-small class="mx-3" v-model="uploadGDriveBtn">{{ uploadGDriveBtn }}</v-btn>
             </v-col>
             </v-toolbar>
           </template>
@@ -279,6 +280,7 @@ export default {
       dateModal : false,
       selected: [],
       header: '',
+      uploadGDriveBtn: 'Upload to Google Drive',
 		};
 	},
 
@@ -562,6 +564,18 @@ export default {
         })
         this.loading = false;
         return data;
+    },
+
+    async upload2GDrive(){
+      console.log("before upload")
+      this.uploadGDriveBtn = 'Uploading start...';
+      const response = await SpecificServiceEndPoints.uploadToGDrive();
+
+      if(response.data.file_id){
+        window.open('https://docs.google.com/spreadsheets/d/'+ response.data.file_id.id +'/edit', '_blank');
+      }
+      this.uploadGDriveBtn = 'Upload to Google Drive';
+      console.log("after upload")
     },
 	},
 

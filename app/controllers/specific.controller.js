@@ -6,10 +6,14 @@ const Revenue = db.revenues;
 const csv = require('csvtojson')
 const XLSX = require('xlsx');
 var fs = require('fs');
-const { transformCSVData } = require("../util/util");
+const { transformCSVData, createExcel } = require("../util/util");
 const { url } = require("../config/db.config");
 const { version } = require("../config/db.config");
 const specificService = require("../services/specific-service");
+const { ServerApp } = require("../config/constants");
+const dbService = require("../services/db-service");
+const { google } = require('googleapis');
+const googleService = require('../services/google-service');
 
 // exports.saveInvoicesBulk = async (req, res) => { // not in use - initially for getting data from previous MagicXPA (csv) 
 // 	if (!req.body) {
@@ -310,6 +314,93 @@ exports.getDbInfo = (req,res) => {
 		res.status(500).send({ message: "Error getting db info", error });
 	}
 };
+
+exports.uploadInvoicesToGDrive = async (req, res) => {
+	try {
+
+		const model = ServerApp.models.invoice;
+		const invoices = await dbService.getMultipleItems(db[model], req.query);
+		
+		if (invoices) {
+
+			let invoiceData = specificService.getInvoicesToExcelExport(invoices);
+
+			let invoiceExecelFile =  createExcel(invoiceData);
+
+			if(invoiceExecelFile){
+				auth = googleService.getAuth();
+
+				const file = await googleService.uploadToGoogleDrive(auth, invoiceExecelFile.filename);
+				
+				if(file.id){
+					fs.unlinkSync(invoiceExecelFile.filePath);
+				}
+
+				res.send({success: true, file_id: file});
+			}else{
+				res.send({success: false, message: "Error! While generating invoice file."});
+			}
+
+
+		}
+
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error while uploading invoices to google drive."
+		});
+	}	
+};
+
+exports.googleConnectionStatus = async (req, res) => {
+	try{
+		let auth = googleService.getAuth();
+		
+		if(auth instanceof google.auth.OAuth2){
+
+			const userInfo = await googleService.getUser(auth);
+			const username = (userInfo != false ? userInfo.name : '');
+			res.send({
+				connected: true,
+				username: username
+			});
+
+		}else{
+			res.send({
+				connected: false,
+				authUrl: auth
+			});
+		}
+
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error while checking google connection."
+		});
+	}
+};
+
+exports.googleAuthHandler = async (req, res) => {
+	try{
+		
+		const oAuth2Client = googleService.getAuthClient();
+		const code = req.query.code;
+
+		googleService.getToken(oAuth2Client, code);
+
+		res.send({
+			code: code,
+			connected: true,
+			username: 't2p demo'
+		});
+
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error while checking google connection."
+		});
+	}
+}
 
 function unLinkFile(path) {
 	fs.unlinkSync(path);

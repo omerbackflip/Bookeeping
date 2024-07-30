@@ -2,3 +2,5 @@ node_modules
 uploads
 app/config/db.config.js
 .env
+app/config/google-credentials.json
+app/config/token.json

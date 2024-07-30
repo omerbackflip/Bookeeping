@@ -58,6 +58,14 @@ class SpecificServiceEndPoints {
   async getDbInfo() {
 		return await axios.get(`${baseUrl}/specific/get-database-info`);
 	}
+
+  async uploadToGDrive() {
+    return await axios.post(`${baseUrl}/specific/upload-invoices-to-gdrive`);
+  }
+
+  async getGoogleConnectionStatus(){
+    return await axios.get(`${baseUrl}/specific/get-google-connection-status`);
+  }
 }
 
 export default new SpecificServiceEndPoints();

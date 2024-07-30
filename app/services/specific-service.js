@@ -80,4 +80,33 @@ exports.getInvoicesToSave = (data) => {
         console.log(error)
         throw error;
     }
+},
+
+exports.getInvoicesToExcelExport = (invoices) => {
+    try{
+        let formatedInvoices = [];
+
+        formatedInvoices = invoices.map((invoice) => {
+                
+            invoice._id = invoice._id.toString();
+            invoice.date = new Date (invoice.date).toLocaleDateString('en-GB')
+
+            delete invoice.project;
+
+            return ({...invoice, payments: invoice.payments.length
+            ? invoice.payments.map((payment) => {
+                
+                let redeemed = payment.redeemed ? true : false;
+                return (["checkID",payment.checkID,
+                        "date",new Date (payment.date).toLocaleDateString('en-GB'),
+                        "payment",payment.payment,
+                        "redeemed", redeemed])}) 
+            : ''});
+        });
+        return formatedInvoices;
+
+    }catch (error){
+        console.log(error)
+        throw error;
+    }
 }

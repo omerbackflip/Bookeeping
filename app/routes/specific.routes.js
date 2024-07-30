@@ -17,5 +17,11 @@ module.exports = app => {
   router.put("/update-payment-in-invoice/:objIdOfPayment", specific.updatePaymentInInvoice);
   router.get("/get-database-info", specific.getDbInfo);
 
+
+  //Google auth  
+  router.post("/upload-invoices-to-gdrive", specific.uploadInvoicesToGDrive);
+  router.get("/get-google-connection-status", specific.googleConnectionStatus);
+  router.get("/google-auth-handler", specific.googleAuthHandler);
+
   app.use('/api/specific', router);
 };

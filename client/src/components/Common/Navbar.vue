@@ -59,6 +59,18 @@
                         <v-list-item-title class="white--text">{{link.text}}</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
+                <v-list-item @click="checkGoogleConnection()">
+                    <v-list-item-action>
+                        <v-icon class="white--text">
+                            links
+                        </v-icon>
+                    </v-list-item-action>
+                    <v-list-item-content>
+                        <v-list-item-title v-model="googleConnectMenuItem" class="white--text">
+                            {{ googleConnectMenuItem }}
+                        </v-list-item-title>
+                    </v-list-item-content>
+                </v-list-item>
             </v-list>
         </v-navigation-drawer>
         <template v-if="openImportModal">
@@ -82,6 +94,7 @@ export default {
         return {
             navItems,
             isMobile,
+            googleConnectMenuItem: 'Google (Not Connected)',
             query: null,
             drawer: false,
             openImportModal: false,
@@ -166,6 +179,26 @@ export default {
             }
         },
 
+        async checkGoogleConnection() {
+            try{
+                const response = await SpecificServiceEndPoints.getGoogleConnectionStatus();
+
+                if(response.data.connected){
+                    if(response.data.username != ''){
+                        this.googleConnectMenuItem = 'Google (' + response.data.username + ')';
+                    }
+                }
+
+                if(!response.data.connected){
+                    this.googleConnectMenuItem = 'Google (Connect)';
+                    window.open(response.data.authUrl, '_blank');
+                }
+
+            }catch (error){
+                console.log(error);
+            }
+        },
+
 		loadTable: async function (table_id, tableName) {
 			try {
 				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
@@ -183,6 +216,7 @@ export default {
 		await this.loadTable(4, "yearList");
         this.selectedYear = 2024;
         this.getDatabaseInformation();
+        this.checkGoogleConnection();
     },
 
     computed: {
