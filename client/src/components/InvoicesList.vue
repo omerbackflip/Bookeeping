@@ -41,7 +41,7 @@
               </export-excel>
               <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> <!-- don't need because there is "fetchData"-->
               <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn>
-              <v-btn @click="upload2GDrive" x-small class="mx-3" v-model="uploadGDriveBtn">{{ uploadGDriveBtn }}</v-btn>
+              <v-btn @click="upload2GDrive" x-small class="mx-3">backup</v-btn>
             </v-col>
             </v-toolbar>
           </template>
@@ -280,7 +280,6 @@ export default {
       dateModal : false,
       selected: [],
       header: '',
-      uploadGDriveBtn: 'Upload to Google Drive',
 		};
 	},
 
@@ -548,8 +547,8 @@ export default {
 			}
     },
 
-    async fetchData(){
-        this.loading = true;
+    async fetchData(){  // used during extract all data to "vue-excel-export"
+        this.isLoading = true;
         const response = await apiService.getMany({model:INVOICE_MODEL})
         let data = response.data.map((item) => {
           item.date = new Date (item.date).toLocaleDateString('en-GB')
@@ -562,20 +561,18 @@ export default {
                         "redeemed", redeemed])}) 
             : ''})
         })
-        this.loading = false;
+        this.isLoading = false;
         return data;
     },
 
     async upload2GDrive(){
-      console.log("before upload")
-      this.uploadGDriveBtn = 'Uploading start...';
+      this.isLoading = true;
       const response = await SpecificServiceEndPoints.uploadToGDrive();
-
       if(response.data.file_id){
-        window.open('https://docs.google.com/spreadsheets/d/'+ response.data.file_id.id +'/edit', '_blank');
+        window.alert('file saved to GDrive');
+        // window.open('https://docs.google.com/spreadsheets/d/'+ response.data.file_id.id +'/edit', '_blank');
       }
-      this.uploadGDriveBtn = 'Upload to Google Drive';
-      console.log("after upload")
+      this.isLoading = false;
     },
 	},
 

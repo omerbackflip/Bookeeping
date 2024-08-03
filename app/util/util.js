@@ -1,4 +1,5 @@
 const xlsx = require('xlsx');
+const moment = require('moment');
 const { ServerApp } = require("../config/constants");
 
 exports.transformCSVData = (sheet_name_list, workbook) => {
@@ -64,7 +65,7 @@ exports.convertToJSON = (array) => {
  	let excelFilename;
 
  	if(filename === ''){
- 		excelFilename = 'invoices-data-' + Date.now() + '.xlsx';
+ 		excelFilename = 'invoices-data-' + moment(Date.now()).format('DD-MM-YYYY') + '.xlsx';
  	}else{
  		excelFilename = filename;
  	}

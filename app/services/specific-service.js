@@ -82,7 +82,7 @@ exports.getInvoicesToSave = (data) => {
     }
 },
 
-exports.getInvoicesToExcelExport = (invoices) => {
+exports.getInvoicesToExcelExport = (invoices) => { // used during upload to GDrive
     try{
         let formatedInvoices = [];
 
