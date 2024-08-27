@@ -21,6 +21,7 @@ module.exports = mongoose => {
         date: Date,
         redeemed: Boolean,
 			}],
+      link: String,
     },
     { timestamps: true }
   );

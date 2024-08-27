@@ -40,7 +40,7 @@
                 </v-btn>
               </export-excel>
               <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> <!-- don't need because there is "fetchData"-->
-              <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn>
+              <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
               <v-btn @click="upload2GDrive" x-small class="mx-3">backup</v-btn>
             </v-col>
             </v-toolbar>
@@ -570,7 +570,8 @@ export default {
       const response = await SpecificServiceEndPoints.uploadToGDrive();
       if(response.data.file_id){
         window.alert('file saved to GDrive');
-        // window.open('https://docs.google.com/spreadsheets/d/'+ response.data.file_id.id +'/edit', '_blank');
+        await apiService.findOneAndUpdate({description: `last bckp - ${moment (new Date()).format('DD/MM/YYYY')}`},
+                                          {model:TABLE_MODEL, table_id: 99, table_code: 80})
       }
       this.isLoading = false;
     },

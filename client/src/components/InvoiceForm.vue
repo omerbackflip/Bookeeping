@@ -20,7 +20,10 @@
                   <v-col cols="4">
                     <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                   </v-col>
-                  <v-col cols="12" class="no-padding">
+                  <v-col cols="5" class="no-padding">
+                    <v-text-field v-model="invoice.link" label="link" @focus="$event.target.select()"></v-text-field>
+                  </v-col>
+                  <v-col cols="7" class="no-padding">
                     <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">

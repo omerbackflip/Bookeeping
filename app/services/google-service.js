@@ -1,7 +1,10 @@
+// looks that some tutorials can be found here... https://github.com/googleapis/google-api-nodejs-client?tab=readme-ov-file
+
 const fs = require('fs');
 const { google } = require('googleapis');
 const path = require('path');
 const { ServerApp } = require('../config/constants');
+const { auth } = require('google-auth-library');
 
 const SCOPES = [
   'https://www.googleapis.com/auth/drive.file', 
@@ -12,7 +15,7 @@ const TOKEN_PATH = path.join(ServerApp.configFolderPath, 'token.json');
 
 function getNewToken(oAuth2Client) {
   const authUrl = oAuth2Client.generateAuthUrl({
-    access_type: 'offline',
+    access_type: 'offline', // 'online' (default) or 'offline' (gets refresh_token). IMPORTANT NOTE - The refresh_token is only returned on the first authorization.
     scope: SCOPES,
   });
   console.log('Authorize this app by visiting this url:', authUrl);
@@ -81,7 +84,7 @@ exports.getUser = async (oAuth2Client) => {
 }
 
 exports.uploadToGoogleDrive = async (oAuth2Client, filename) => {
-  const drive = google.drive({ version: 'v3', auth });
+  const drive = google.drive({ version: 'v3', auth }); // auth object was "require" above...
 
   const filePath = path.join(ServerApp.uploadFolderPath, filename);
   const fileMetadata = {

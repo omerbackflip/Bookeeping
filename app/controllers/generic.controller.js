@@ -39,6 +39,16 @@ exports.findOne = async (req, res) => {
 	}
 };
 
+//Find a single entity with specific field(s) in the req.query
+exports.getOne = async (req, res) => {
+	try {
+		let modelName = req.query.model;
+		delete req.query.model
+		return res.send(await dbService.getSingleItem(db[modelName], req.query));
+	} catch (error) {
+		res.status(500).send({ message: "Error retrieving entity!"});		
+	}
+};
 
 //Update a entity identified by the id in the request:
 exports.update = async (req, res) => {
@@ -90,5 +100,15 @@ exports.deleteAll = async (req, res) => {
 			message:
 				err.message || "Some error occurred while removing all data."
 		});
+	}
+};
+
+exports.findOneAndUpdate = async (req, res) => {
+	try {
+		const model = req.query.model;
+		delete req.query.model;
+		return res.send(await dbService.updateItem(db[model], req.query, req.body));
+	} catch (error) {
+		res.status(500).send({message: error.message || "Some error occurred while retrieving entity."});		
 	}
 };

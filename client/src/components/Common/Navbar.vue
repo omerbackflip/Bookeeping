@@ -9,7 +9,7 @@
                 <div v-else>
                     {{local ? 'LocalHost' : 'Production'}}
                 </div>
-            &nbsp; {{ version }}
+            &nbsp; {{ lastBkup }}
             </div>
             <v-spacer></v-spacer>
             <template>
@@ -108,6 +108,7 @@ export default {
             toggleCompany : 'ביצועים',
             selectedYear: 2024,
             yearList: [],
+            lastBkup:'',
             local: false,
             version: '',
         }
@@ -208,6 +209,10 @@ export default {
 			} catch (error) {
 				console.log(error);
 			}
+            // at the same time bring also last backup (although it is not relevant to this fuction)
+            // const response = await apiService.getMany({ table_id: 99, model: TABLE_MODEL });
+            const response = await apiService.getOne({ table_id: 99, table_code:80, model: TABLE_MODEL });
+            this.lastBkup = response.data.description;
 		},
 
     },
