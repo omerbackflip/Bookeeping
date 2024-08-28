@@ -8,6 +8,9 @@ const { auth } = require('google-auth-library');
 
 const SCOPES = [
   'https://www.googleapis.com/auth/drive.file', 
+  // 'https://www.googleapis.com/auth/drive',
+  // 'https://www.googleapis.com/auth/drive.file',,
+  // 'https://www.googleapis.com/auth/drive.metadata',
   'https://www.googleapis.com/auth/userinfo.profile'
 ];
 const TOKEN_PATH = path.join(ServerApp.configFolderPath, 'token.json');
@@ -84,7 +87,7 @@ exports.getUser = async (oAuth2Client) => {
 }
 
 exports.uploadToGoogleDrive = async (oAuth2Client, filename) => {
-  const drive = google.drive({ version: 'v3', auth }); // auth object was "require" above...
+  const drive = google.drive({ version: 'v3', auth: oAuth2Client }); // auth object was "require" above...
 
   const filePath = path.join(ServerApp.uploadFolderPath, filename);
   const fileMetadata = {
