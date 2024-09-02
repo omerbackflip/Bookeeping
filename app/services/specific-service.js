@@ -89,7 +89,9 @@ exports.getInvoicesToExcelExport = (invoices) => { // used during upload to GDri
         formatedInvoices = invoices.map((invoice) => {
                 
             invoice._id = invoice._id.toString();
-            invoice.date = new Date (invoice.date).toLocaleDateString('en-GB')
+            invoice.date = moment(invoice.date).format('DD/MM/YYYY')
+            // invoice.date = moment(invoice.date)
+            // invoice.date = new Date (invoice.date).toLocaleDateString('en-GB')
 
             // delete invoice.project;
 

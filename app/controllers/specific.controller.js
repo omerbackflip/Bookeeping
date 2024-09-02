@@ -329,10 +329,10 @@ exports.uploadInvoicesToGDrive = async (req, res) => {
 
 			if(invoiceExecelFile){
 				auth = googleService.getAuth();
-
+				console.log(auth);
 				const file = await googleService.uploadToGoogleDrive(auth, invoiceExecelFile.filename);
-				
-				if(file.id){
+				console.log("file",file)
+				if(file.id){ // after uploading the excel file, remove the tmporary excel file from "upload" directory
 					fs.unlinkSync(invoiceExecelFile.filePath);
 				}
 

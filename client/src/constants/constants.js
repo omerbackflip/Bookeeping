@@ -69,6 +69,7 @@ export const NEW_INVOICE = {
         excelRecID: null,
         year: null,
         payments: [],
+        link: "Here Link",
 };
 
 export const navItems = [

@@ -5,6 +5,10 @@ class ApiService {
     return http.get("generic/get-list",{params});
   }
 
+  getOne(params) {
+    return http.get("generic/get-one",{params});
+  }
+
   getById(id,params) {
     return http.get(`generic/get-by-id/${id}`,{params});
   }
@@ -15,6 +19,10 @@ class ApiService {
 
   update(id, data,params) {
     return http.put(`generic/update/${id}`, data, {params});
+  }
+
+  findOneAndUpdate(data, params) {
+    return http.put("generic/find-one-and-update", data, {params});
   }
 
   deleteOne(params) {
