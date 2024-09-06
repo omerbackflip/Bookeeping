@@ -28,21 +28,19 @@
               <v-toolbar-title> {{header}} - {{invoiceList.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
+              To pay = {{ pending.toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,}) }}
               <v-spacer></v-spacer>
-              <v-col style="text-align-last: center;">
-              <export-excel
-                :fetch="fetchData"
-                type="xlsx"
-                name="all-data"
-                >
-                <v-btn x-small class="btn btn-danger">
-                  <v-icon small>mdi-download</v-icon>
-                </v-btn>
-              </export-excel>
-              <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> <!-- don't need because there is "fetchData"-->
-              <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
-              <v-btn @click="upload2GDrive" x-small class="mx-3">backup</v-btn>
-            </v-col>
+              <!-- <v-col style="text-align-last: center;"> -->
+                <export-excel v-show="!isMobile()" :fetch="fetchData" type="xlsx" name="all-data">
+                  <v-btn x-small class="btn btn-danger">
+                    <v-icon small>mdi-download</v-icon>
+                  </v-btn>
+                </export-excel>
+                <!-- <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> don't need because there is "fetchData"-->
+                <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
+                <v-btn v-show="!isMobile()" @click="upload2GDrive" x-small class="mx-3">backup</v-btn>
+                <v-btn @click="toggleList" x-small class="mx-3">{{ notPayedList ? "unfiltered" : "filtered"}}</v-btn>
+              <!-- </v-col> -->
             </v-toolbar>
           </template>
           <template v-slot:[`item.date`]="{ item }">
@@ -105,7 +103,7 @@
           </template>
           <template v-slot:[`item.published`]="{ item }">
             <td @click.stop>
-              <v-checkbox v-model="item.published" @click="updateOne(item)"></v-checkbox>
+              <v-checkbox v-model="item.published" @click="togglePublished(item)"></v-checkbox>
             </td>
           </template>
         </v-data-table>
@@ -221,6 +219,7 @@ export default {
 		return {
       isMobile,
 			invoiceList: [],
+			previusList: [], // used to store the prevoius invoiceList
 			companyName: [],
 			projectName: [],
 			supplierName: [],
@@ -280,6 +279,8 @@ export default {
       dateModal : false,
       selected: [],
       header: '',
+      notPayedList: false,
+      pending: '',
 		};
 	},
 
@@ -378,6 +379,11 @@ export default {
         // this was added to align the view of "date" to exclude time.
         this.invoiceList = this.removeTimeFromDate(this.invoiceList)
         this.invoiceList.sort((a, b) => b.group - a.group);
+        this.pending = this.invoiceList.filter((item) =>{
+          return (item.published === false)
+        }).reduce ((pendingTotal, item1) => {
+          return item1.total + pendingTotal
+        },0)
 				this.isLoading = false;
 			}
 		},
@@ -463,13 +469,18 @@ export default {
 		},
 
     // called @click on toggle "published" field
-		async updateOne(item) {
+		async togglePublished(item) {
 			await apiService.update(
 				item._id,
 				{ published: item.published },
 				{ model: INVOICE_MODEL }
 			);
 			this.itemToEdit = "";
+      if (item.published) {
+        this.pending = this.pending - item.total
+      } else {
+        this.pending = this.pending + item.total
+      }
 		},
 
     // run this batch to update 
@@ -574,6 +585,18 @@ export default {
                                           {model:TABLE_MODEL, table_id: 99, table_code: 80})
       }
       this.isLoading = false;
+    },
+
+    toggleList() {
+      if (this.notPayedList) {
+        this.invoiceList = this.previusList;
+      } else {
+        this.previusList = this.invoiceList
+        this.invoiceList = this.invoiceList.filter((item) => {
+          return item.published === false
+        })
+      }
+      this.notPayedList = !this.notPayedList
     },
 	},
 
