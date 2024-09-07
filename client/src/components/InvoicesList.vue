@@ -28,9 +28,12 @@
               <v-toolbar-title> {{header}} - {{invoiceList.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
-              To pay = {{ pending.toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,}) }}
               <v-spacer></v-spacer>
-              <!-- <v-col style="text-align-last: center;"> -->
+              <div @click="toggleList" :class="{'hdr-styles' : notPayedList}">
+                To pay = {{ pending.toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,}) }}
+              </div>
+              <v-spacer></v-spacer>
+              <div v-show="!isMobile()">
                 <export-excel v-show="!isMobile()" :fetch="fetchData" type="xlsx" name="all-data">
                   <v-btn x-small class="btn btn-danger">
                     <v-icon small>mdi-download</v-icon>
@@ -39,8 +42,8 @@
                 <!-- <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> don't need because there is "fetchData"-->
                 <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
                 <v-btn v-show="!isMobile()" @click="upload2GDrive" x-small class="mx-3">backup</v-btn>
-                <v-btn @click="toggleList" x-small class="mx-3">{{ notPayedList ? "unfiltered" : "filtered"}}</v-btn>
-              <!-- </v-col> -->
+                <!-- <v-btn @click="toggleList" x-small class="mx-3">{{ notPayedList ? "unfiltered" : "filtered"}}</v-btn> -->
+              </div>
             </v-toolbar>
           </template>
           <template v-slot:[`item.date`]="{ item }">
@@ -614,10 +617,12 @@ export default {
 		});
 
     this.$root.$on("yearChange", (year) => {
+      this.notPayedList = false;
 			this.selectedYear = year;
 		});
 
     this.$root.$on("companyChange", (company) => {
+      this.notPayedList = false;
 			this.selectedCompany = company;
 		});
 
@@ -784,6 +789,10 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     direction: rtl;
     white-space: pre-wrap;
     text-align: center;
+}
+.v-toolbar__content {
+  padding-left: 0px;
+  padding-right: 0px;
 }
 .sreach-width {
   width: 4rem;
