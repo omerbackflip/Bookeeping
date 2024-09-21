@@ -3,7 +3,7 @@
     <v-layout>
       <v-flex>
         <v-data-table
-          :headers="summaryHeaders"
+          :headers="revenueHeaders"
           :items="revenueList"
           :search="search"
           @click:row="updateRevenue"
@@ -91,11 +91,14 @@ export default {
 			revenueList: [],
 			projectList: [],
 			dialog: false,
-			summaryHeaders: [
+			revenueHeaders: [
+				{ text: "Remark", value: "remark", class: "hdr-styles", align: "right" },
 				{ text: "Date", value: "date", class: "hdr-styles", align: "right" },
 				{ text: "Amount", value: "amount", class: "hdr-styles", align: "right" },
 				{ text: "Invoice", value: "invoiceId", class: "hdr-styles", align: "right" },
+				{ text: "PaymentType", value: "paymentType", class: "hdr-styles", align: "right" },
 				{ text: "Description", value: "description", class: "hdr-styles", align: "right" },
+				{ text: "FlatId", value: "flatId", class: "hdr-styles", align: "right" },
 				{ text: "Project", value: "project", class: "hdr-styles", align: "right" },
 				{ text: '', value: 'controls' },
 			],

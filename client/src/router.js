@@ -28,6 +28,11 @@ export default new Router({
       component: () => import("./components/TableList")
     },
     {
+      path: "/holdersList",
+      name: "holderList",
+      component: () => import("./components/HoldersList")
+    },
+    {
       path: "/projectsummary",
       name: "project-summary",
       component: () => import("./components/ProjectSummary")

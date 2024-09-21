@@ -157,6 +157,7 @@ exports.saveRevenuesBulk = async (req, res) => {
 	try {
         await Promise.all([Revenue.deleteMany()]);
 		let data = await csv().fromFile(`uploads/${req.file.filename}`);
+		console.log(data)
 		if (data) {
 			const result = await Revenue.insertMany(data, { ordered: true });
 			unLinkFile(`uploads/${req.file.filename}`);

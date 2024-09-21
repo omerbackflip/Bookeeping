@@ -1,17 +1,18 @@
 <template>
     <v-dialog v-model="dialog" width="500" :style="{ zIndex: options.zIndex }" @keydown.esc="cancel">
-        <v-card>
+        <v-card class="hebrew">
             <v-card-title class="text-h5 grey lighten-2">
                 {{newRevenue ? 'New' : 'Update'}} Revenue
             </v-card-title>
             <div class="field-margin" v-show="showMessage">
                 {{message}}
             </div>
-            <v-text-field class="field-margin" v-model="revenue.project" label="Name"></v-text-field>
+            <v-text-field class="field-margin" v-model="revenue.project" label="Project"></v-text-field>
+            <v-text-field class="field-margin" v-model="revenue.flatId" label="FlatID"></v-text-field>
             <v-text-field class="field-margin" v-model="revenue.description" label="Description"></v-text-field>
+            <v-text-field class="field-margin" v-model="revenue.paymentType" label="Payment Type"></v-text-field>
             <v-text-field class="field-margin" v-model="revenue.invoiceId" label="Invoice"></v-text-field>
             <v-text-field class="field-margin" v-model="revenue.amount" label="Amount"></v-text-field>
-            <!-- <v-text-field class="field-margin" v-model="revenue.date" label="Date"></v-text-field> -->
             <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="revenue.date" persistent width="290px">
                 <template v-slot:activator="{ on, attrs }">
                 <v-text-field class="field-margin" v-model="revenue.date" label="תאריך" readonly v-bind="attrs" v-on="on">
@@ -23,6 +24,7 @@
                 <v-btn text color="primary" @click="$refs.dialog.save(revenue.date)"> OK </v-btn>
                 </v-date-picker>
             </v-dialog>
+            <v-text-field class="field-margin" v-model="revenue.remark" label="Remark"></v-text-field>
             <v-divider></v-divider>
 
             <v-card-actions>
@@ -105,5 +107,15 @@ export default {
 
 .field-margin{
 	margin: 12px;
+}
+
+.v-text-field{input 
+  {
+    color: blue;
+  }
+}
+
+.hebrew {
+    direction: rtl;
 }
 </style>

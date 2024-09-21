@@ -253,6 +253,7 @@ export default {
 					// fatch all paymanets for this project cross years.
 					response = await apiService.getMany({model: BOOKS_MODEL, cust_lname: summaryItem , company: this.selectedCompany})
 					this.summaryFilter = response.data
+					this.summaryFilter.sort((a, b) => new Date(b.asmchta_date) - new Date(a.asmchta_date)); // sort the summary by date
 					break;
 				default : break;
 			}

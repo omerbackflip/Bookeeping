@@ -2,6 +2,7 @@ export const BOOKS_MODEL = 'books';
 export const INVOICE_MODEL = 'invoices';
 export const TABLE_MODEL = 'tables';
 export const REVENUE_MODEL = 'revenues';
+export const HOLDER_MODEL = 'holders';
 export const VAT_PERCENTAGE = 17;
 
 export const INVOICE_MOBILE_HEADERS = [
@@ -72,10 +73,31 @@ export const NEW_INVOICE = {
         link: "Here Link",
 };
 
+export const NEW_HOLDER = {
+    flatId: "",
+    holderName: "",
+    phone: "",
+    signDate: new Date(),
+    signPrice: null,
+    email: "",
+    remark: "",
+};
+
+export const HOLDER_HEADERS = [
+    { text: "FlatID",       value: "flatId",        class: "hdr-styles",        groupable: false},	
+    { text: "holderName",   value: "holderName",    class: "mobile-headers",    groupable: false},	
+    { text: "phone",        value: "phone",         class: "mobile-headers",    groupable: false},
+    { text: "signDate",     value: "signDate",      class: "mobile-headers",    groupable: false},
+    { text: "signPrice",    value: "signPrice",     class: " mobile-headers",   groupable: false},
+    { text: "remark",       value: "remark",        class: " mobile-headers",   groupable: false},
+    { text: "email",        value: "email",         class: " mobile-headers",   groupable: false,   align: "left"},
+];
+
 export const navItems = [
     {icon: 'home', text: 'Invoice List', route: '/'},
     {icon: 'dashboard', text: 'Book List', route: '/bookingList/' },
     {icon: 'event', text: 'Table List', route: '/tableList'},
+    {icon: 'event', text: 'Holder List', route: '/HoldersList'},
     {icon: 'folder', text: 'Import INVOICEs', route: null, import: 'INVOICES', onClick: 'runModal'},
     {icon: 'folder', text: 'Import Bella BOOKs', route: null, import: 'BOOKS', onClick: 'runModal'},
     {icon: 'folder', text: 'Import REVENUEs', route: null, import: 'REVENUES', onClick: 'runModal'},

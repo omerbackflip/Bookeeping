@@ -324,6 +324,7 @@ export default {
 
       // this was added to align the view of "date" to exclude time.
       this.summaryFilter = this.removeTimeFromDate(this.summaryFilter)
+      this.summaryFilter.sort((a, b) => new Date(b.date) - new Date(a.date)); // sort the summary by date
 
       this.summaryName = summaryItem;
       this.summaryTotal = this.summaryFilter.reduce((currentTotal, item) =>{
