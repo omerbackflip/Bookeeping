@@ -85,11 +85,10 @@ export default {
 			}
 		},
 
-        open(revenue, newRevenue) {
-            this.newRevenue = newRevenue;
-            this.revenue = newRevenue 
-                ? {revenue: '' , budget: 0 , suppliers: []} 
-                : {...revenue       };
+        open(revenue) {
+            this.newRevenue = revenue.newPayment ? true : false;
+            delete revenue.newPayment;
+            this.revenue = revenue 
             this.revenue.date = moment(this.revenue.date).format('YYYY-MM-DD');
             this.dialog = true;
             return new Promise((resolve) => {

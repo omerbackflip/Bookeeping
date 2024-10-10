@@ -7,9 +7,9 @@ export const VAT_PERCENTAGE = 17;
 
 export const INVOICE_MOBILE_HEADERS = [
     // { text: "G",            value: "group",         class: "hdr-styles",  groupable: false, align: "right"},	
-    { text: "Date",         value: "date",          class: "mobile-headers",  groupable: false},	
-    { text: "Description",  value: "description",   class: "mobile-headers",  groupable: false,   align: "right"},
-    { text: "Amount",       value: "amount",        class: "mobile-headers",  groupable: false,   align: "right", width: "4%"},
+    { text: "Supplier",         value: "supplier",          class: "mobile-headers",  groupable: false, width: "30%"},	
+    { text: "Description",  value: "description",   class: "mobile-headers",  groupable: false,   align: "right", width: "60%"},
+    { text: "Amount",       value: "amount",        class: "mobile-headers",  groupable: false,   align: "right", width: "10%"},
     // { text: "Act.",         value: "actions",           class: " mobile-headers",                   groupable: false}
 ];
 
@@ -40,7 +40,7 @@ export const INVOICE_WEB_HEADERS = [
     { text: "Comp.",        value: "company",       class: 'hdr-styles',                                   width: "4%"},	
     { text: "Project",      value: "project",       class: 'hdr-styles',},
     { text: "Date",         value: "date",          class: 'hdr-styles',groupable: false},	
-    { text: "Description",  value: "description",   class: 'hdr-styles',groupable: false,   align: "right", width: "20%"},
+    { text: "Description",  value: "description",   class: 'hdr-styles',groupable: false,   align: "right", width: "15%"},
     { text: "Supplier",     value: "supplier",      class: 'hdr-styles',                    align: "right"},	
     { text: "Amount",       value: "amount",        class: 'hdr-styles',groupable: false,   align: "right"},
     { text: "Vat",          value: "vat",           class: 'hdr-styles',groupable: false,   align: "right"},
@@ -71,16 +71,6 @@ export const NEW_INVOICE = {
         year: null,
         payments: [],
         link: "Here Link",
-};
-
-export const NEW_HOLDER = {
-    flatId: "",
-    holderName: "",
-    phone: "",
-    signDate: new Date(),
-    signPrice: null,
-    email: "",
-    remark: "",
 };
 
 export const HOLDER_HEADERS = [

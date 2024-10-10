@@ -25,10 +25,10 @@
               <v-toolbar-title> Total Holders - {{holdersList.length}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
-              <v-spacer></v-spacer>
+              <!-- <v-spacer></v-spacer>
               <v-btn x-small @click="getHolderForEdit">
                 <v-icon small>mdi-plus</v-icon>
-              </v-btn>
+              </v-btn> -->
             </v-toolbar>
           </template>
           <template v-slot:[`item.signDate`]="{ item }">
@@ -50,7 +50,7 @@
                 class="expanded-datatable">
                 <template v-slot:top>
                   <v-toolbar flat>
-                    <v-btn @click="updatePament(item)" x-small> Add Payment</v-btn>
+                    <v-btn @click="updatePament({newPayment: true, project: item.project, flatId: item.flatId})" x-small> Add Payment</v-btn>
                   </v-toolbar>
                 </template>
 								<template v-slot:[`item.payment`]="{ item }">
@@ -80,7 +80,7 @@ import Vue from "vue";
 import moment from "moment";
 import apiService from "../services/apiService";
 import ConfirmDialog from './Common/ConfirmDialog.vue';
-import { HOLDER_MODEL, HOLDER_HEADERS, NEW_HOLDER, REVENUE_MODEL } from "../constants/constants";
+import { HOLDER_MODEL, HOLDER_HEADERS, REVENUE_MODEL } from "../constants/constants";
 import { isMobile } from '../constants/constants';
 import HolderForm from './HolderForm.vue';
 import RevenueForm from './RevenueForm.vue';
@@ -112,11 +112,8 @@ export default {
 			search: "",
 			headers: [],
       expanded: [],
-      revenueItem: {},
       dateModal : false,
       isLoading : false,
-      series: [],
-
 		};
 	},
 
@@ -129,9 +126,18 @@ export default {
 				this.holdersList = response.data;
 			}
       this.holdersList.forEach(async (item) => {
-        let pmt = await apiService.getMany({model: REVENUE_MODEL, flatId: item.flatId});
-        item.payments = pmt.data;
+        if(item.holderName) {
+          item.signDate = moment(item.signDate).format('YYYY-MM-DD');
+          let payments = await apiService.getMany({model: REVENUE_MODEL, flatId: item.flatId});
+          if (payments && payments.data) { // there are payments for this flatId
+            payments.data.forEach((item1) => {
+              item1.date = moment(item1.date).format('YYYY-MM-DD');
+            })
+            item.payments = payments.data;
+          }
+        }
       })
+      console.log(this.holdersList)
       this.isLoading = false
 		},
 
@@ -146,16 +152,12 @@ export default {
     async getHolderForEdit(item) {
 			if (item._id) { // this is update holder
 			  await this.$refs.holderForm.open(item, false);
-			} else { // this is new holder
-        let holder = NEW_HOLDER
-			  await this.$refs.holderForm.open(holder, true);
       }
       this.getHolders();
 		},
 
     async updatePament(item) {
-			let newPayment = item ? false : true;
-			await this.$refs.revenueForm.open(item, newPayment);
+			await this.$refs.revenueForm.open(item);
       this.getHolders();
 		},
 	},

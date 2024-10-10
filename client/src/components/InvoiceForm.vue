@@ -144,6 +144,7 @@ export default {
 
     methods: {
       open(invoice, isNewInvoice) {
+        console.log(invoice)
         this.isNewInvoice = isNewInvoice;
         this.invoice = invoice 
         // this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD'); no need any more, already done when fetch from DB

@@ -68,9 +68,10 @@
           </template>
           <template v-slot:[`item.description`]="{ item }">
             <div class="description-width">
-              <span> {{ item.description }}</span>
+              <span class="desc-oflow"> {{ item.description }}</span>
               <td @click.stop>
-                <span v-if="isMobile()" @click="getSummary('supplier', item.supplier)" class="summary"> {{ item.supplier }} </span>
+                <!-- <span v-if="isMobile()" @click="getSummary('supplier', item.supplier)" class="summary"> {{ item.supplier }} </span> -->
+                <span v-if="isMobile()" style="margin-left: 0.5rem; font-size: small"> {{ item.date | formatDate }}</span>
               </td>
             </div>
           </template>
@@ -85,9 +86,16 @@
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
-            <td @click.stop>
-              <span @click="getSummary('supplier', item.supplier)" class="summary">{{ item.supplier }}</span>
-            </td>
+            <div class="description-width">
+              <td @click.stop>
+                <span @click="getSummary('supplier', item.supplier)" class="summary" style="font-size: small">{{ item.supplier }}</span>
+              </td>
+              </div>
+              <div>
+              <td @click.stop>
+                <span v-if="isMobile()" style="margin-left: 0.7rem; font-size: small">{{ item.group }}</span>
+              </td>
+            </div>
           </template>
           <template v-slot:[`item.excelRecID`]="{ item }">
             <td @click.stop>
@@ -803,5 +811,12 @@ input[type="date"]::-webkit-calendar-picker-indicator {
   padding-top: 0px !important;
   padding-bottom: 0px !important;
   text-align-last: end;
+}
+.desc-oflow {
+  overflow: hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  width:150px;
+  display:inline-block;
 }
 </style>

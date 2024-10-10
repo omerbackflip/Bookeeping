@@ -39,40 +39,33 @@
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
-                  <v-col cols="12" class="no-padding hebrew">
+                  <v-col cols="10" class="no-padding hebrew">
                     <v-textarea v-model="holder.remark" label="הערה" auto-grow rows="1" @focus="$event.target.select()"></v-textarea>
+                  </v-col>
+                  <v-col cols="2">
+                    <v-text-field v-model="holder.updatedAt"></v-text-field>
                   </v-col>
                 </v-row>
               </v-form>
             </v-container>
           </v-card-text>
           <div class="payments-wrapper">
-              <h6>Payments</h6>
-              <v-container>
-                  <div v-for="(payment, i) in holder.payments" :key="i" class="text-fields-row">
-                      <v-row>
-                          <v-col cols="3">
-                              <v-text-field label="Invoice ID" v-model="payment.invoiceId" @focus="$event.target.select()"></v-text-field>
-                          </v-col>
-                          <v-col cols="3">
-                              <v-text-field label="Payment" v-model="payment.amount" @focus="$event.target.select()"></v-text-field>
-                          </v-col>
-                          <v-col cols="4" class="padding-date">
-                            <!-- <div class="input-container"> -->
-                              <!-- <input v-model="payment.date" type="date" /> -->
-                              <v-text-field label="date" v-model="payment.date" @focus="$event.target.select()"></v-text-field>
-                            <!-- </div> -->
-                          </v-col>
-                          <v-col cols="2" style="margin-top: 0px; padding-top: 0px;">
-                              <!-- <v-checkbox v-model="payment.redeemed"></v-checkbox> -->
-                              <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small>mdi-delete</v-icon></v-btn>
-                          </v-col>
-                      </v-row>
-                  </div>                    
-                  <v-btn @click="addPaymentRow" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>					
-              </v-container>
+            <v-col style="text-align-last: justify;"> Payments
+            <v-btn @click="addPaymentRow()" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>
+            </v-col>
+            <v-list two-line class="hebrew">
+              <v-list-item-group>
+                  <v-list-item v-for="(payment) in holder.payments" :key="payment._id">
+                      <v-list-item-content>
+                        <v-list-item-title >{{ payment.description }}</v-list-item-title>
+                        <v-list-item-subtitle>סכום {{ payment.amount ? payment.amount.toLocaleString() :'' }} ש"ח , חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
+                        <v-list-item-subtitle>הערה: {{ payment.remark }}</v-list-item-subtitle>
+                      </v-list-item-content>
+                  </v-list-item>
+                  <v-divider class="ma-0"></v-divider>
+              </v-list-item-group>
+            </v-list>
           </div>
-
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn small @click="saveHolder()" :loading="isLoading">
@@ -80,7 +73,7 @@
             </v-btn>
             <v-btn small v-show="!invoiceID" class="mx-3" @click="clearForm"> Clear </v-btn>
             <v-spacer></v-spacer>
-            <v-icon color="red" @click="deleteOne(holder._id, holder.description)">mdi-delete</v-icon>
+            <!-- <v-icon color="red" @click="deleteOne(holder._id, holder.description, 'holderModel')">mdi-delete</v-icon> -->
             <v-icon color="red" @click="dialogHolderForm = false">mdi-close-box</v-icon>
           </v-card-actions>
         </v-card>
@@ -88,7 +81,7 @@
 </template>
 
 <script>
-import { HOLDER_MODEL } from "../constants/constants";
+import { HOLDER_MODEL, REVENUE_MODEL } from "../constants/constants";
 import apiService from "../services/apiService";
 import Vue from "vue";
 import moment from "moment";
@@ -113,6 +106,7 @@ export default {
           zIndex: 200,
         },
         dateModal : false,
+        datePayment : false,
         invoiceID: 0,
         flatList: [], // need to fatch refdata
         projectName: [],
@@ -125,7 +119,6 @@ export default {
       open(holder, isNewHolder) {
         this.isNewHolder = isNewHolder;
         this.holder = holder 
-        console.log(this.holder)
         this.dialogHolderForm = true;
         return new Promise((resolve) => {
           this.resolve = resolve;
@@ -145,6 +138,11 @@ export default {
             response = await apiService.create(this.holder, {model: HOLDER_MODEL});
           } else {
             response = await apiService.update(this.holder._id, this.holder, { model: HOLDER_MODEL });
+            if (this.holder.payments) {
+              this.holder.payments.forEach(async (item) => {
+                await apiService.update(item._id, item, { model: REVENUE_MODEL, upsert: true}); //upsert = true so in case of new payment to create new payment
+              }) 
+            }
           } 
           if (response) {
             this.dialogHolderForm = false;
@@ -161,9 +159,9 @@ export default {
         }
       },
 
-      async deleteOne(id, description) {
+      async deleteOne(id, description) { // this delete only from REVENUE_MODEL (no need to delete from HOLDER_MODEL)
         if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
-          const response = await apiService.deleteOne({model: HOLDER_MODEL,id});
+          const response = await apiService.deleteOne({model: REVENUE_MODEL,id});
           if (response) {
             this.dialogHolderForm = false;
           }
@@ -173,7 +171,8 @@ export default {
       addPaymentRow() {
         this.holder.payments.push({ project: this.holder.project,
                                     flatId: this.holder.flatId,
-                                    date: moment(new Date()).format('YYYY-MM-DD') });
+                                    date: moment(new Date()).format('YYYY-MM-DD')});  
+        this.holder.updatedAt = new Date();
       },
 
       clearForm() {
