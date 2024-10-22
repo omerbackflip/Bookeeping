@@ -92,7 +92,9 @@ export default {
 					case "BOOKS" :
 						if (this.company && this.file.name.includes(this.company) 
 							&& this.importYear && this.file.name.includes(this.importYear)) {
-							response = await SpecificServiceEndPoints.saveBooksBulk(this.file,this.company,this.importYear) ;
+								if (window.confirm("confirm delete all book data of this year but DOESNOT clear excelRecID in INVOICE")) {
+									response = await SpecificServiceEndPoints.saveBooksBulk(this.file,this.company,this.importYear) ;
+								}
 						} else alert("company or year does not fits")
 						break
 					case "REVENUES" :

@@ -24,9 +24,11 @@ exports.getBooksToSave = (data, company) => {
                     schum_hova: item['schum_hova'],
                     schum_zchut: item['schum_zchut'],
                     cust_lname: item['cust_lname'],
-                    cust_fname: item['cust_fname'],
+                    cust_id: item['cust_id'],
                     bs_item_name: item['bs_item_name'],
+                    bs_item_id: item['bs_item_id'],
                     bs_group_name: item['bs_group_name'],
+                    bs_group_id: item['bs_group_id'],
                 }
                 books.push(book);
             }

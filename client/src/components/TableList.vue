@@ -175,21 +175,36 @@
           <v-flex>
             <v-data-table
               :headers="summaryHeaders"
-              :items="summaryFilter"
+              :items="filteredData"
+              @click:row="showPratim"
               disable-pagination
               hide-default-footer
               fixed-header
               mobile-breakpoint="0"
               class="elevation-3 list"
               dense
+              :loading="isLoading"
+              loading-text="Loading... Please wait"
+              loader-height="20"
               height="70vh">
               <template v-slot:top>
                 <v-toolbar style="font-size: x-large;">
-                  Total : {{ summaryTotal.toLocaleString() }}
-                  <v-spacer></v-spacer>
+                  <v-btn-toggle v-model="company" @change="onCompanyChange" color="primary" dense group mandatory>
+                    <v-btn value="ביצועים" text>
+                      ביצועים
+                    </v-btn>
+            
+                    <v-btn value="יזמות" text>
+                      יזמות
+                    </v-btn>
+                  </v-btn-toggle>
                   {{ summaryHeader }}
                   <v-spacer></v-spacer>
-                  Count : {{ summaryFilter.length }}
+                  Zhcut : {{ summaryZchut.toLocaleString() }}
+                  <v-spacer></v-spacer>
+                  Hova : {{ summaryHova.toLocaleString() }}
+                  <v-spacer></v-spacer>
+                  Count : {{ filteredData.length }}
                 </v-toolbar>
               </template>
               <template v-slot:[`item.asmchta_date`]="{ item }">
@@ -197,7 +212,35 @@
               </template>
               <template v-slot:[`item.record_schum`]="{ item }">
                 <span> {{ item.record_schum.toLocaleString() }}</span>
-              </template>            </v-data-table>
+              </template>            
+            </v-data-table>
+          </v-flex>
+        </v-card>
+      </v-dialog>
+
+      <v-dialog v-model="pratimDialog" max-width="1100px">
+        <v-card>
+          <v-flex>
+            <v-data-table
+              :headers="summaryHeaders"
+              :items="pratimData"
+              disable-pagination
+              hide-default-footer
+              fixed-header
+              mobile-breakpoint="0"
+              class="elevation-3 list"
+              dense
+              :loading="isLoading"
+              loading-text="Loading... Please wait"
+              loader-height="20"
+              height="50vh">
+              <template v-slot:[`item.asmchta_date`]="{ item }">
+                <span style="margin-left: 0.5rem"> {{ item.asmchta_date | formatDate }}</span>
+              </template>
+              <template v-slot:[`item.record_schum`]="{ item }">
+                <span> {{ item.record_schum.toLocaleString() }}</span>
+              </template>  
+            </v-data-table>
           </v-flex>
         </v-card>
       </v-dialog>
@@ -238,7 +281,7 @@ export default {
         { text: "Description", value: "description", class: 'success title', groupable: false },
         { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
       ],
-      isLoading: true,
+      isLoading: false,
       itemToEdit: "",
       tblFields: {
         table_id:         "",
@@ -248,15 +291,21 @@ export default {
       fldRules: [v => !!v || 'Field is required'],
       summaryHeaders:[
         { text: "asmchta_date", value: "asmchta_date", class: 'success title'},
-        { text: "company", value: "company", class: 'success title'},
-        { text: "record_schum", value: "record_schum", class: 'success title'},
+        { text: "asmacta1", value: "asmacta1", class: 'success title'},
+        { text: "schum_zchut", value: "schum_zchut", class: 'success title'},
+        { text: "schum_hova", value: "schum_hova", class: 'success title'},
         { text: "year", value: "year", class: 'success title'},
-        { text: "cust_lname", value: "cust_lname", class: 'success title'},
+        { text: "pratim", value: "pratim", class: 'success title', align: "right"},
       ],
 			summaryDialog: false,
-      summaryFilter:[],
+      pratimDialog: false,
+      summaryData:[],
+      filteredData:[],
+      pratimData:[],
       summaryHeader: '',
-      summaryTotal: 0,
+      summaryHova: 0,
+      summaryZchut: 0,
+      company: 'ביצועים'
     };
   },
 
@@ -340,26 +389,46 @@ export default {
     },
 
     async showData (item) {
+      this.isLoading = true;
       let response = ''
       switch (item.table_id) {
-        case 5 :
+        case 5 : // take summary from bank records
           response = await apiService.getMany({model:BOOKS_MODEL, asmacta1:item.table_code})
           break;
 
-        case 6 :
-          response = await apiService.getMany({model:BOOKS_MODEL, cust_lname:item.description})
+        case 6 : // take summary from the exported data
+          response = await apiService.getMany({model:BOOKS_MODEL, cust_id:item.table_code})
           break;           
       }
-      this.summaryFilter = response.data; 
-      this.summaryTotal = this.summaryFilter.reduce((currentTotal, item) => {
-        return (item.record_schum + currentTotal) },0);
-
-      if (item.table_id === 5) {
-        this.summaryTotal = this.summaryTotal/2
-      }
+      this.summaryData = response.data; 
       this.summaryHeader = item.description
+      this.filterCompany()
+      this.isLoading = false;
       this.summaryDialog = true;
-    }
+    },
+    
+    onCompanyChange (company) {
+      this.company = company
+      this.filterCompany()
+    },
+
+    filterCompany: function () {
+      this.filteredData = this.summaryData.filter((item) => {
+        return item.company === this.company
+      })
+      this.summaryHova = this.filteredData.reduce((currentTotal, item) => {
+            return (item.schum_hova + currentTotal) },0);
+      this.summaryZchut = this.filteredData.reduce((currentTotal, item) => {
+            return (item.schum_zchut + currentTotal) },0);
+    },
+
+    async showPratim (item) {
+      this.isLoading = true;
+      let response = await apiService.getMany({model:BOOKS_MODEL, pratim:item.pratim})
+      this.pratimData = response.data; 
+      this.isLoading = false;
+      this.pratimDialog = true;
+    },
   },
 
   computed: {

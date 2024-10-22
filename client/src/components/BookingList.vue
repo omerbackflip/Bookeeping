@@ -4,7 +4,7 @@
       <v-flex>
         <v-data-table
 			:headers="headers"
-			:items="bookList"
+			:items="filteredList"
 			:search="search"
 			disable-pagination
 			hide-default-footer
@@ -24,9 +24,22 @@
 			dense>
 			<template v-slot:top>
 				<v-toolbar flat>
-					<v-toolbar-title> {{header}} - {{bookList.length.toLocaleString()}} </v-toolbar-title>
+					<v-toolbar-title> {{header}} - {{filteredList.length.toLocaleString()}} </v-toolbar-title>
 					<v-spacer></v-spacer>
 					<v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
+					<v-spacer></v-spacer>
+					<v-select
+						v-model="selectedCard"
+						:items="cardsList"
+						:hint="summaryHint"
+						item-text="text"
+						item-value="value"
+						label="בחר כרטסת"
+						persistent-hint
+						return-object
+						single-line
+						@change="onCardChange"
+						></v-select>
 					<v-spacer></v-spacer>
 					<v-btn x-small @click="removeAllBooks()">delete</v-btn>
 				</v-toolbar>
@@ -108,7 +121,7 @@ import moment from "moment";
 import excel from "vue-excel-export";
 // import VueVirtualTable from 'vue-virtual-table'
 import apiService from '../services/apiService';
-import { BOOKS_MODEL } from '../constants/constants';
+import { BOOKS_MODEL, TABLE_MODEL } from '../constants/constants';
 
 
 Vue.use(excel);
@@ -126,6 +139,7 @@ export default {
 	data() {
 		return {
 			bookList: [],
+			filteredList: [],
 			currInvoice: null,
 			currentIndex: -1,
 			search: "",
@@ -140,9 +154,11 @@ export default {
 				{ text: "schum_hova", 	value: "schum_hova", 	class: "red white--text"},
 				{ text: "schum_zchut", 	value: "schum_zchut", 	class: "red white--text"},
 				{ text: "cust_lname", 	value: "cust_lname", 	class: "red white--text"},
-				{ text: "cust_fname", 	value: "cust_fname",class: "red white--text"},
+				{ text: "cust_id", 		value: "cust_id",class: "red white--text"},
 				{ text: "bs_item_name", value: "bs_item_name",class: "red white--text"},
+				{ text: "bs_item_id", 	value: "bs_item_id",class: "red white--text"},
 				{ text: "bs_group_name",value: "bs_group_name",class: "red white--text"},
+				{ text: "bs_group_id",	value: "bs_group_id",class: "red white--text"},
 			],
 			// headers: [
 			// 	{ name: "company", 		prop: "company", 		actionName: 'company', 	searchable: true },
@@ -170,9 +186,11 @@ export default {
 				schum_hova: null,
 				schum_zchut: null,
 				cust_lname: "",
-				cust_fname: "",
+				cust_id: null,
 				bs_item_name: "",
+				bs_item_id: null,
 				bs_group_name: "",
+				bs_group_id: null,
 			},
 			isLoading: true,
 			selectedYear: '2024',
@@ -191,6 +209,9 @@ export default {
 			],
 			selected: [],
 			header: '',
+			cardsList: [],
+			selectedCard: '',
+			summaryHint: '',
 		};
 	},
 
@@ -218,6 +239,7 @@ export default {
 			});
 			if (response && response.data) {
 				this.bookList = response.data;
+				this.filteredList = this.bookList.sort((a,b) => {return a.cust_id - b.cust_id});
 			}
 			this.header = this.selectedYear + ' ' + this.selectedCompany
 			this.isLoading = false;
@@ -271,15 +293,54 @@ export default {
 			// this.selected[0] ? this.$emit('findMatch', this.selected[0]) : ''
 			this.$emit('findMatch', this.selected[0] || '') 
 		},
+
+		onCardChange(selectedCard) {
+			if (selectedCard.value != 0){
+				this.filteredList = this.bookList.filter((item) => {
+					return (item.cust_id === selectedCard.value)
+				})
+				let hova = this.filteredList.reduce((currentTotal, item) => {
+					return (item.schum_hova + currentTotal) },0);
+				let zchut = this.filteredList.reduce((currentTotal, item) => {
+					return (item.schum_zchut + currentTotal) },0);				
+				this.summaryHint = 'Zchut: ' + zchut.toLocaleString("en", {minimumFractionDigits: 0, maximumFractionDigits: 0,})
+								+ '..........'
+								+ 'Hova: '	 + hova.toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,})
+								+ '..........'
+								+ 'Balance: '+ (zchut-hova).toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,})
+			} else {
+				this.filteredList = this.bookList;
+				this.summaryHint =''
+			}
+		},
+
+		loadTable: async function (table_id, tableName) {
+			try {
+				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
+				if (response) {
+					this[tableName] = response.data.map((item) => {
+						return {text: item.description, value: item.table_code}
+					});
+				}
+			} catch (error) {
+				console.log(error);
+			}
+		},
+
 	},
 
-	mounted() {
+	async mounted() {
 		this.retrieveBooks();
+		await this.loadTable(6, "cardsList");
 		this.$root.$on("yearChange", (year) => {
+			this.selectedCard = '',
+			this.summaryHint = '',
 			this.selectedYear = year;
 		});
 
 		this.$root.$on("companyChange", (company) => {
+			this.selectedCard = '',
+			this.summaryHint = '',
 			this.selectedCompany = company;
 		});
 	},
