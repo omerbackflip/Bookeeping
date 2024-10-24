@@ -39,6 +39,7 @@
 						return-object
 						single-line
 						@change="onCardChange"
+						class="mx-4 sreach-width"
 						></v-select>
 					<v-spacer></v-spacer>
 					<v-btn x-small @click="removeAllBooks()">delete</v-btn>
@@ -195,7 +196,6 @@ export default {
 			isLoading: true,
 			selectedYear: '2024',
 			selectedCompany: 'ביצועים',
-			value: 50,
 			searchedBooks: [],
 			summaryDialog: false,
 			summaryTotal: 0,
@@ -307,7 +307,7 @@ export default {
 								+ '..........'
 								+ 'Hova: '	 + hova.toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,})
 								+ '..........'
-								+ 'Balance: '+ (zchut-hova).toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,})
+								+ 'Balance: '+ (hova-zchut).toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,})
 			} else {
 				this.filteredList = this.bookList;
 				this.summaryHint =''
@@ -321,6 +321,7 @@ export default {
 					this[tableName] = response.data.map((item) => {
 						return {text: item.description, value: item.table_code}
 					});
+					this[tableName].sort((a,b) => a.text.localeCompare(b.text));
 				}
 			} catch (error) {
 				console.log(error);
@@ -389,5 +390,8 @@ export default {
 }
 .sreach-width {
   width: 4rem;
+}
+.v-list-item__title{
+	text-align: -webkit-right;
 }
 </style>

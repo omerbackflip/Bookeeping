@@ -34,15 +34,21 @@
               </div>
               <v-spacer></v-spacer>
               <div v-show="!isMobile()">
-                <export-excel v-show="!isMobile()" :fetch="fetchData" type="xlsx" name="all-data">
-                  <v-btn x-small class="btn btn-danger">
-                    <v-icon small>mdi-download</v-icon>
-                  </v-btn>
-                </export-excel>
-                <!-- <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> don't need because there is "fetchData"-->
-                <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
-                <v-btn v-show="!isMobile()" @click="upload2GDrive" x-small class="mx-3">backup</v-btn>
-                <!-- <v-btn @click="toggleList" x-small class="mx-3">{{ notPayedList ? "unfiltered" : "filtered"}}</v-btn> -->
+                <v-row>
+                  <v-col>
+                  <export-excel :data="invoiceList" type="xlsx" name="all-data">
+                  <!-- <export-excel :fetch="fetchData" type="xlsx" name="all-data"> -->
+                    <v-btn x-small class="btn btn-danger">
+                      <v-icon small>mdi-download</v-icon>
+                    </v-btn>
+                  </export-excel>
+                </v-col>
+                <v-col>
+                  <!-- <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> don't need because there is "fetchData"-->
+                  <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
+                  <v-btn @click="upload2GDrive" x-small class="mx-3">backup</v-btn>
+                </v-col>
+                </v-row>
               </div>
             </v-toolbar>
           </template>
