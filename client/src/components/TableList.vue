@@ -1,6 +1,6 @@
 <template>
   <div class="list row">
-    <v-layout row wrap>
+    <v-layout row wrap style="padding: 0px">
       <v-flex xs12 md6 mt-5>
         <v-data-table :headers="headers" 
                       :items="tableID"
@@ -10,7 +10,8 @@
                       height="70vh"
                       @click:row="filterTbl"
                       dense
-                      class="elevation-3"
+                      mobile-breakpoint="0"
+                      class="elevation-3 hebrew"
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
           <template v-slot:top>
@@ -78,7 +79,8 @@
                       hide-default-footer
                       fixed-header
                       height="70vh"
-                      class="elevation-3"
+                      mobile-breakpoint="0"
+                      class="elevation-3 hebrew"
                       loading = "isLoading"
                       loading-text="Loading... Please wait">
           <template v-slot:top>
@@ -94,7 +96,7 @@
                   ></v-text-field>
                 </v-col>
                 <v-col cols="5">
-                  <v-text-field v-model="tableTitle">  {{tableTitle}} </v-text-field>
+                  <v-text-field v-model="tableTitle" solo disabled hide-details style="text-align-last: center;">  {{tableTitle}} </v-text-field>
                 </v-col>
               </v-row>
 
@@ -181,7 +183,7 @@
               hide-default-footer
               fixed-header
               mobile-breakpoint="0"
-              class="elevation-3 list"
+              class="elevation-3 list hebrew"
               dense
               :loading="isLoading"
               loading-text="Loading... Please wait"
@@ -198,7 +200,7 @@
                       יזמות
                     </v-btn>
                   </v-btn-toggle>
-                  {{ summaryHeader }}
+                  <v-text-field v-model="summaryHeader" solo disabled hide-details style="text-align-last: center;">  {{summaryHeader}} </v-text-field>
                   <v-spacer></v-spacer>
                   Zhcut : {{ summaryZchut.toLocaleString() }}
                   <v-spacer></v-spacer>
@@ -228,7 +230,7 @@
               hide-default-footer
               fixed-header
               mobile-breakpoint="0"
-              class="elevation-3 list"
+              class="elevation-3 list hebrew"
               dense
               :loading="isLoading"
               loading-text="Loading... Please wait"
@@ -449,11 +451,17 @@ export default {
   text-align: left;
   max-width: auto;
   margin: auto;
+  justify-content: center;
 }
 .title {
 border: 3px solid blue;
 text-align: center;
 font-weight: bold;
 font-size: 16px;
+}
+.hebrew {
+  direction: rtl;
+  /* text-align: right; */
+  text-align-last: right !important
 }
 </style>

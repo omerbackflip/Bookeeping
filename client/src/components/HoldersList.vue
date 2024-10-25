@@ -22,7 +22,7 @@
           item-key="flatId">
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title> Total Holders - {{holdersList.length}} </v-toolbar-title>
+              <v-toolbar-title> Total Holders - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
               <!-- <v-spacer></v-spacer>
@@ -66,7 +66,7 @@
       </v-flex>
 
       <revenue-form ref="revenueForm"/>
-      <confirm-dialog ref="confirm"/>
+      <!-- <confirm-dialog ref="confirm"/> -->
       <holder-form ref="holderForm"/>
 
     </v-layout>
@@ -79,7 +79,7 @@
 import Vue from "vue";
 import moment from "moment";
 import apiService from "../services/apiService";
-import ConfirmDialog from './Common/ConfirmDialog.vue';
+// import ConfirmDialog from './Common/ConfirmDialog.vue';
 import { HOLDER_MODEL, HOLDER_HEADERS, REVENUE_MODEL } from "../constants/constants";
 import { isMobile } from '../constants/constants';
 import HolderForm from './HolderForm.vue';
@@ -92,14 +92,13 @@ Vue.filter("formatDate", function (value) {
 });
 export default {
 	// name: "holders-list",
-	components: { ConfirmDialog, HolderForm, RevenueForm },
+	components: { HolderForm, RevenueForm },
 	data() {
 		return {
       isMobile,
 			holdersList: [],
-			revenues: [],
-			dialog: false,
-      graph: [],
+			holdersCount: '',
+			// dialog: false,
 
       paymentHeaders: [
 				{ text: "Payment", value: "amount", align: "right" },
@@ -121,12 +120,14 @@ export default {
 	methods: {
 		async getHolders() {
       this.isLoading = true
+      this.holdersCount = 0;
 			let response = await apiService.getMany({model: HOLDER_MODEL});
 			if (response.data) {
 				this.holdersList = response.data;
 			}
       this.holdersList.forEach(async (item) => {
         if(item.holderName) {
+          this.holdersCount += 1
           item.signDate = moment(item.signDate).format('YYYY-MM-DD');
           let payments = await apiService.getMany({model: REVENUE_MODEL, flatId: item.flatId});
           if (payments && payments.data) { // there are payments for this flatId
