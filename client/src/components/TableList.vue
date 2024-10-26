@@ -110,22 +110,21 @@
                   <v-icon small>mdi-download</v-icon>
                 </v-btn>
               </export-excel>
-
             </v-toolbar>           
           </template>
           <template v-slot:[`item.actions`]="{ item }"> 
-            <!-- <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon> -->
-            <div>
-              <v-icon small @click="(itemToEdit === item._id) ? updateOne(item) : setEdit(item)">
-                {{(itemToEdit === item._id) ? "mdi-floppy" : "mdi-pencil"}}
-              </v-icon>
-              <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
-            </div>
+            <td @click.stop>
+              <div>
+                <v-icon small @click="(itemToEdit === item._id) ? updateOne(item) : setEdit(item)">
+                  {{(itemToEdit === item._id) ? "mdi-floppy" : "mdi-pencil"}}
+                </v-icon>
+                <v-icon small @click="deleteOne(item._id)">mdi-delete</v-icon>
+              </div>
+            </td>
           </template>
           <template v-slot:[`item.description`]="{ item }"> 
             <div v-if = "itemToEdit === item._id">
-              <v-text-field v-model="item.description"
-                            :id="`itemEdit-${item._id}`"/>
+              <v-text-field v-model="item.description" :id="`itemEdit-${item._id}`"/>
             </div>
             <div >
               <span> {{item.description}}</span>
@@ -133,8 +132,7 @@
           </template>
           <template v-slot:[`item.table_id`]="{ item }"> 
             <div v-if = "itemToEdit === item._id">
-              <v-text-field v-model="item.table_id"
-                            :id="`itemEdit-${item._id}`"/>
+              <v-text-field v-model="item.table_id" :id="`itemEdit-${item._id}`"/>
             </div>
             <div >
               <span> {{item.table_id}}</span>
@@ -142,16 +140,16 @@
           </template>
           <template v-slot:[`item.table_code`]="{ item }"> 
             <div v-if = "itemToEdit === item._id">
-              <v-text-field v-model="item.table_code"
-                            :id="`itemEdit-${item._id}`"/>
+              <v-text-field v-model="item.table_code" :id="`itemEdit-${item._id}`"/>
             </div>
-            <div >
+            <div>
               <span> {{item.table_code}}</span>
             </div>
           </template>
         </v-data-table>
       </v-flex>
 
+      <!-- ADD NEW TABLE -->
       <v-flex md10>
         <v-footer color="primary lighten-1" align="center" class="mt-2" elevation="10">
           <v-form ref="form" >
@@ -172,6 +170,7 @@
         </v-footer>
       </v-flex>
 
+      <!-- DATA from BOOK table -->
       <v-dialog v-model="summaryDialog" max-width="1100px">
         <v-card>
           <v-flex>
@@ -192,17 +191,13 @@
               <template v-slot:top>
                 <v-toolbar style="font-size: x-large;">
                   <v-btn-toggle v-model="company" @change="onCompanyChange" color="primary" dense group mandatory>
-                    <v-btn value="ביצועים" text>
-                      ביצועים
-                    </v-btn>
-            
-                    <v-btn value="יזמות" text>
-                      יזמות
-                    </v-btn>
+                    <v-btn value="ביצועים" text small> ביצועים </v-btn>
+                    <v-btn value="יזמות"   text small> יזמות   </v-btn>
                   </v-btn-toggle>
-                  <v-text-field v-model="summaryHeader" solo disabled hide-details style="text-align-last: center;">  {{summaryHeader}} </v-text-field>
                   <v-spacer></v-spacer>
                   Zhcut : {{ summaryZchut.toLocaleString() }}
+                  <v-spacer></v-spacer>
+                  <v-text-field v-model="summaryHeader" solo disabled hide-details dense style="text-align-last: center;">  {{summaryHeader}} </v-text-field>
                   <v-spacer></v-spacer>
                   Hova : {{ summaryHova.toLocaleString() }}
                   <v-spacer></v-spacer>
@@ -220,6 +215,7 @@
         </v-card>
       </v-dialog>
 
+      <!-- filter on PRATIM from BOOK table -->
       <v-dialog v-model="pratimDialog" max-width="1100px">
         <v-card>
           <v-flex>
@@ -236,6 +232,13 @@
               loading-text="Loading... Please wait"
               loader-height="20"
               height="50vh">
+              <template v-slot:top>
+                <v-toolbar style="font-size: x-large;">
+                  <v-col cols="3">
+                  <v-text-field v-model="pratimHeader" solo disabled hide-details dense style="text-align-last: center;">  {{pratimHeader}} </v-text-field>
+                  </v-col>
+                </v-toolbar>
+              </template>
               <template v-slot:[`item.asmchta_date`]="{ item }">
                 <span style="margin-left: 0.5rem"> {{ item.asmchta_date | formatDate }}</span>
               </template>
@@ -305,6 +308,7 @@ export default {
       filteredData:[],
       pratimData:[],
       summaryHeader: '',
+      pratimHeader: '',
       summaryHova: 0,
       summaryZchut: 0,
       company: 'ביצועים'
@@ -391,22 +395,23 @@ export default {
     },
 
     async showData (item) {
-      this.isLoading = true;
-      let response = ''
-      switch (item.table_id) {
-        case 5 : // take summary from bank records
-          response = await apiService.getMany({model:BOOKS_MODEL, asmacta1:item.table_code})
-          break;
-
-        case 6 : // take summary from the exported data
-          response = await apiService.getMany({model:BOOKS_MODEL, cust_id:item.table_code})
-          break;           
+      if (item.table_id === 5 || item.table_id ===6) {
+        this.isLoading = true;
+        let response = ''
+        switch (item.table_id) {
+          case 5 : // take summary from bank records
+            response = await apiService.getMany({model:BOOKS_MODEL, asmacta1:item.table_code})
+            break;
+          case 6 : // take summary from the exported data
+            response = await apiService.getMany({model:BOOKS_MODEL, cust_id:item.table_code})
+            break;           
+        }
+        this.summaryData = response.data; 
+        this.summaryHeader = item.description
+        this.filterCompany()
+        this.isLoading = false;
+        this.summaryDialog = true;
       }
-      this.summaryData = response.data; 
-      this.summaryHeader = item.description
-      this.filterCompany()
-      this.isLoading = false;
-      this.summaryDialog = true;
     },
     
     onCompanyChange (company) {
@@ -428,6 +433,7 @@ export default {
       this.isLoading = true;
       let response = await apiService.getMany({model:BOOKS_MODEL, pratim:item.pratim})
       this.pratimData = response.data; 
+      this.pratimHeader = item.pratim
       this.isLoading = false;
       this.pratimDialog = true;
     },
@@ -463,5 +469,8 @@ font-size: 16px;
   direction: rtl;
   /* text-align: right; */
   text-align-last: right !important
+}
+.v-toolbar__content {
+  justify-content: center;
 }
 </style>

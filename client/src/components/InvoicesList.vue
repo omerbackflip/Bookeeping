@@ -54,9 +54,9 @@
           </template>
           <template v-slot:[`item.date`]="{ item }">
             <span style="margin-left: 0.5rem"> {{ item.date | formatDate }}</span>
-            <td @click.stop>
+            <!-- <td @click.stop>
               <span v-if="isMobile()" @click="getSummary('group', item.group)" class="summary" style="margin-left: 1.9rem">{{ item.group }}</span>
-            </td>
+            </td> -->
           </template>
           <template v-slot:[`item.total`]="{ item }">
             <v-tooltip bottom>
@@ -75,10 +75,10 @@
           <template v-slot:[`item.description`]="{ item }">
             <div class="description-width">
               <span class="desc-oflow"> {{ item.description }}</span>
-              <td @click.stop>
+              <!-- <td @click.stop> -->
                 <!-- <span v-if="isMobile()" @click="getSummary('supplier', item.supplier)" class="summary"> {{ item.supplier }} </span> -->
                 <span v-if="isMobile()" style="margin-left: 0.5rem; font-size: small"> {{ item.date | formatDate }}</span>
-              </td>
+              <!-- </td> -->
             </div>
           </template>
           <template v-slot:[`item.remark`]="{ item }">
@@ -98,9 +98,9 @@
               </td>
               </div>
               <div>
-              <td @click.stop>
+              <!-- <td @click.stop> -->
                 <span v-if="isMobile()" style="margin-left: 0.7rem; font-size: small">{{ item.group }}</span>
-              </td>
+              <!-- </td> -->
             </div>
           </template>
           <template v-slot:[`item.excelRecID`]="{ item }">
@@ -124,6 +124,7 @@
             </td>
           </template>
         </v-data-table>
+        
         <v-btn v-if="$route.params.project" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
       </v-flex>
 
