@@ -337,8 +337,6 @@ export default {
         default : break;
       }
 
-      // this was added to align the view of "date" to exclude time.
-      this.summaryFilter = this.removeTimeFromDate(this.summaryFilter)
       this.summaryFilter.sort((a, b) => new Date(b.date) - new Date(a.date)); // sort the summary by date
 
       this.summaryName = summaryItem;
@@ -395,8 +393,6 @@ export default {
       }
 			if (response && response.data) {
 				this.invoiceList = response.data;
-        // this was added to align the view of "date" to exclude time.
-        this.invoiceList = this.removeTimeFromDate(this.invoiceList)
         this.invoiceList.sort((a, b) => b.group - a.group);
         this.pending = this.invoiceList.filter((item) =>{
           return (item.published === false)
@@ -417,19 +413,6 @@ export default {
 				console.log(error);
 			}
 		},
-
-    // function taking list of invoices and format date to exclude time
-    removeTimeFromDate: function (invoiceToDate) {
-      invoiceToDate = invoiceToDate.map((item) =>{ 
-        item.date = moment(item.date).format('YYYY-MM-DD');
-        item.payments = item.payments.map((item1) => {
-          item1.date = moment(item1.date).format('YYYY-MM-DD');
-          return item1
-        })
-        return item
-      })
-      return invoiceToDate
-    }, 
 
 		refreshList() {
 			this.retrieveInvoices();
@@ -570,7 +553,6 @@ export default {
       response = await apiService.getMany({ model: INVOICE_MODEL });
 			if (response && response.data) {
 				this.invoiceList = response.data;
-        this.invoiceList = this.removeTimeFromDate(this.invoiceList)
         this.invoiceList.sort((a, b) => b.group - a.group);
         this.header = 'All Invoices '
 				this.isLoading = false;

@@ -157,7 +157,7 @@ exports.saveRevenuesBulk = async (req, res) => {
 	try {
         await Promise.all([Revenue.deleteMany()]);
 		let data = await csv().fromFile(`uploads/${req.file.filename}`);
-		console.log(data)
+		// console.log(data)
 		if (data) {
 			const result = await Revenue.insertMany(data, { ordered: true });
 			unLinkFile(`uploads/${req.file.filename}`);
@@ -330,9 +330,7 @@ exports.uploadInvoicesToGDrive = async (req, res) => {
 
 			if(invoiceExecelFile){
 				auth = googleService.getAuth();
-				console.log(auth);
 				const file = await googleService.uploadToGoogleDrive(auth, invoiceExecelFile.filename);
-				console.log("file",file)
 				if(file.id){ // after uploading the excel file, remove the tmporary excel file from "upload" directory
 					fs.unlinkSync(invoiceExecelFile.filePath);
 				}

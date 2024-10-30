@@ -53,8 +53,7 @@ exports.getInvoicesToSave = (data) => {
                 vat: item.vat,
                 total: item.total,
                 group: item.group,
-			    // date: item.date,
-                date: !isNaN(Date.parse(item.date)) ? moment(item.date,"DD MM YYYY").add(1,'days').subtract(1,'hour') : null,
+                date: !isNaN(Date.parse(item.date)) ? moment(item.date,"DD MM YYYY") : null,
                 supplier: item.supplier,
                 invoiceId: item.invoiceId,
                 remark: item.remark,
@@ -91,7 +90,7 @@ exports.getInvoicesToExcelExport = (invoices) => { // used during upload to GDri
         formatedInvoices = invoices.map((invoice) => {
                 
             invoice._id = invoice._id.toString();
-            invoice.date = moment(invoice.date).format('DD/MM/YYYY')
+            // invoice.date = moment(invoice.date).format('DD/MM/YYYY')
             // invoice.date = moment(invoice.date)
             // invoice.date = new Date (invoice.date).toLocaleDateString('en-GB')
 

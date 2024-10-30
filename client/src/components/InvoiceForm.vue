@@ -48,7 +48,6 @@
                         </v-text-field>
                       </template>
                       <v-date-picker @input="onDateChange" v-model="invoice.date" scrollable>
-                      <!-- <v-date-picker v-model="invoice.date" scrollable> -->
                         <v-spacer></v-spacer>
                         <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
                         <v-btn text color="primary" @click="$refs.dateDialog.save(invoice.date)"> OK </v-btn>
@@ -80,9 +79,17 @@
                               <v-text-field label="Payment" v-model="inv.payment" @focus="$event.target.select()"></v-text-field>
                           </v-col>
                           <v-col cols="4" class="padding-date">
-                            <div class="input-container">
-                              <input v-model="inv.date" type="date" />
-                            </div>
+                            <v-dialog ref="dateDialog" v-model="dateModal" :return-value.sync="inv.date" persistent width="290px">
+                      <template v-slot:activator="{ on, attrs }">
+                        <v-text-field v-model="inv.date" label="תאריך" readonly v-bind="attrs" v-on="on">
+                        </v-text-field>
+                      </template>
+                      <v-date-picker @input="onDateChange" v-model="inv.date" scrollable>
+                        <v-spacer></v-spacer>
+                        <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
+                        <v-btn text color="primary" @click="$refs.dateDialog.save(inv.date)"> OK </v-btn>
+                      </v-date-picker>
+                    </v-dialog>
                           </v-col>
                           <v-col cols="2" style="margin-top: 0px; padding-top: 0px;">
                               <v-checkbox v-model="inv.redeemed"></v-checkbox>
@@ -146,7 +153,10 @@ export default {
       open(invoice, isNewInvoice) {
         this.isNewInvoice = isNewInvoice;
         this.invoice = invoice 
-        // this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD'); no need any more, already done when fetch from DB
+        this.invoice.date = moment(this.invoice.date).format('YYYY-MM-DD'); // to allow using the DATE Dialog
+        this.invoice.payments.map((item) => {
+          item.date = moment(item.date).format('YYYY-MM-DD')
+        })
         this.dialogInvForm = true;
         return new Promise((resolve) => {
           this.resolve = resolve;

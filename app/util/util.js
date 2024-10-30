@@ -70,7 +70,7 @@ exports.convertToJSON = (array) => {
  		excelFilename = filename;
  	}
 
- 	const ws = xlsx.utils.json_to_sheet(data, {cellDates: true, dateNF: 'dd/mm/yyyy'});
+ 	const ws = xlsx.utils.json_to_sheet(data, {cellDates: true, dateNF: 'dd/mm/yyyy', UTC: true});
 	const wb = xlsx.utils.book_new();
 	xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
 

@@ -1,6 +1,6 @@
 <template>
   <div class="list row">
-    <v-layout row wrap style="padding: 0px">
+    <!-- <v-layout row wrap style="padding: 0px"> -->
       <v-flex xs12 md6 mt-5>
         <v-data-table :headers="headers" 
                       :items="tableID"
@@ -16,7 +16,7 @@
                       loading-text="Loading... Please wait">
           <template v-slot:top>
             <v-toolbar>
-              <v-row>
+              <v-row style="justify-content: center;">
                 <v-col cols="5">
                   <v-text-field
                     v-model="search"
@@ -27,7 +27,17 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              </v-toolbar>           
+              <export-excel
+                :data="tables"
+                type="xlsx"
+                name="all-tables"
+                title="All Tables"
+                footer="This is footer">
+                <v-btn x-small class="btn btn-danger">
+                  <v-icon small>mdi-download</v-icon>
+                </v-btn>
+              </export-excel>
+            </v-toolbar>           
           </template>
           <template v-slot:[`item.actions`]="{ item }"> 
             <!-- <v-icon small @click="editOne(item._id)">mdi-pencil</v-icon> -->
@@ -85,8 +95,8 @@
                       loading-text="Loading... Please wait">
           <template v-slot:top>
             <v-toolbar>
-              <v-row>
-                <v-col cols="5">
+              <v-row style="justify-content: center;">
+                <v-col cols="6">
                   <v-text-field
                     v-model="search"
                     append-icon="mdi-magnify"
@@ -95,21 +105,10 @@
                     hide-details
                   ></v-text-field>
                 </v-col>
-                <v-col cols="5">
+                <v-col cols="6">
                   <v-text-field v-model="tableTitle" solo disabled hide-details style="text-align-last: center;">  {{tableTitle}} </v-text-field>
                 </v-col>
               </v-row>
-
-              <export-excel
-                :data="tables"
-                type="xlsx"
-                name="all-tables"
-                title="All Tables"
-                footer="This is footer">
-                <v-btn x-small class="btn btn-danger">
-                  <v-icon small>mdi-download</v-icon>
-                </v-btn>
-              </export-excel>
             </v-toolbar>           
           </template>
           <template v-slot:[`item.actions`]="{ item }"> 
@@ -150,9 +149,9 @@
       </v-flex>
 
       <!-- ADD NEW TABLE -->
-      <v-flex md10>
+      <v-flex md8 align-self-center>
         <v-footer color="primary lighten-1" align="center" class="mt-2" elevation="10">
-          <v-form ref="form" >
+          <v-form ref="form">
             <v-row>
               <v-col >
                 <v-text-field v-model="tblFields.table_id" label="ID" :rules="fldRules"></v-text-field>
@@ -234,7 +233,7 @@
               height="50vh">
               <template v-slot:top>
                 <v-toolbar style="font-size: x-large;">
-                  <v-col cols="3">
+                  <v-col cols="8">
                   <v-text-field v-model="pratimHeader" solo disabled hide-details dense style="text-align-last: center;">  {{pratimHeader}} </v-text-field>
                   </v-col>
                 </v-toolbar>
@@ -249,7 +248,7 @@
           </v-flex>
         </v-card>
       </v-dialog>
-    </v-layout>
+    <!-- </v-layout> -->
   </div>
 </template>
 
@@ -467,7 +466,6 @@ font-size: 16px;
 }
 .hebrew {
   direction: rtl;
-  /* text-align: right; */
   text-align-last: right !important
 }
 .v-toolbar__content {
