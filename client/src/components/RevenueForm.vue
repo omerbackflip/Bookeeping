@@ -2,7 +2,7 @@
     <v-dialog v-model="dialog" width="500" :style="{ zIndex: options.zIndex }" @keydown.esc="cancel">
         <v-card class="hebrew">
             <v-card-title class="text-h5 grey lighten-2">
-                {{newRevenue ? 'New' : 'Update'}} Revenue
+                {{isNewRevenue ? 'New' : 'Update'}} Revenue
             </v-card-title>
             <div class="field-margin" v-show="showMessage">
                 {{message}}
@@ -55,7 +55,7 @@ export default {
 			dialog: false,
             resolve: null,      // What is this for ?
 			showMessage: false,
-            newRevenue: false,
+            isNewRevenue: false,
 			message: '',
             options: {
                 color: "grey lighten-3",
@@ -68,7 +68,7 @@ export default {
     methods: {
         async submitRevenue() {
 			try {
-				if(this.newRevenue) {
+				if(this.isNewRevenue) {
 					await apiService.create(this.revenue , {model:REVENUE_MODEL});
 				} else {
 					await apiService.update(this.revenue._id , this.revenue , {model:REVENUE_MODEL});
@@ -85,9 +85,8 @@ export default {
 			}
 		},
 
-        open(revenue) {
-            this.newRevenue = revenue.newPayment ? true : false;
-            delete revenue.newPayment;
+        open(revenue, isNewRevenue) {
+            this.isNewRevenue = isNewRevenue
             this.revenue = revenue 
             this.revenue.date = moment(this.revenue.date).format('YYYY-MM-DD');
             this.dialog = true;

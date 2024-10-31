@@ -51,12 +51,12 @@
           </v-card-text>
           <div class="payments-wrapper">
             <v-col style="text-align-last: justify;"> Payments
-            <v-btn @click="addPaymentRow()" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>
+            <v-btn @click="updatePayment()" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>
             </v-col>
             <v-list two-line class="hebrew">
               <v-list-item-group>
                   <v-list-item v-for="(payment) in holder.payments" :key="payment._id">
-                      <v-list-item-content>
+                      <v-list-item-content @click="updatePayment(payment)">
                         <v-list-item-title >{{ payment.description }}</v-list-item-title>
                         <v-list-item-subtitle>סכום {{ payment.amount ? payment.amount.toLocaleString() :'' }} ש"ח , חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
                         <v-list-item-subtitle>הערה: {{ payment.remark }}</v-list-item-subtitle>
@@ -77,12 +77,14 @@
             <v-icon color="red" @click="dialogHolderForm = false">mdi-close-box</v-icon>
           </v-card-actions>
         </v-card>
+        <revenue-form ref="revenueForm"/>
       </v-dialog>
 </template>
 
 <script>
 import { HOLDER_MODEL, REVENUE_MODEL } from "../constants/constants";
 import apiService from "../services/apiService";
+import RevenueForm from './RevenueForm.vue';
 import Vue from "vue";
 import moment from "moment";
 Vue.filter("formatDate", function (value) {
@@ -93,6 +95,7 @@ Vue.filter("formatDate", function (value) {
 });
 export default {
     name: "holder-form",
+    components: { RevenueForm },
     data() {
       return {
         dialogHolderForm: false,
@@ -168,17 +171,22 @@ export default {
         }
       },
 
-      addPaymentRow() {
-        this.holder.payments.push({ project: this.holder.project,
-                                    flatId: this.holder.flatId,
-                                    date: moment(new Date()).format('YYYY-MM-DD')});  
-        this.holder.updatedAt = new Date();
-      },
-
       clearForm() {
         this.$refs.form.reset();
       },
 
+      async updatePayment(payment) {
+        let isNewPayment = false
+        if (payment) {
+          null
+        } else {
+          isNewPayment = true
+          payment = { project: this.holder.project, 
+                      flatId: this.holder.flatId,
+                      date: new Date()};
+        }
+        await this.$refs.revenueForm.open(payment, isNewPayment);
+      },
     },
 
     async mounted(){

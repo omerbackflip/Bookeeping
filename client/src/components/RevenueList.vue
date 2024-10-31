@@ -142,9 +142,15 @@ export default {
 			this.dialog = true;
     },
 
-    async updateRevenue(item) {
-			let newRevenue = item ? false : true;
-			await this.$refs.revenueForm.open(item, newRevenue);
+    async updateRevenue(payment) {
+      let isNewPayment = false
+      if (payment) {
+        null
+      } else {
+        isNewPayment = true
+        payment = {date: new Date()};
+      }
+      await this.$refs.revenueForm.open(payment, isNewPayment);
       this.getRevenues();
 		},
 

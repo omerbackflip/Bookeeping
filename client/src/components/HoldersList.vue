@@ -138,7 +138,6 @@ export default {
           }
         }
       })
-      console.log(this.holdersList)
       this.isLoading = false
 		},
 
