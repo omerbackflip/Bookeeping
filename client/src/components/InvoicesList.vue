@@ -54,9 +54,6 @@
           </template>
           <template v-slot:[`item.date`]="{ item }">
             <span style="margin-left: 0.5rem"> {{ item.date | formatDate }}</span>
-            <!-- <td @click.stop>
-              <span v-if="isMobile()" @click="getSummary('group', item.group)" class="summary" style="margin-left: 1.9rem">{{ item.group }}</span>
-            </td> -->
           </template>
           <template v-slot:[`item.total`]="{ item }">
             <v-tooltip bottom>
@@ -125,7 +122,7 @@
           </template>
         </v-data-table>
         
-        <v-btn v-if="$route.params.project" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
+        <v-btn v-if="$route.params.project || $route.params.supplier" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
       </v-flex>
 
       <!-- SummaryDialog for supplier/Project/Group -->
@@ -217,7 +214,8 @@ import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
 import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, 
-          TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE, VAT_PERCENTAGE } from "../constants/constants";
+          TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE, VAT_PERCENTAGE, 
+          loadTable} from "../constants/constants";
 import invoiceForm from "./InvoiceForm.vue"
 import { isMobile } from '../constants/constants';
 Vue.use(excel);
@@ -236,6 +234,7 @@ export default {
 	data() {
 		return {
       isMobile,
+      loadTable,
 			invoiceList: [],
 			previusList: [], // used to store the prevoius invoiceList
 			companyName: [],
@@ -400,17 +399,6 @@ export default {
           return item1.total + pendingTotal
         },0)
 				this.isLoading = false;
-			}
-		},
-
-		loadTable: async function (table_id, tableName) {
-			try {
-				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-				if (response) {
-					this[tableName] = response.data.map((code) => code.description);
-				}
-			} catch (error) {
-				console.log(error);
 			}
 		},
 
@@ -603,9 +591,9 @@ export default {
 
 	async mounted() {
 		this.retrieveInvoices();
-		await this.loadTable(1, "companyName");
-		await this.loadTable(2, "projectName");
-		await this.loadTable(3, "supplierName");
+    this.companyName = (await loadTable(1)).map((code) => code.description)
+    this.projectName = (await loadTable(2)).map((code) => code.description)
+    this.supplierName = (await loadTable(3)).map((code) => code.description)
     this.$root.$on("addNewInvoice", async () => {
 			// this.dialog = true;
 			this.invoiceID = 0;

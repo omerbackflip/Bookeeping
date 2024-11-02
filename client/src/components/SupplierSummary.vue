@@ -46,7 +46,7 @@ import Vue from "vue";
 import moment from "moment";
 import excel from "vue-excel-export";
 import apiService from "../services/apiService";
-import { INVOICE_MODEL, TABLE_MODEL, SUMMARY_SUPPLIER_HEADERS } from "../constants/constants";
+import { INVOICE_MODEL, SUMMARY_SUPPLIER_HEADERS, loadTable } from "../constants/constants";
 
 Vue.use(excel);
 Vue.filter("formatDate", function (value) {
@@ -59,6 +59,7 @@ export default {
 	name: "supplier-summary",
 	data() {
 		return {
+      loadTable,
       invoices: [],
 			supplierList: [],
 			search: "",
@@ -74,31 +75,14 @@ export default {
 			if (response.data) {
 				this.invoices = response.data; // put all invoices data in invoices
         this.supplierList = this.supplierList.map((item1) => { // add to supplierList the total for each supplier
-          // let totalInclude = this.invoices.filter((item2) => {
-          //   return item2.supplier === item1.supplier
-          // }).reduce ((currSum,item3) => {return item3.total + currSum},0)
           let totalExclude = this.invoices.filter((item2) => {
             return item2.supplier === item1.supplier
           }).reduce ((currSum,item3) => {return item3.amount + currSum},0)
           return({...item1, totalExclude:totalExclude}) // concatinate the totalSupplier
-          // return({...item1, totalInclude:totalInclude, totalExclude:totalExclude}) // concatinate the totalSupplier
         })  
 			}
       this.isLoading = false
 		},  
-
-		loadTable: async function (table_id, tableName) {
-			try {
-				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-				if (response) {
-					this[tableName] = response.data.map((item) => {
-            return {supplier: item.description, budget: item.table_code}
-          });
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		},
 
     clickRow(row) {
 			this.$router.push({ name: "invoicesList", params: { supplier: row.supplier } });
@@ -110,8 +94,10 @@ export default {
 	},
 
 	async mounted() {
-		await this.loadTable(3, "supplierList");
-		this.mainSummary();
+    this.supplierList = (await loadTable(3)).map((code) => {
+      return {supplier: code.description, budget: code.table_code}
+    })
+    this.mainSummary();
 	},
 	
   watch: {

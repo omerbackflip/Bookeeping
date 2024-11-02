@@ -74,7 +74,7 @@ import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
-import { TABLE_MODEL, REVENUE_MODEL } from "../constants/constants";
+import { REVENUE_MODEL, loadTable } from "../constants/constants";
 
 Vue.use(excel);
 Vue.filter("formatDate", function (value) {
@@ -87,6 +87,7 @@ export default {
 	components: { RevenueForm, ConfirmDialog },
 	data() {
 		return {
+      loadTable,
 			invoices: [],
 			revenueList: [],
 			projectList: [],
@@ -119,19 +120,6 @@ export default {
 				this.revenueList = response.data; // put all revenueList data in revenueList
 			}
       this.isLoading = false
-		},
-
-		loadTable: async function (table_id, tableName) {
-			try {
-				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-				if (response) {
-					this[tableName] = response.data.map((item) => {
-            return {project: item.description}
-          });
-				}
-			} catch (error) {
-				console.log(error);
-			}
 		},
 
     // get Revenue data before open dialog for edit
@@ -170,8 +158,8 @@ export default {
 	},
 
 	async mounted() {
-		await this.loadTable(2, "projectList");
-		this.getRevenues();
+    this.projectList = (await loadTable(2)).map((code) => code.description)
+    this.getRevenues();
 	},
 	
   watch: {

@@ -10,7 +10,7 @@
             <v-text-field class="field-margin" v-model="revenue.project" label="Project"></v-text-field>
             <v-text-field class="field-margin" v-model="revenue.flatId" label="FlatID"></v-text-field>
             <v-text-field class="field-margin" v-model="revenue.description" label="Description"></v-text-field>
-            <v-text-field class="field-margin" v-model="revenue.paymentType" label="Payment Type"></v-text-field>
+            <v-autocomplete class="field-margin" v-model="revenue.paymentType" label="Payment Type" :items="paymentTypeList" item-text="description"></v-autocomplete>
             <v-text-field class="field-margin" v-model="revenue.invoiceId" label="Invoice"></v-text-field>
             <v-text-field class="field-margin" v-model="revenue.amount" label="Amount"></v-text-field>
             <v-dialog ref="dialog" v-model="dateModal" :return-value.sync="revenue.date" persistent width="290px">
@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { REVENUE_MODEL } from "../constants/constants";
+import { REVENUE_MODEL, loadTable } from "../constants/constants";
 import apiService from "../services/apiService";
 import Vue from "vue";
 import moment from "moment";
@@ -51,6 +51,7 @@ export default {
     name: "revenue-form",
     data() {
         return {
+            loadTable,
             revenue: {},
 			dialog: false,
             resolve: null,      // What is this for ?
@@ -63,6 +64,7 @@ export default {
                 zIndex: 200,
             },
             dateModal : false,
+            paymentTypeList: []
         };
     },
     methods: {
@@ -85,10 +87,11 @@ export default {
 			}
 		},
 
-        open(revenue, isNewRevenue) {
+        async open(revenue, isNewRevenue) {
             this.isNewRevenue = isNewRevenue
             this.revenue = revenue 
             this.revenue.date = moment(this.revenue.date).format('YYYY-MM-DD');
+            this.paymentTypeList = (await loadTable(7)).map((code) => code.description)
             this.dialog = true;
             return new Promise((resolve) => {
                 this.resolve = resolve;

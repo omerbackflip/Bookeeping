@@ -1,29 +1,29 @@
 <template>
       <!-- Add New/Update row dialog -->
-      <v-dialog v-model="dialogHolderForm" >
-        <v-card>
+      <v-dialog v-model="dialogHolderForm" width="600">
+        <v-card class="hebrew">
           <v-card-title>
             <span class="text-h5">{{ holder._id ? "Update" : "Add New" }}</span>
             <v-spacer></v-spacer>
             <v-btn v-show="holder._id" @click="copyToNew"> Copy </v-btn>
           </v-card-title>
-          <v-card-text>
+          <v-card-text style="padding: 0px;">
             <v-container>
               <v-form ref="form">
                 <v-row>
-                  <v-col cols="4">
+                  <v-col cols="2">
                     <v-text-field v-model="holder.flatId" label="דירה" @focus="$event.target.select()"></v-text-field>
                   </v-col>
-                  <v-col cols="4">
+                  <v-col cols="6">
                     <v-text-field v-model="holder.holderName" label="שם הדייר" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="4">
                     <v-text-field v-model="holder.phone" label="טלפון" @focus="$event.target.select()"></v-text-field>
                   </v-col>
-                  <v-col cols="4">
+                  <v-col cols="3">
                     <v-text-field v-model="holder.signPrice" label="מחיר בחתימה" @focus="$event.target.select()"></v-text-field>
                   </v-col>
-                  <v-col cols="4">
+                  <v-col cols="6">
                     <v-text-field v-model="holder.email" label="email" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
@@ -39,11 +39,8 @@
                       </v-date-picker>
                     </v-dialog>
                   </v-col>
-                  <v-col cols="10" class="no-padding hebrew">
+                  <v-col cols="12" class="no-padding hebrew">
                     <v-textarea v-model="holder.remark" label="הערה" auto-grow rows="1" @focus="$event.target.select()"></v-textarea>
-                  </v-col>
-                  <v-col cols="2">
-                    <v-text-field v-model="holder.updatedAt"></v-text-field>
                   </v-col>
                 </v-row>
               </v-form>

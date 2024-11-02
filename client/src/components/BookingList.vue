@@ -122,7 +122,7 @@ import moment from "moment";
 import excel from "vue-excel-export";
 // import VueVirtualTable from 'vue-virtual-table'
 import apiService from '../services/apiService';
-import { BOOKS_MODEL, TABLE_MODEL } from '../constants/constants';
+import { BOOKS_MODEL, loadTable } from '../constants/constants';
 
 
 Vue.use(excel);
@@ -139,6 +139,7 @@ export default {
 	// components: { VueVirtualTable },
 	data() {
 		return {
+            loadTable,
 			bookList: [],
 			filteredList: [],
 			currInvoice: null,
@@ -295,6 +296,7 @@ export default {
 		},
 
 		onCardChange(selectedCard) {
+			console.log(selectedCard)
 			if (selectedCard.value != 0){
 				this.filteredList = this.bookList.filter((item) => {
 					return (item.cust_id === selectedCard.value)
@@ -314,25 +316,11 @@ export default {
 			}
 		},
 
-		loadTable: async function (table_id, tableName) {
-			try {
-				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-				if (response) {
-					this[tableName] = response.data.map((item) => {
-						return {text: item.description, value: item.table_code}
-					});
-					this[tableName].sort((a,b) => a.text.localeCompare(b.text));
-				}
-			} catch (error) {
-				console.log(error);
-			}
-		},
-
 	},
 
 	async mounted() {
 		this.retrieveBooks();
-		await this.loadTable(6, "cardsList");
+		this.cardsList = (await loadTable(6)).map((code) => code.description)
 		this.$root.$on("yearChange", (year) => {
 			this.selectedCard = '',
 			this.summaryHint = '',

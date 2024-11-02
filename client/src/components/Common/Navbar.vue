@@ -83,7 +83,7 @@
 
 <script>
 import ImportCSV from '../ImportCSV.vue';
-import { navItems, isMobile } from '../../constants/constants';
+import { navItems, isMobile, loadTable } from '../../constants/constants';
 import SpecificServiceEndPoints from "../../services/specificServiceEndPoints";
 import { TABLE_MODEL } from "../../constants/constants";
 import apiService from "../../services/apiService";
@@ -94,6 +94,7 @@ export default {
         return {
             navItems,
             isMobile,
+            loadTable,
             googleConnectMenuItem: 'Google (Not Connected)',
             query: null,
             drawer: false,
@@ -200,28 +201,19 @@ export default {
             }
         },
 
-		loadTable: async function (table_id, tableName) {
-			try {
-				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-				if (response) {
-					this[tableName] = response.data.map((code) => code.description);
-				}
-			} catch (error) {
-				console.log(error);
-			}
-            // at the same time bring also last backup (although it is not relevant to this fuction)
-            // const response = await apiService.getMany({ table_id: 99, model: TABLE_MODEL });
+        async getLastBkup() {
             const response = await apiService.getOne({ table_id: 99, table_code:80, model: TABLE_MODEL });
             this.lastBkup = response.data.description;
-		},
+        }
 
     },
 
     async mounted() {
-		await this.loadTable(4, "yearList");
+        this.yearList = (await loadTable(4)).map((code) => code.description)
         this.selectedYear = 2024;
         this.getDatabaseInformation();
         this.checkGoogleConnection();
+        this.getLastBkup();
     },
 
     computed: {

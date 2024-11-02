@@ -4,6 +4,7 @@ export const TABLE_MODEL = 'tables';
 export const REVENUE_MODEL = 'revenues';
 export const HOLDER_MODEL = 'holders';
 export const VAT_PERCENTAGE = 17;
+import apiService from "../services/apiService";
 
 export const INVOICE_MOBILE_HEADERS = [
     // { text: "G",            value: "group",         class: "hdr-styles",  groupable: false, align: "right"},	
@@ -96,7 +97,7 @@ export const navItems = [
     {icon: 'widgets', text: 'Supplier Summary', route: '/SupplierSummary'},
     {icon: 'widgets', text: 'Revenues', route: '/RevenueList'},
     {icon: 'widgets', text: 'Forcast Payments', route: '/ForecastPayment'},
-]
+];
 
 export const isMobile = () => {
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
@@ -104,4 +105,16 @@ export const isMobile = () => {
     } else {
         return false;
     }
-}
+};
+
+export const loadTable = async (table_id) => {
+    try {
+        const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
+        if (response.data.length > 0) {
+            return (response.data)
+            // return (response.data.map((code) => code.description))
+        } else return (window.alert("Read Table no - " + table_id + " faild"))
+    } catch (error) {
+        console.log(error);
+    }
+};

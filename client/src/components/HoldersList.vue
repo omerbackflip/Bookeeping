@@ -22,7 +22,11 @@
           item-key="flatId">
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title> Total Holders - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
+              <v-toolbar-title> Sales - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
+              <v-spacer></v-spacer>
+              Payments - {{ totalPayed.toLocaleString() }}
+              <v-spacer></v-spacer>
+              Total - {{ totalSales.toLocaleString() }}
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
               <!-- <v-spacer></v-spacer>
@@ -113,6 +117,8 @@ export default {
       expanded: [],
       dateModal : false,
       isLoading : false,
+      totalPayed: 0,
+      totalSales: 0,
 		};
 	},
 
@@ -128,11 +134,13 @@ export default {
       this.holdersList.forEach(async (item) => {
         if(item.holderName) {
           this.holdersCount += 1
+          this.totalSales += item.signPrice
           item.signDate = moment(item.signDate).format('YYYY-MM-DD');
           let payments = await apiService.getMany({model: REVENUE_MODEL, flatId: item.flatId});
           if (payments && payments.data) { // there are payments for this flatId
             payments.data.forEach((item1) => {
               item1.date = moment(item1.date).format('YYYY-MM-DD');
+              if (item1.paymentType === 'תשלומי דירה') this.totalPayed += item1.amount
             })
             item.payments = payments.data;
           }

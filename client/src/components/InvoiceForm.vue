@@ -116,7 +116,7 @@
 </template>
 
 <script>
-import { INVOICE_MODEL, TABLE_MODEL, VAT_PERCENTAGE } from "../constants/constants";
+import { INVOICE_MODEL, loadTable, VAT_PERCENTAGE } from "../constants/constants";
 import apiService from "../services/apiService";
 import Vue from "vue";
 import moment from "moment";
@@ -130,6 +130,7 @@ export default {
     name: "invoice-form",
     data() {
       return {
+        loadTable,
         dialogInvForm: false,
         resolve: null,      // What is this for ?
         isLoading: false,
@@ -235,17 +236,6 @@ export default {
         this.$refs.form.reset();
       },
 
-      loadTable: async function (table_id, tableName) {
-        try {
-          const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-          if (response) {
-            this[tableName] = response.data.map((code) => code.description);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      },
-
       onDateChange() {
         this.invoice.year = new Date((this.invoice.date)).getFullYear();
       },
@@ -257,9 +247,9 @@ export default {
     },
 
     async mounted(){
-      await this.loadTable(1, "companyName");
-      await this.loadTable(2, "projectName");
-      await this.loadTable(3, "supplierName");
+      this.companyName = (await loadTable(1)).map((code) => code.description)
+      this.projectName = (await loadTable(2)).map((code) => code.description)
+      this.supplierName = (await loadTable(3)).map((code) => code.description)
     }
 };
 </script>

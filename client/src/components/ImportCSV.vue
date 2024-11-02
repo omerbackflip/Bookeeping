@@ -50,8 +50,8 @@
 
 <script>
 import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
-import { TABLE_MODEL } from "../constants/constants";
-import apiService from "../services/apiService";
+import { loadTable } from "../constants/constants";
+// import apiService from "../services/apiService";
 
 export default {
 	props: {
@@ -61,6 +61,7 @@ export default {
 	},
 	data() {
 		return {
+			loadTable,
 			file: null,
 			message: "",
 			dialog: false,
@@ -115,21 +116,9 @@ export default {
 			}
 			this.loading = false;
 		},
-		loadTable: async function (table_id, tableName) {
-        try {
-          const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-          if (response) {
-            this[tableName] = response.data.map((code) => code.description);
-          }
-        } catch (error) {
-          console.log(error);
-        }
-		// console.log(this.years)
-      },
 	},
 	async mounted() {
-		// this.dialog = this.openImportModal;
-		await this.loadTable(4, "years");
+		this.years = (await loadTable(4)).map((code) => code.description)
 		this.dialog = true;
 	}
 };

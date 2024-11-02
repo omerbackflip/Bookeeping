@@ -93,7 +93,7 @@ import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
-import { INVOICE_MODEL, TABLE_MODEL, REVENUE_MODEL, SUMMARY_PROJECT_WEB_HEADERS, SUMMARY_PROJECT_MOBILE_HEADERS } from "../constants/constants";
+import { INVOICE_MODEL, REVENUE_MODEL, SUMMARY_PROJECT_WEB_HEADERS, SUMMARY_PROJECT_MOBILE_HEADERS, loadTable } from "../constants/constants";
 import { isMobile } from '../constants/constants';
 // import ApexCharts from 'apexcharts';
 import VueApexCharts from 'vue-apexcharts'
@@ -110,6 +110,7 @@ export default {
 	data() {
 		return {
       isMobile,
+      loadTable,
 			invoices: [],
 			revenues: [],
 			projectList: [],
@@ -215,9 +216,6 @@ export default {
           return({...item1, revenue:totalRevenue, payedList}) // concatinate the totalRevenue and list of payed projects
         })  
 			}
-      // this.graph = this.projectList.map((item) =>{
-      //   return Math.round(item.revenue/1000000 * 10) / 10
-      // })
       let proj = this.projectList.map((item) =>{
         return (item.project)
       })
@@ -230,21 +228,7 @@ export default {
         return (Math.round(item.total/100)/10)
       })
       this.series = [{name:'הכנסות', data: revs},{name:'הוצאות', data:exps}]
-      // console.log(this.series)
       this.isLoading = false
-		},
-
-		loadTable: async function (table_id, tableName) {
-			try {
-				const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
-				if (response) {
-					this[tableName] = response.data.map((item) => {
-            return {project: item.description}
-          });
-				}
-			} catch (error) {
-				console.log(error);
-			}
 		},
 
     projectInvoices(row) {
@@ -278,8 +262,10 @@ export default {
 	},
 
 	async mounted() {
-		await this.loadTable(2, "projectList");
-		this.mainSummary();
+    this.projectList = (await loadTable(2)).map((code) => {
+      return {project: code.description}
+    })
+    this.mainSummary();
 	},
 	
   watch: {
