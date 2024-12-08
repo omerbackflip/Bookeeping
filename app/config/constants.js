@@ -3,7 +3,7 @@ const path = require('path');
 module.exports = {
 	ServerApp : {
 		google: {
-			invoiceFolderIds: '1BvNLoUo14eK-HPVbArD_G6NcR769L7aS', // this is the id of "backup" folder in Google-Drive
+			invoiceFolderIds: '1nB3lzLf8lgszVEXK4hcGW1LuPl6-OonU', // this is the id of "backup" folder in Google-Drive
 		},
 		models : {
 			invoice : 'invoices'
