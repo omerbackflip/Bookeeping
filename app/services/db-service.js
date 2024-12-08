@@ -16,7 +16,7 @@ exports.getMultipleItems = async (model,query) => {
 },
 exports.updateItem = async (model,query,paylod) => {
     try {
-        return await model.findOneAndUpdate(query,paylod);
+        return await model.findOneAndUpdate(query,paylod,{ new: true, upsert: true });
     } catch (error) {
         console.log(error)
         throw error;

@@ -2,6 +2,8 @@ const db = require("../models");
 var fs = require('fs');
 const csv = require('csvtojson');
 const dbService = require("../services/db-service");
+const { google } = require('googleapis');
+const googleService = require('../services/google-service');
 
 //Create and Save a new entity:
 exports.create = async (req, res) => {
@@ -52,17 +54,54 @@ exports.getOne = async (req, res) => {
 
 //Update a entity identified by the id in the request:
 exports.update = async (req, res) => {
-	try {
-		const id = req.params.id;
-		const data = await dbService.updateItem(db[req.query.model], {_id: id}, req.body);
-		if(data) {
-			res.send({ message: "entity was updated successfully." });
-		} else {
-			res.status(404).send({message: `Cannot update entity with id=${id}. Maybe entity was not found!`});
-		}
-	} catch (error) {
-		res.status(500).send({ message: "Error updating entity!"});		
-	}
+    try {
+        
+        const id = req.params.id;
+        const file = req.file;
+        const {year,group,invoiceId} = req.body;
+        let updatePayload = {};
+        
+        if(file){
+	       
+	        if (!file) {
+	            return res.status(400).send({ message: 'No file uploaded!' });
+	        }
+
+	        
+	        let path = `${year}/${group}/${invoiceId}`;
+	        
+	        const auth = googleService.getAuth();
+	        const uploadedFile = await googleService.uploadToGoogleDrive(auth, file.filename,path);
+
+	        if (!uploadedFile || !uploadedFile.id) {
+	            return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
+	        }
+	       
+	        fs.unlinkSync(`uploads/${file.filename}`);
+
+	        updatePayload = {
+	            ...req.body,
+	            link: uploadedFile.url, 
+	        };
+	    }else{
+	    	 updatePayload = req.body;
+	    }
+
+	    if(updatePayload.payments){
+	    	updatePayload.payments = JSON.parse(updatePayload.payments);
+	    }
+
+        const updatedEntity = await dbService.updateItem(db[req.query.model], { _id: id }, updatePayload);
+
+        if (!updatedEntity) {
+            return res.status(404).send({ message: `Cannot update entity with id=${id}. Entity not found!` });
+        }
+
+        res.send({ message: 'Entity updated successfully.' });
+    } catch (error) {
+        console.error('Error updating entity:', error);
+        res.status(500).send({ message: `Error updating entity: ${error.message}` });
+    }
 };
 
 
@@ -112,3 +151,5 @@ exports.findOneAndUpdate = async (req, res) => {
 		res.status(500).send({message: error.message || "Some error occurred while retrieving entity."});		
 	}
 };
+
+

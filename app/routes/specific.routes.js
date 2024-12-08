@@ -1,5 +1,5 @@
-const multer  = require('multer')
-const upload = multer({ dest: 'uploads/' })
+const multer  = require('multer');
+const upload = multer({ dest: 'uploads/' });
 
 // Save Bulk of Specific
 module.exports = app => {

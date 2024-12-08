@@ -1,4 +1,5 @@
 <template>
+  <div>
       <!-- Add New/Update row dialogInvForm -->
       <v-dialog v-model="dialogInvForm" >
         <v-card>
@@ -20,10 +21,32 @@
                   <v-col cols="4">
                     <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                   </v-col>
-                  <v-col cols="5" class="no-padding">
-                    <v-text-field v-model="invoice.link" label="link" @focus="$event.target.select()"></v-text-field>
+                  <v-col cols="12" class="no-padding">
+                    <v-file-input
+                      v-model="file"
+                      accept="image/*"
+                      label="link"
+                      v-if="!invoice.link"
+                      @change="onFileSelect"
+                    ></v-file-input>
+                    <span v-else>
+                      <v-text-field
+                        v-model="invoice.link"
+                        label="Link"
+                        @focus="$event.target.select()"
+                        :disabled="false"  
+                      >
+                        <template v-slot:append>
+                          <v-icon @click="clickToView(invoice.link)">mdi-eye-outline</v-icon>
+                          <v-icon @click="deleteLink">mdi-delete</v-icon>
+                        </template>
+                        <template v-slot:prepend>
+                          <v-icon @click="copyToClipboard(invoice.link)">mdi-content-copy</v-icon>
+                        </template>
+                      </v-text-field>
+                    </span>
                   </v-col>
-                  <v-col cols="7" class="no-padding">
+                  <v-col cols="12" class="no-padding">
                     <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
@@ -69,7 +92,7 @@
           </v-card-text>
           <div class="payments-wrapper">
               <h6>Payments</h6>
-              <v-container>
+              <v-container v-if="invoice.payments.length > 0">
                   <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
                       <v-row>
                           <v-col cols="3">
@@ -113,6 +136,21 @@
           </v-card-actions>
         </v-card>
       </v-dialog>
+       <v-dialog v-model="dialogInvFile" max-width="800">
+          <div>
+
+          <iframe
+            v-if="filelink"
+            :src="filelink"
+            width="100%"
+            height="800px"
+            frameborder="0"
+            allowfullscreen
+          ></iframe>
+        </div>
+
+       </v-dialog>
+    </div>
 </template>
 
 <script>
@@ -130,6 +168,9 @@ export default {
     name: "invoice-form",
     data() {
       return {
+        filelink:'',
+        dialogInvFile:false,
+        file:null,
         loadTable,
         dialogInvForm: false,
         resolve: null,      // What is this for ?
@@ -151,6 +192,26 @@ export default {
     },
 
     methods: {
+      onFileSelect(file) {
+        this.invoice.file =file;
+      },
+      copyToClipboard(link) {
+
+          const inputElement = document.createElement('input');
+          inputElement.value = link;
+          document.body.appendChild(inputElement);
+          inputElement.select();
+          document.execCommand('copy');
+          document.body.removeChild(inputElement);
+
+      },
+      clickToView(link) {
+          this.filelink = link;    
+          this.dialogInvFile = true;    
+        },
+        deleteLink(){
+            this.invoice.link = null;
+        },
       open(invoice, isNewInvoice) {
         this.isNewInvoice = isNewInvoice;
         this.invoice = invoice 
@@ -163,38 +224,51 @@ export default {
           this.resolve = resolve;
         });
       },
-
       copyToNew() {
         this.isNewInvoice = true
         this.invoice._id = null
         this.invoice.published = false
       },
-
       // saveInvoice: async function () {
       async saveInvoice() {
         try {
-          this.isLoading = true
-          let response = ''
-          if (this.isNewInvoice)  {
-            response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
+          
+          this.isLoading = true;
+          const formData = new FormData();
+
+          for (const key in this.invoice) {
+            if (this.file && key == 'link') {
+              formData.append('file', this.invoice.link);
+            } else if (key == 'payments') {
+              formData.append(key, JSON.stringify(this.invoice.payments));
+            } else {
+              formData.append(key, this.invoice[key]);
+            }
+          }
+          
+          let response;
+          
+          if (this.isNewInvoice) {
+            response = await apiService.create(formData, { model: INVOICE_MODEL, headers: { 'Content-Type': 'multipart/form-data' } });
           } else {
-            response = await apiService.update(this.invoice._id, this.invoice, { model: INVOICE_MODEL });
-          } 
+            response = await apiService.update(this.invoice._id, formData, { model: INVOICE_MODEL, headers: { 'Content-Type': 'multipart/form-data' } });
+          }
+
           if (response) {
             this.dialogInvForm = false;
-            this.isLoading =  false;
+            this.isLoading = false;
             this.resolve(true);
+            window.location.reload();
           }
         } catch (error) {
-          this.msg = JSON.stringify(error.message);
+          console.error(error);
+          this.isLoading = false;
+          this.message = error.message;
           setTimeout(() => {
-            this.msg = "";
+            this.message = '';
           }, 3000);
-          console.log(error);
-          this.isLoading = false
         }
       },
-
       async deleteOne(id, description) {
         if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
           const response = await apiService.deleteOne({model: INVOICE_MODEL,id});
@@ -247,6 +321,7 @@ export default {
     },
 
     async mounted(){
+      
       this.companyName = (await loadTable(1)).map((code) => code.description)
       this.projectName = (await loadTable(2)).map((code) => code.description)
       this.supplierName = (await loadTable(3)).map((code) => code.description)

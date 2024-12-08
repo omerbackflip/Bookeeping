@@ -113,7 +113,7 @@ export const loadTable = async (table_id) => {
         if (response.data.length > 0) {
             return (response.data)
             // return (response.data.map((code) => code.description))
-        } else return (window.alert("Read Table no - " + table_id + " faild"))
+        } else return [];
     } catch (error) {
         console.log(error);
     }

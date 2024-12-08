@@ -86,33 +86,99 @@ exports.getUser = async (oAuth2Client) => {
   }
 }
 
-exports.uploadToGoogleDrive = async (oAuth2Client, filename) => {
-  const drive = google.drive({ version: 'v3', auth: oAuth2Client }); // auth object was "require" above...
+exports.uploadToGoogleDrive = async (oAuth2Client, filename, folderPath = null) => {
+  
+  const drive = google.drive({ version: 'v3', auth: oAuth2Client });
+   
+  let parentFolderId = ServerApp.google.invoiceFolderIds; 
+  
+  if(folderPath){
 
-  const filePath = path.join(ServerApp.uploadFolderPath, filename);
+    const folderParts = folderPath.split('/');
+    
+    for (const part of folderParts) {
+      parentFolderId = await findOrCreateFolder(part, parentFolderId, drive);
+    }
+  }
+  console.log(parentFolderId)
   const fileMetadata = {
-    name: filename,
-    parents: ServerApp.google.invoiceFolderIds,
+    name: filename, 
+    parents: [parentFolderId], 
   };
+  const filePath = path.join(ServerApp.uploadFolderPath, filename);
   const media = {
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    body: fs.createReadStream(filePath),
+    mimeType: 'application/octet-stream', 
+    body: fs.createReadStream(filePath), 
   };
 
   try {
+    // Upload file to Google Drive
     const file = await drive.files.create({
       resource: fileMetadata,
       media: media,
-      fields: 'id',
-      supportsAllDrives: true,
+      fields: 'id, name',
+      supportsAllDrives: true, 
     });
-    
-    // console.log('file.data', file.data);
-    // console.log('file', file);
 
-    return file.data;
+    await drive.permissions.create({
+      fileId: file.data.id,
+      requestBody: {
+        role: 'reader',
+        type: 'anyone', 
+      },
+    });
+
+    const readableUrl = `https://docs.google.com/file/d/${file.data.id}/preview?usp=drivesdk`;
+    
+    return { id: file.data.id, name: file.data.name, url: readableUrl };
   } catch (error) {
-    console.error('Error uploading the file to google drive:', error);
+    console.error('Error uploading the file to Google Drive:', error);
     return false;
+  }
+};
+
+async function findOrCreateFolder(folderName, parentFolderId, drive) {
+  try {
+    // Trim folderName to avoid issues with leading/trailing spaces
+    const trimmedFolderName = folderName.trim();
+
+    // Search for the folder by name within the parent folder
+    const searchQuery = `
+      '${parentFolderId}' in parents 
+      and name = '${trimmedFolderName}' 
+      and mimeType = 'application/vnd.google-apps.folder' 
+      and trashed = false`;
+    
+    const response = await drive.files.list({
+      q: searchQuery,
+      fields: 'files(id, name)',
+      spaces: 'drive',
+    });
+    console.log(response.data)
+    if (response.data.files.length > 0) {
+      // Folder exists, return its ID
+      console.log(`Folder exists: ${trimmedFolderName} (ID: ${response.data.files[0].id})`);
+      return response.data.files[0].id;
+    } else {
+      // Folder doesn't exist, create it
+      console.log(`Folder not found. Creating folder: ${trimmedFolderName}`);
+      const folderMetadata = {
+        name: trimmedFolderName,
+        mimeType: 'application/vnd.google-apps.folder',
+        parents: [parentFolderId],
+      };
+
+      const folder = await drive.files.create({
+        resource: folderMetadata,
+        fields: 'id, name',
+        supportsAllDrives: true,
+      });
+
+      console.log(`Folder created: ${trimmedFolderName} (ID: ${folder.data.id})`);
+      return folder.data.id;
+    }
+  } catch (error) {
+    console.error(`Error finding or creating folder '${folderName}':`, error.message);
+    throw error;
   }
 }

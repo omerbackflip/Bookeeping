@@ -1,3 +1,5 @@
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" }); 
 module.exports = app => {
 	const generic = require("../controllers/generic.controller.js");
 
@@ -19,7 +21,7 @@ module.exports = app => {
 	router.delete("/delete", generic.delete);
 
 	// Update an entity with id
-	router.put("/update/:id", generic.update);
+	router.post("/update/:id",upload.single('file'), generic.update);
 
 	// Update an entity with id
 	router.put("/find-one-and-update", generic.findOneAndUpdate);

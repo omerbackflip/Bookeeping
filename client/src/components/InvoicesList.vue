@@ -318,7 +318,7 @@ export default {
         case 'project':
           // fatch all paymanets for this project cross years.
           response = await apiService.getMany({model: INVOICE_MODEL,project: summaryItem})
-          this.summaryFilter = response.data
+          this.summaryFilter = response.data 
           break;
         case 'supplier':
           // fatch all paymanets for this supplier cross years.

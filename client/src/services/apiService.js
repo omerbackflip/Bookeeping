@@ -18,7 +18,12 @@ class ApiService {
   }
 
   update(id, data,params) {
-    return http.put(`generic/update/${id}`, data, {params});
+    console.log(data,params);
+    return http.post(`generic/update/${id}`, data, {params,
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   }
 
   findOneAndUpdate(data, params) {
