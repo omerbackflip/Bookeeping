@@ -95,7 +95,7 @@ exports.uploadToGoogleDrive = async (oAuth2Client, filename, folderPath = null) 
   if(folderPath){
 
     const folderParts = folderPath.split('/');
-    
+    parentFolderId = null;
     for (const part of folderParts) {
       parentFolderId = await findOrCreateFolder(part, parentFolderId, drive);
     }
@@ -142,19 +142,19 @@ async function findOrCreateFolder(folderName, parentFolderId, drive) {
     // Trim folderName to avoid issues with leading/trailing spaces
     const trimmedFolderName = folderName.trim();
 
-    // Search for the folder by name within the parent folder
+    // Search query for the folder
     const searchQuery = `
-      '${parentFolderId}' in parents 
-      and name = '${trimmedFolderName}' 
+      ${parentFolderId ? `'${parentFolderId}' in parents and ` : ''}
+      name = '${trimmedFolderName}' 
       and mimeType = 'application/vnd.google-apps.folder' 
       and trashed = false`;
-    
+
     const response = await drive.files.list({
       q: searchQuery,
       fields: 'files(id, name)',
       spaces: 'drive',
     });
-    console.log(response.data)
+
     if (response.data.files.length > 0) {
       // Folder exists, return its ID
       console.log(`Folder exists: ${trimmedFolderName} (ID: ${response.data.files[0].id})`);
@@ -165,7 +165,7 @@ async function findOrCreateFolder(folderName, parentFolderId, drive) {
       const folderMetadata = {
         name: trimmedFolderName,
         mimeType: 'application/vnd.google-apps.folder',
-        parents: [parentFolderId],
+        ...(parentFolderId && { parents: [parentFolderId] }), // Add parents only if parentFolderId is defined
       };
 
       const folder = await drive.files.create({

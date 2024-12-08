@@ -68,7 +68,7 @@ exports.update = async (req, res) => {
 	        }
 
 	        
-	        let path = `${year}/${group}/${invoiceId}`;
+	        let path = `${group}`;
 	        
 	        const auth = googleService.getAuth();
 	        const uploadedFile = await googleService.uploadToGoogleDrive(auth, file.filename,path);
