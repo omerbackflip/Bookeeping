@@ -188,7 +188,7 @@ export default {
         companyName: [], // need to fatch refdata
         projectName: [],
         supplierName: [],
-        invoice: [],
+        invoice:[]
       };
     },
 
@@ -210,9 +210,9 @@ export default {
           this.filelink = link;    
           this.dialogInvFile = true;    
         },
-        deleteLink(){
-            this.invoice.link = null;
-        },
+      deleteLink(){
+          this.invoice.link = null;
+      },
       open(invoice, isNewInvoice) {
         this.isNewInvoice = isNewInvoice;
         this.invoice = invoice 

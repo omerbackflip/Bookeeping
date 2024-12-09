@@ -6,7 +6,7 @@ module.exports = app => {
 	var router = require("express").Router();
 
 	// Create entity
-	router.post("/create", generic.create);
+	router.post("/create",upload.single('file'), generic.create);
 
 	// Retrieve all entity
 	router.get("/get-list", generic.findAll);

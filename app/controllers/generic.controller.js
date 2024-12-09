@@ -8,8 +8,9 @@ const googleService = require('../services/google-service');
 //Create and Save a new entity:
 exports.create = async (req, res) => {
 	try {
-		const entity = { ...req.body };
-		const data = await dbService.createItem(db[req.query.model], entity);
+		const  updatePayload = await createUpdate(req);
+
+		const data = await dbService.createItem(db[req.query.model], updatePayload);
 		if (data) {
 			res.send(data);
 		}
@@ -57,41 +58,11 @@ exports.update = async (req, res) => {
     try {
         
         const id = req.params.id;
-        const file = req.file;
-        const {year,group,invoiceId} = req.body;
-        let updatePayload = {};
         
-        if(file){
-	       
-	        if (!file) {
-	            return res.status(400).send({ message: 'No file uploaded!' });
-	        }
-
-	        
-	        let path = `${group}`;
-	        
-	        const auth = googleService.getAuth();
-	        const uploadedFile = await googleService.uploadToGoogleDrive(auth, file.filename,path);
-
-	        if (!uploadedFile || !uploadedFile.id) {
-	            return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
-	        }
-	       
-	        fs.unlinkSync(`uploads/${file.filename}`);
-
-	        updatePayload = {
-	            ...req.body,
-	            link: uploadedFile.url, 
-	        };
-	    }else{
-	    	 updatePayload = req.body;
-	    }
-
-	    if(updatePayload.payments){
-	    	updatePayload.payments = JSON.parse(updatePayload.payments);
-	    }
-
+        const  updatePayload = await createUpdate(req);
+	    
         const updatedEntity = await dbService.updateItem(db[req.query.model], { _id: id }, updatePayload);
+
 
         if (!updatedEntity) {
             return res.status(404).send({ message: `Cannot update entity with id=${id}. Entity not found!` });
@@ -151,5 +122,44 @@ exports.findOneAndUpdate = async (req, res) => {
 		res.status(500).send({message: error.message || "Some error occurred while retrieving entity."});		
 	}
 };
+
+async function createUpdate(req){
+
+		const file = req.file;
+        const {year,group,invoiceId} = req.body;
+        let updatePayload = {};
+        
+        if(file){
+	       
+	        if (!file) {
+	            return res.status(400).send({ message: 'No file uploaded!' });
+	        }
+
+	        
+	        let path = `${group}`;
+	        
+	        const auth = googleService.getAuth();
+	        const uploadedFile = await googleService.uploadToGoogleDrive(auth, file.filename,path);
+
+	        if (!uploadedFile || !uploadedFile.id) {
+	            return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
+	        }
+	       
+	        fs.unlinkSync(`uploads/${file.filename}`);
+
+	        updatePayload = {
+	            ...req.body,
+	            link: uploadedFile.url, 
+	        };
+	    }else{
+	    	 updatePayload = req.body;
+	    }
+
+	    if(updatePayload.payments){
+	    	updatePayload.payments = JSON.parse(updatePayload.payments);
+	    }
+
+	    return updatePayload;
+}
 
 
