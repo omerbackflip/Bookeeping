@@ -146,7 +146,7 @@ async function createUpdate(req){
 	        }
 	       
 	        fs.unlinkSync(`uploads/${file.filename}`);
-
+	        
 	        updatePayload = {
 	            ...req.body,
 	            link: uploadedFile.url, 

@@ -100,39 +100,45 @@ exports.uploadToGoogleDrive = async (oAuth2Client, filename, folderPath = null) 
       parentFolderId = await findOrCreateFolder(part, parentFolderId, drive);
     }
   }
-  console.log(parentFolderId)
-  const fileMetadata = {
-    name: filename, 
-    parents: [parentFolderId], 
-  };
-  const filePath = path.join(ServerApp.uploadFolderPath, filename);
-  const media = {
-    mimeType: 'application/octet-stream', 
-    body: fs.createReadStream(filePath), 
-  };
 
-  try {
-    // Upload file to Google Drive
-    const file = await drive.files.create({
-      resource: fileMetadata,
-      media: media,
-      fields: 'id, name',
-      supportsAllDrives: true, 
-    });
+  if(parentFolderId){
 
-    await drive.permissions.create({
-      fileId: file.data.id,
-      requestBody: {
-        role: 'reader',
-        type: 'anyone', 
-      },
-    });
+      const fileMetadata = {
+        name: filename, 
+        parents: [parentFolderId], 
+      };
+      const filePath = path.join(ServerApp.uploadFolderPath, filename);
+      const media = {
+        mimeType: 'application/octet-stream', 
+        body: fs.createReadStream(filePath), 
+      };
 
-    const readableUrl = `https://docs.google.com/file/d/${file.data.id}/preview?usp=drivesdk`;
-    
-    return { id: file.data.id, name: file.data.name, url: readableUrl };
-  } catch (error) {
-    console.error('Error uploading the file to Google Drive:', error);
+      try {
+        // Upload file to Google Drive
+        const file = await drive.files.create({
+          resource: fileMetadata,
+          media: media,
+          fields: 'id, name',
+          supportsAllDrives: true, 
+        });
+
+        await drive.permissions.create({
+          fileId: file.data.id,
+          requestBody: {
+            role: 'reader',
+            type: 'anyone', 
+          },
+        });
+
+        const readableUrl = `https://docs.google.com/file/d/${file.data.id}/preview?usp=drivesdk`;
+        
+        return { id: file.data.id, name: file.data.name, url: readableUrl };
+
+    } catch (error) {
+      console.error('Error uploading the file to Google Drive:', error);
+      
+    }
+  }else{
     return false;
   }
 };
@@ -160,6 +166,9 @@ async function findOrCreateFolder(folderName, parentFolderId, drive) {
       console.log(`Folder exists: ${trimmedFolderName} (ID: ${response.data.files[0].id})`);
       return response.data.files[0].id;
     } else {
+
+      return null;
+      //We will do later
       // Folder doesn't exist, create it
       console.log(`Folder not found. Creating folder: ${trimmedFolderName}`);
       const folderMetadata = {

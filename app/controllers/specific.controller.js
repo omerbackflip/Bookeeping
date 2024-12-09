@@ -68,7 +68,7 @@ exports.saveInvoicesBulk1 = async (req, res) => {
         let invoices = specificService.getInvoicesToSave(data[0]);
 		if (invoices) {
 			const result = await Invoice.insertMany(invoices, { ordered: true });
-			//unLinkFile(`uploads/${req.file.filename}`);
+			unLinkFile(`uploads/${req.file.filename}`);
 			if (result) {
 				return res.send({
 					success: true,
