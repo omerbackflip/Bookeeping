@@ -21,7 +21,7 @@
                   <v-col cols="4">
                     <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                   </v-col>
-                  <v-col cols="12" class="no-padding">
+                  <v-col cols="6" class="no-padding">
                     <v-file-input
                       v-model="file"
                       accept="image/*"
@@ -46,7 +46,7 @@
                       </v-text-field>
                     </span>
                   </v-col>
-                  <v-col cols="12" class="no-padding">
+                  <v-col cols="6" class="no-padding">
                     <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
@@ -92,34 +92,36 @@
           </v-card-text>
           <div class="payments-wrapper">
               <h6>Payments</h6>
-              <v-container v-if="invoice.payments.length > 0">
-                  <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
-                      <v-row>
-                          <v-col cols="3">
-                              <v-text-field label="checkID" v-model="inv.checkID" @focus="$event.target.select()"></v-text-field>
-                          </v-col>
-                          <v-col cols="3">
-                              <v-text-field label="Payment" v-model="inv.payment" @focus="$event.target.select()"></v-text-field>
-                          </v-col>
-                          <v-col cols="4" class="padding-date">
-                            <v-dialog ref="dateDialog" v-model="dateModal" :return-value.sync="inv.date" persistent width="290px">
-                      <template v-slot:activator="{ on, attrs }">
-                        <v-text-field v-model="inv.date" label="תאריך" readonly v-bind="attrs" v-on="on">
-                        </v-text-field>
-                      </template>
-                      <v-date-picker @input="onDateChange" v-model="inv.date" scrollable>
-                        <v-spacer></v-spacer>
-                        <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
-                        <v-btn text color="primary" @click="$refs.dateDialog.save(inv.date)"> OK </v-btn>
-                      </v-date-picker>
-                    </v-dialog>
-                          </v-col>
-                          <v-col cols="2" style="margin-top: 0px; padding-top: 0px;">
-                              <v-checkbox v-model="inv.redeemed"></v-checkbox>
-                              <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small>mdi-delete</v-icon></v-btn>
-                          </v-col>
-                      </v-row>
-                  </div>                    
+              <v-container >
+                  <div v-if="invoice.payments.length > 0">
+                    <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
+                        <v-row>
+                            <v-col cols="3">
+                                <v-text-field label="checkID" v-model="inv.checkID" @focus="$event.target.select()"></v-text-field>
+                            </v-col>
+                            <v-col cols="3">
+                                <v-text-field label="Payment" v-model="inv.payment" @focus="$event.target.select()"></v-text-field>
+                            </v-col>
+                            <v-col cols="4" class="padding-date">
+                              <v-dialog ref="dateDialog" v-model="dateModal" :return-value.sync="inv.date" persistent width="290px">
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field v-model="inv.date" label="תאריך" readonly v-bind="attrs" v-on="on">
+                          </v-text-field>
+                        </template>
+                        <v-date-picker @input="onDateChange" v-model="inv.date" scrollable>
+                          <v-spacer></v-spacer>
+                          <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
+                          <v-btn text color="primary" @click="$refs.dateDialog.save(inv.date)"> OK </v-btn>
+                        </v-date-picker>
+                      </v-dialog>
+                            </v-col>
+                            <v-col cols="2" style="margin-top: 0px; padding-top: 0px;">
+                                <v-checkbox v-model="inv.redeemed"></v-checkbox>
+                                <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small>mdi-delete</v-icon></v-btn>
+                            </v-col>
+                        </v-row>
+                    </div>  
+                  </div>                  
                   <v-btn @click="addPaymentRow" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>					
               </v-container>
           </div>
