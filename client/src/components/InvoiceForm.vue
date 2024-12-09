@@ -24,7 +24,6 @@
                   <v-col cols="6" class="no-padding">
                     <v-file-input
                       v-model="file"
-                      accept="image/*"
                       label="link"
                       v-if="!invoice.link"
                       @change="onFileSelect"
