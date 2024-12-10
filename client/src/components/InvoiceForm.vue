@@ -242,8 +242,10 @@ export default {
               formData.append('file', this.invoice.link);
             } else if (key == 'payments') {
               formData.append(key, JSON.stringify(this.invoice.payments));
-            } else {
-              formData.append(key, this.invoice[key]);
+            } else{
+              if(this.invoice[key]){
+                formData.append(key, this.invoice[key]);
+              }
             }
           }
           
