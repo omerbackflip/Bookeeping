@@ -154,8 +154,8 @@ export default {
         dateModal : false,
         invoiceID: 0,
         companyName: [], // need to fatch refdata
-        projectName: [],
-        supplierName: [],
+        projectName: [], // remark
+        supplierName: [], // remark2
         invoice: [],
         isModalOpen: false, // Controls modal visibility
         iframeSrc: '',      // Dynamically set iframe source
