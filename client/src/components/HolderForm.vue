@@ -12,7 +12,7 @@
               <v-form ref="form">
                 <v-row>
                   <v-col cols="2">
-                    <v-text-field v-model="holder.flatId" label="דירה" @focus="$event.target.select()"></v-text-field>
+                    <v-text-field v-model="holder.flatId" label="דירה" disabled></v-text-field>
                   </v-col>
                   <v-col cols="6">
                     <v-text-field v-model="holder.holderName" label="שם הדייר" @focus="$event.target.select()"></v-text-field>
@@ -120,6 +120,7 @@ export default {
         this.isNewHolder = isNewHolder;
         this.holder = holder 
         this.dialogHolderForm = true;
+        console.log(this.holder)
         return new Promise((resolve) => {
           this.resolve = resolve;
         });

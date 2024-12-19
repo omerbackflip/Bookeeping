@@ -6,6 +6,7 @@
             <span class="text-h5">{{ invoice._id ? "Update" : "Add New" }}</span>
             <v-spacer></v-spacer>
             <v-btn v-show="invoice._id" @click="copyToNew"> Copy </v-btn>
+            <v-btn @click="openModal()">Iframe</v-btn>
           </v-card-title>
           <v-card-text>
             <v-container>
@@ -20,10 +21,13 @@
                   <v-col cols="4">
                     <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                   </v-col>
-                  <v-col cols="5" class="no-padding">
+                  <v-col cols="1">
+                    <v-checkbox v-model="invoice.published"></v-checkbox>
+                  </v-col>
+                  <v-col cols="4">
                     <v-text-field v-model="invoice.link" label="link" @focus="$event.target.select()"></v-text-field>
                   </v-col>
-                  <v-col cols="7" class="no-padding">
+                  <v-col cols="7">
                     <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                   </v-col>
                   <v-col cols="3">
@@ -60,7 +64,7 @@
                   <v-col cols="3">
                     <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
                   </v-col>
-                  <v-col cols="12" class="no-padding hebrew">
+                  <v-col cols="12" class="hebrew">
                     <v-textarea v-model="invoice.remark" label="הערה" auto-grow rows="1" @focus="$event.target.select()"></v-textarea>
                   </v-col>
                 </v-row>
@@ -112,6 +116,12 @@
             <v-icon color="red" @click="dialogInvForm = false">mdi-close-box</v-icon>
           </v-card-actions>
         </v-card>
+        <div v-if="isModalOpen" class="modal">
+          <!-- <div class="modal-content"> -->
+            <button class="close-btn" @click="closeModal">X</button>
+            <iframe :src="iframeSrc" width="400" height="800"></iframe>
+          <!-- </div> -->
+        </div>
       </v-dialog>
 </template>
 
@@ -147,6 +157,8 @@ export default {
         projectName: [],
         supplierName: [],
         invoice: [],
+        isModalOpen: false, // Controls modal visibility
+        iframeSrc: '',      // Dynamically set iframe source
       };
     },
 
@@ -244,6 +256,14 @@ export default {
         this.invoice.payments.splice(index, 1);
       },
 
+      openModal() {
+        this.iframeSrc = 'https://drive.google.com/file/d/1QdtcPrryb7Mpc1cSk3Vbji7QRbLenajd/view'; // Set iframe source
+        this.isModalOpen = true; // Show modal
+      },
+      closeModal() {
+        this.isModalOpen = false; // Hide modal
+        this.iframeSrc = ''; // Clear iframe source
+      }
     },
 
     async mounted(){
@@ -277,5 +297,39 @@ export default {
 .hebrew {
   direction: rtl;
   text-align-last: right;
+}
+
+/* Modal styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  /* width: 200;
+  height: 600; */
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* z-index: 1000; */
+}
+
+/* .modal-content {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  position: relative;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+} */
+
+.close-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: red;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+  border-radius: 5px;
 }
 </style>

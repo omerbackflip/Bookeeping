@@ -19,7 +19,8 @@
           single-expand
           show-expand
           :expanded.sync="expanded"
-          item-key="flatId">
+          item-key="flatId"
+          :sort-by="['flatId']">
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title> Sales - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
@@ -132,7 +133,7 @@ export default {
 				this.holdersList = response.data;
 			}
       this.holdersList.forEach(async (item) => {
-        if(item.holderName) {
+        // if(item.holderName) {
           this.holdersCount += 1
           this.totalSales += item.signPrice
           item.signDate = moment(item.signDate).format('YYYY-MM-DD');
@@ -144,7 +145,7 @@ export default {
             })
             item.payments = payments.data;
           }
-        }
+        // }
       })
       this.isLoading = false
 		},
