@@ -211,13 +211,13 @@
 import Vue from "vue";
 import moment from "moment";
 import excel from "vue-excel-export";
-import apiService from "../services/apiService";
-import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
+import apiService from "@/services/apiService";
+import SpecificServiceEndPoints from "@/services/specificServiceEndPoints";
 import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, 
           TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE, VAT_PERCENTAGE, 
-          loadTable} from "../constants/constants";
+          loadTable} from "@/constants/constants";
 import invoiceForm from "./InvoiceForm.vue"
-import { isMobile } from '../constants/constants';
+import { isMobile } from '@/constants/constants';
 Vue.use(excel);
 
 Vue.filter("formatDate", function (value) {
@@ -595,7 +595,8 @@ export default {
     this.projectName = (await loadTable(2)).map((code) => code.description)
     this.supplierName = (await loadTable(3)).map((code) => code.description)
     this.$root.$on("addNewInvoice", async () => {
-			// this.dialog = true;
+
+			//this.dialog = true;
 			this.invoiceID = 0;
       this.invoice = NEW_INVOICE;
       this.invoice.date = moment(new Date()).format('YYYY-MM-DD')

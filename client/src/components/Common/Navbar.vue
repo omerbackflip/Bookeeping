@@ -82,11 +82,13 @@
 
 
 <script>
-import ImportCSV from '../ImportCSV.vue';
-import { navItems, isMobile, loadTable } from '../../constants/constants';
-import SpecificServiceEndPoints from "../../services/specificServiceEndPoints";
-import { TABLE_MODEL } from "../../constants/constants";
-import apiService from "../../services/apiService";
+import ImportCSV from '@/components/ImportCSV.vue';
+import { navItems, isMobile, loadTable } from '@/constants/constants';
+import SpecificServiceEndPoints from "@/services/specificServiceEndPoints";
+import { checkGoogleStatus } from "@/utils/commonService";
+
+import { TABLE_MODEL } from "@/constants/constants";
+import apiService from "@/services/apiService";
 
 export default {
     components: { ImportCSV },
@@ -182,23 +184,9 @@ export default {
         },
 
         async checkGoogleConnection() {
-            try{
-                const response = await SpecificServiceEndPoints.getGoogleConnectionStatus();
-
-                if(response.data.connected){
-                    if(response.data.username != ''){
-                        this.googleConnectMenuItem = 'Google (' + response.data.username + ')';
-                    }
-                }
-
-                if(!response.data.connected){
-                    this.googleConnectMenuItem = 'Google (Connect)';
-                    window.open(response.data.authUrl, '_blank');
-                }
-
-            }catch (error){
-                console.log(error);
-            }
+             await checkGoogleStatus((menuItem) => {
+                this.googleConnectMenuItem = menuItem;
+            });
         },
 
         async getLastBkup() {

@@ -71,7 +71,7 @@ export const NEW_INVOICE = {
         excelRecID: null,
         year: null,
         payments: [],
-        link: "Here Link111",
+        link: "",
 };
 
 export const HOLDER_HEADERS = [
@@ -97,6 +97,7 @@ export const navItems = [
     {icon: 'widgets', text: 'Supplier Summary', route: '/SupplierSummary'},
     {icon: 'widgets', text: 'Revenues', route: '/RevenueList'},
     {icon: 'widgets', text: 'Forcast Payments', route: '/ForecastPayment'},
+    {icon: 'widgets', text: 'Google Drive', route: '/googleDrive'},
 ];
 
 export const isMobile = () => {

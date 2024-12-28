@@ -5,6 +5,7 @@ const Table = db.tables;
 const Revenue = db.revenues;
 const csv = require('csvtojson')
 const XLSX = require('xlsx');
+const path = require('path');
 var fs = require('fs');
 const { transformCSVData, createExcel } = require("../util/util");
 const { url } = require("../config/db.config");
@@ -351,17 +352,66 @@ exports.uploadInvoicesToGDrive = async (req, res) => {
 	}	
 };
 
+exports.uploadInvoicesToGoogleDrive = async (req, res) => {
+	
+	const file = req.file;
+	if (!req.file) {
+	    return res.status(500).send({ message: "No file uploaded" });
+	}
+
+	const originalFileName = file.originalname; // Original file name
+
+    const newFileName = path.basename(originalFileName, path.extname(originalFileName)) + '.png'; // Add or change to `.pdf`
+    const newFilePath = path.join(file.destination, newFileName); // New file path
+
+    // Rename or copy the file with the new name
+    fs.renameSync(file.path, newFilePath);
+
+	
+	const {group} = req.body;
+
+	let filepath = `${group}`;
+	
+	const auth = googleService.getAuth();
+	const uploadedFile = await googleService.uploadInvoiceToGoogleDrive(auth, newFileName,filepath);
+	fs.unlinkSync(newFilePath);
+	if (!uploadedFile || !uploadedFile.id) {
+	    return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
+	}
+
+	res.send({success: true , uploadedFile:uploadedFile});
+}
+
 exports.googleConnectionStatus = async (req, res) => {
 	try{
 		let auth = googleService.getAuth();
 		
 		if(auth instanceof google.auth.OAuth2){
-
+			
 			const userInfo = await googleService.getUser(auth);
-			const username = (userInfo != false ? userInfo.name : '');
+			const username = (userInfo != false ? userInfo.name : null);
+			let token = JSON.parse(fs.readFileSync(ServerApp.configFolderPath + 'token.json'));
+			const { access_token,refresh_token } = token;
+			
+			//if(!username){
+				 await googleService.refreshAccessToken(auth,refresh_token);
+				 token = JSON.parse(fs.readFileSync(ServerApp.configFolderPath + 'token.json'));
+			//}
+
+			const credentials = JSON.parse(fs.readFileSync(ServerApp.configFolderPath + 'google-credentials.json'));
+			
+  
+  			const { client_secret, client_id,developer_key } = credentials.web;
+  			
+
 			res.send({
 				connected: true,
-				username: username
+				username: username,
+				client_secret:client_secret,
+				client_id:client_id,
+				developerKey:developer_key,
+				access_token:access_token,
+				folderId:ServerApp.google.storeInvoiceFolderIds
 			});
 
 		}else{
@@ -392,7 +442,7 @@ exports.googleAuthHandler = async (req, res) => {
 			connected: true,
 			username: 't2p demo'
 		});
-
+		
 	} catch (error) {
 		console.log(error)
 		res.status(500).send({

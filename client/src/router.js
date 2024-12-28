@@ -52,5 +52,11 @@ export default new Router({
       name: "forecastPayment",
       component: () => import("./components/ForecastPayment")
     },
+    {
+      path: "/googleDrive",
+      alias: "/googleDrive",
+      name: "invoicesList",
+      component: () => import("./components/GoogleDrive")
+    },
   ]
 });

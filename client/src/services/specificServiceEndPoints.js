@@ -24,6 +24,15 @@ class SpecificServiceEndPoints {
     });
   }
 
+  async uploadInvoiceToGoogleDrive(formData) {
+    
+    return await axios.post(`${baseUrl}/specific/upload-to-google-drive`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
+  }
+
   async saveRevenuesBulk(bulk) {
     var formData = new FormData(); // FormData is being used because need to transfer file to server
     formData.append("file", bulk);
