@@ -89,8 +89,13 @@ export default {
   methods: {
     openCamera() {
       this.dialogCamInternal = true;
+      
       navigator.mediaDevices
-        .getUserMedia({ video: true })
+        .getUserMedia({
+          video: {
+            facingMode: "environment"
+          },
+        })
         .then((mediaStream) => {
           this.$refs.video.srcObject = mediaStream;
           this.$refs.video.play();
@@ -100,6 +105,7 @@ export default {
           console.error("Error accessing webcam:", error);
         });
     },
+
     closeCam() {
       if (this.mediaStream) {
         this.mediaStream.getTracks().forEach((track) => track.stop());
