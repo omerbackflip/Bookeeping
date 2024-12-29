@@ -436,12 +436,8 @@ exports.googleAuthHandler = async (req, res) => {
 		const code = req.query.code;
 
 		googleService.getToken(oAuth2Client, code);
-
-		res.send({
-			code: code,
-			connected: true,
-			username: 't2p demo'
-		});
+		
+		res.redirect(`${process.env.CLIENT_URL}?success=true`);
 		
 	} catch (error) {
 		console.log(error)

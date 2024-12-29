@@ -21,7 +21,7 @@ export async function checkGoogleStatus(setMenuItemCallback = null) {
         } else {
             if(setMenuItemCallback != null){
               setMenuItemCallback('Google (Connect)');
-              window.open(response.data.authUrl, '_blank');
+              window.open(response.data.authUrl, '_self');
             }
         }
 
