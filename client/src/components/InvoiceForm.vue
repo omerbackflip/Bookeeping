@@ -371,8 +371,6 @@ export default {
         if (data.action === google.picker.Action.PICKED) {
           const fileId = data.docs[0].id;
           this.invoice.link = fileId;
-          // const group  = this.invoice.group;
-          // this.invoice.group = group;
         }
       },
     },

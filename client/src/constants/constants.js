@@ -71,7 +71,7 @@ export const NEW_INVOICE = {
         excelRecID: null,
         year: null,
         payments: [],
-        link: "",
+        link: null,
 };
 
 export const HOLDER_HEADERS = [
