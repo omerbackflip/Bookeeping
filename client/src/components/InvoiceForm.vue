@@ -367,26 +367,12 @@ export default {
 
         picker.setVisible(true);
       },
-
       pickerCallback(data) {
         if (data.action === google.picker.Action.PICKED) {
           const fileId = data.docs[0].id;
-          const token = localStorage.getItem('googleAccessToken');
-
-          // Construct the file URL
           const fileUrl = fileId;
-
-          // Save the file URL to your database
-          this.saveFileUrlToDatabase(fileUrl);
-
-          // Update the UI with the file URL
-          this.fileUrl = fileUrl;
+          this.invoice.link = fileUrl;
         }
-      },
-      async saveFileUrlToDatabase(fileUrl) {
-
-        this.invoice.link = fileUrl;
-        this.dialogInvFile = false;
       },
     },
 
