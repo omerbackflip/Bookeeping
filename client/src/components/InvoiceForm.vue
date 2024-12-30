@@ -27,18 +27,18 @@
                     <v-col cols="6" class="no-padding">
                       <label>Invoice</label>
                       <div v-if="!invoice.link" class="invoice-box">
-                      <v-text-field disabled  placeholder="Upload Invoice"  >
-                        <template v-slot:prepend>
-                            <v-icon small>mdi-link-variant</v-icon>
-                        </template>
-                          
-                      </v-text-field>
-                      <v-btn small @click="openCameraDialog" class="ml-1">
-                        <v-icon   small >mdi-camera</v-icon>
-                      </v-btn>
-                      <v-btn small @click="loadPickerApi()" class="ml-1">
-                        <v-icon  small>mdi-google-drive</v-icon>
-                      </v-btn>
+                        <v-text-field disabled  placeholder="Upload Invoice"  >
+                          <template v-slot:prepend>
+                              <v-icon small>mdi-link-variant</v-icon>
+                          </template>
+                            
+                        </v-text-field>
+                        <v-btn small @click="openCameraDialog" class="ml-1">
+                          <v-icon   small >mdi-camera</v-icon>
+                        </v-btn>
+                        <v-btn small @click="loadPickerApi()" class="ml-1">
+                          <v-icon  small>mdi-google-drive</v-icon>
+                        </v-btn>
                       </div>
                       <span v-else>
                         <v-text-field
@@ -370,8 +370,7 @@ export default {
       pickerCallback(data) {
         if (data.action === google.picker.Action.PICKED) {
           const fileId = data.docs[0].id;
-          const fileUrl = fileId;
-          this.invoice.link = fileUrl;
+          this.invoice.link = fileId;
         }
       },
     },
