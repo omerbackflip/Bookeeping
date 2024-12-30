@@ -371,10 +371,12 @@ export default {
         if (data.action === google.picker.Action.PICKED) {
           const fileId = data.docs[0].id;
           this.invoice.link = fileId;
+          /*const group = this.invoice.group;
+          this.invoice.group = 22;
+          this.invoice.group = group;*/
         }
       },
     },
-
     async mounted(){
       this.companyName = (await loadTable(1)).map((code) => code.description)
       this.projectName = (await loadTable(2)).map((code) => code.description)
