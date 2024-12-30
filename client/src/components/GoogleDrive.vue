@@ -1,6 +1,6 @@
 <template>
   <div>
-    <!-- Add your template content here -->
+    <span @click="openDrive">Open Drive</span>
   </div>
 </template>
 
@@ -92,7 +92,9 @@ export default {
         .setCallback(this.pickerCallback)
         .build();
 
-      picker.setVisible(true);
+      
+        picker.setVisible(true);
+      
     },
 
     pickerCallback(data) {
@@ -103,11 +105,7 @@ export default {
         // Construct the file URL
         const fileUrl = `https://drive.google.com/file/d/${fileId}/view`;
 
-        // Save the file URL to your database
-        this.saveFileUrlToDatabase(fileUrl);
-
-        // Update the UI with the file URL
-        this.fileUrl = fileUrl;
+        
       }
     },
   },

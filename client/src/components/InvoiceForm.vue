@@ -339,7 +339,6 @@ export default {
       openDrive() {
         this.createPicker();  // Open the picker directly
       },
-
       async createPicker() {
         const token = this.token;  // Use the saved access token directly
 
@@ -365,7 +364,9 @@ export default {
                           .setCallback(this.pickerCallback)
                           .build();
 
+        
         picker.setVisible(true);
+        
       },
       pickerCallback(data) {
         if (data.action === google.picker.Action.PICKED) {

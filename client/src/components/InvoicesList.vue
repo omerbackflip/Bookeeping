@@ -226,7 +226,7 @@ Vue.filter("formatDate", function (value) {
 		return moment(String(value)).format("DD/MM/YYYY");
 	}
 });
-
+let gapi = window.gapi;
 export default {
 	name: "invoicesList",
   props: ['showSelect'],
@@ -298,6 +298,9 @@ export default {
       header: '',
       notPayedList: false,
       pending: '',
+      folderId:localStorage.getItem('folderId'),
+      token:localStorage.getItem('googleAccessToken'),
+      developerKey:localStorage.getItem('developerKey')
 		};
 	},
 
@@ -587,6 +590,44 @@ export default {
       }
       this.notPayedList = !this.notPayedList
     },
+    loadPickerApi() {
+      if (gapi) {
+        gapi.load("picker", { callback: this.createPicker });
+      } else {
+        console.error("Google API not initialized");
+      }
+    },
+    openDrive() {
+      this.createPicker();  // Open the picker directly
+    },
+    async createPicker() {
+      const token = this.token;  // Use the saved access token directly
+
+      if (!token) {
+        console.error('Access token is missing!');
+        return;
+      }
+      
+      const response = await checkGoogleStatus();
+      console.log("connecting....");
+      if (response.data.connected) {
+        this.token = response.data.access_token;
+      }
+
+      const picker = new google.picker.PickerBuilder()
+                        .addView(
+                          new google.picker.DocsView(google.picker.ViewId.DRIVE)
+                            .setParent(this.folderId)
+                            .setIncludeFolders(true)
+                        )
+                        .setOAuthToken(token)
+                        .setDeveloperKey(this.developerKey)
+                        .build();
+
+      
+     // picker.setVisible(true);
+      
+    },
 	},
 
 	async mounted() {
@@ -628,6 +669,7 @@ export default {
     this.$root.$on("clearExcelRecID", () => {
       this.batchClearExcelRecID();
     });
+    this.createPicker();
 	},
 	
   watch: {
