@@ -199,47 +199,41 @@ exports.uploadInvoiceToGoogleDrive = async (oAuth2Client, filename, folderPath =
 
 async function findOrCreateFolder(folderName, parentFolderId, drive) {
   try {
-    // Trim folderName to avoid issues with leading/trailing spaces
     const trimmedFolderName = folderName.trim();
 
-    // Search query for the folder
-    const searchQuery = `
-      ${parentFolderId ? `'${parentFolderId}' in parents and ` : ''}
-      name = '${trimmedFolderName}' 
-      and mimeType = 'application/vnd.google-apps.folder' 
-      and trashed = false`;
+    // Construct the search query
+    const searchQuery = `${parentFolderId ? `'${parentFolderId}' in parents and ` : ''}name = '${trimmedFolderName}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false`;
 
+    // Search for the folder
     const response = await drive.files.list({
       q: searchQuery,
       fields: 'files(id, name)',
       spaces: 'drive',
     });
-    
+
     if (response.data.files.length > 0) {
       // Folder exists, return its ID
       console.log(`Folder exists: ${trimmedFolderName} (ID: ${response.data.files[0].id})`);
       return response.data.files[0].id;
-    } else {
-
-      //return null;
-      //We will do later
-      // Folder doesn't exist, create it
-      console.log(`Folder not found. Creating folder: ${trimmedFolderName}`);
-      const folderMetadata = {
-        name: trimmedFolderName,
-        mimeType: 'application/vnd.google-apps.folder',
-        ...(parentFolderId && { parents: [parentFolderId] }), // Add parents only if parentFolderId is defined
-      };
-
-      const folder = await drive.files.create({
-        resource: folderMetadata,
-        fields: 'id, name',
-        supportsAllDrives: true,
-      });
-
-     // console.log(`Folder created: ${trimmedFolderName} (ID: ${folder.data.id})`);
-      return folder.data.id;
     }
+
+    // Folder doesn't exist, create it
+    console.log(`Folder not found. Creating folder: ${trimmedFolderName}`);
+    const folderMetadata = {
+      name: trimmedFolderName,
+      mimeType: 'application/vnd.google-apps.folder',
+      ...(parentFolderId && { parents: [parentFolderId] }),
+    };
+
+    const folder = await drive.files.create({
+      resource: folderMetadata,
+      fields: 'id, name',
+      supportsAllDrives: true,
+    });
+
+    console.log(`Folder created: ${trimmedFolderName} (ID: ${folder.data.id})`);
+    return folder.data.id;
+
   } catch (error) {
     console.error(`Error finding or creating folder '${folderName}':`, error.message);
     throw error;
