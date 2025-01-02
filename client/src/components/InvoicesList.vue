@@ -95,9 +95,10 @@
               </td>
               </div>
               <div>
-              <!-- <td @click.stop> -->
-                <span v-if="isMobile()" style="margin-left: 0.7rem; font-size: small">{{ item.group }}</span>
-              <!-- </td> -->
+              <td @click.stop>
+                <span v-if="isMobile()" style="margin-left: 0.7rem; font-size: small"
+                :class="item.link ? 'summary' : ''" @click.stop="item.link ? clickToView(item.link) : null">{{ item.invoiceId }}</span>
+              </td>
             </div>
           </template>
           <template v-slot:[`item.excelRecID`]="{ item }">
@@ -120,6 +121,11 @@
               <v-checkbox v-model="item.published" @click="togglePublished(item)"></v-checkbox>
             </td>
           </template>
+          <template v-slot:[`item.invoiceId`]="{ item }">
+          <td>
+            <span :class="item.link ? 'summary' : ''" @click.stop="item.link ? clickToView(item.link) : null">{{ item.invoiceId }}</span>
+          </td>
+        </template>
         </v-data-table>
         
         <v-btn v-if="$route.params.project || $route.params.supplier" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
@@ -201,6 +207,9 @@
           </v-card-text>
         </v-card>
       </v-dialog>
+
+      <modal-dialog ref="modalDialog"/>
+
     </v-layout>
   </div>
 </template>
@@ -219,6 +228,7 @@ import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS,
 import invoiceForm from "./InvoiceForm.vue"
 import { isMobile } from '@/constants/constants';
 Vue.use(excel);
+import modalDialog from './Common/InvoiceModal.vue';
 
 Vue.filter("formatDate", function (value) {
 	if (value) {
@@ -230,7 +240,7 @@ let gapi = window.gapi;
 export default {
 	name: "invoicesList",
   props: ['showSelect'],
-	components: { invoiceForm },
+	components: { invoiceForm, modalDialog },
 	data() {
 		return {
       isMobile,
@@ -590,44 +600,52 @@ export default {
       }
       this.notPayedList = !this.notPayedList
     },
-    loadPickerApi() {
-      if (gapi) {
-        gapi.load("picker", { callback: this.createPicker });
-      } else {
-        console.error("Google API not initialized");
-      }
-    },
-    openDrive() {
-      this.createPicker();  // Open the picker directly
-    },
-    async createPicker() {
-      const token = this.token;  // Use the saved access token directly
 
-      if (!token) {
-        console.error('Access token is missing!');
-        return;
-      }
-      
-      const response = await checkGoogleStatus();
-      console.log("connecting....");
-      if (response.data.connected) {
-        this.token = response.data.access_token;
-      }
-
-      const picker = new google.picker.PickerBuilder()
-                        .addView(
-                          new google.picker.DocsView(google.picker.ViewId.DRIVE)
-                            .setParent(this.folderId)
-                            .setIncludeFolders(true)
-                        )
-                        .setOAuthToken(token)
-                        .setDeveloperKey(this.developerKey)
-                        .build();
-
-      
-     // picker.setVisible(true);
-      
+    async clickToView(link) {
+      var fileview = `https://docs.google.com/file/d/${link}/preview?usp=drivesdk`
+      await this.$refs.modalDialog.open(fileview);
     },
+
+    // loadPickerApi() {
+    //   if (gapi) {
+    //     gapi.load("picker", { callback: this.createPicker });
+    //   } else {
+    //     console.error("Google API not initialized");
+    //   }
+    // },
+
+    // openDrive() {
+    //   this.createPicker();  // Open the picker directly
+    // },
+
+    // async createPicker() {
+    //   const token = this.token;  // Use the saved access token directly
+
+    //   if (!token) {
+    //     console.error('Access token is missing!');
+    //     return;
+    //   }
+      
+    //   const response = await checkGoogleStatus();
+    //   console.log("connecting....");
+    //   if (response.data.connected) {
+    //     this.token = response.data.access_token;
+    //   }
+
+    //   const picker = new google.picker.PickerBuilder()
+    //                     .addView(
+    //                       new google.picker.DocsView(google.picker.ViewId.DRIVE)
+    //                         .setParent(this.folderId)
+    //                         .setIncludeFolders(true)
+    //                     )
+    //                     .setOAuthToken(token)
+    //                     .setDeveloperKey(this.developerKey)
+    //                     .build();
+
+      
+    //  // picker.setVisible(true);
+      
+    // },
 	},
 
 	async mounted() {
@@ -636,8 +654,6 @@ export default {
     this.projectName = (await loadTable(2)).map((code) => code.description)
     this.supplierName = (await loadTable(3)).map((code) => code.description)
     this.$root.$on("addNewInvoice", async () => {
-
-			//this.dialog = true;
 			this.invoiceID = 0;
       this.invoice = NEW_INVOICE;
       this.invoice.date = moment(new Date()).format('YYYY-MM-DD')
@@ -669,7 +685,8 @@ export default {
     this.$root.$on("clearExcelRecID", () => {
       this.batchClearExcelRecID();
     });
-    this.createPicker();
+
+    // this.createPicker();
 	},
 	
   watch: {

@@ -5,8 +5,10 @@
             <v-card-title>
               <span class="text-h5">{{ invoice._id ? "Update" : "Add New" }}</span>
               <v-spacer></v-spacer>
+              <v-checkbox v-model="invoice.published" label="נפרע"></v-checkbox>
+              <v-spacer></v-spacer>
               <v-btn v-show="invoice._id" @click="copyToNew"> Copy </v-btn>
-              <v-btn @click="openModal()">Iframe</v-btn>
+              <!-- <v-btn @click="openModal()">Iframe</v-btn> -->
             </v-card-title>
             <v-card-text>
               <v-container>
@@ -21,32 +23,23 @@
                     <v-col cols="4">
                       <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                     </v-col>
-                    <v-col cols="1">
-                      <v-checkbox v-model="invoice.published"></v-checkbox>
-                    </v-col>
                     <v-col cols="6" class="no-padding">
                       <label>Invoice</label>
                       <div v-if="!invoice.link" class="invoice-box">
-                        <v-text-field disabled  placeholder="Upload Invoice"  >
+                        <v-text-field disabled  placeholder="Upload Invoice">
                           <template v-slot:prepend>
-                              <v-icon small>mdi-link-variant</v-icon>
+                              <v-icon x-small>mdi-link-variant</v-icon>
                           </template>
-                            
                         </v-text-field>
-                        <v-btn small @click="openCameraDialog" class="ml-1">
-                          <v-icon   small >mdi-camera</v-icon>
+                        <v-btn x-small @click="openCameraDialog" class="ml-1">
+                          <v-icon x-small>mdi-camera</v-icon>
                         </v-btn>
-                        <v-btn small @click="loadPickerApi()" class="ml-1">
-                          <v-icon  small>mdi-google-drive</v-icon>
+                        <v-btn x-small @click="loadPickerApi()" class="ml-1">
+                          <v-icon x-small>mdi-google-drive</v-icon>
                         </v-btn>
                       </div>
                       <span v-else>
-                        <v-text-field
-                          v-model="invoice.link"
-                          label="Link"
-                          @focus="$event.target.select()"
-                          :disabled="false"  
-                        >
+                        <v-text-field v-model="invoice.link" label="Link" @focus="$event.target.select()" :disabled="false" readonly>
                           <template v-slot:append>
                             <v-icon @click="clickToView(invoice.link)">mdi-eye-outline</v-icon>
                             <v-icon @click="deleteLink">mdi-delete</v-icon>
@@ -57,7 +50,7 @@
                         </v-text-field>
                       </span>
                     </v-col>
-                    <v-col cols="5">
+                    <v-col cols="6">
                       <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                     </v-col>
                     <v-col cols="3">
@@ -146,12 +139,14 @@
               <v-icon color="red" @click="dialogInvForm = false">mdi-close-box</v-icon>
             </v-card-actions>
           </v-card>
-          <div v-if="isModalOpen" class="modal">
-            <!-- <div class="modal-content"> -->
+          <!-- <div v-if="isModalOpen" class="modal">
+            <div class="modal-content">
               <button class="close-btn" @click="closeModal">X</button>
               <iframe :src="iframeSrc" width="800" height="800"></iframe>
-            <!-- </div> -->
-          </div>
+            </div>
+          </div> -->
+          <modal-dialog ref="modalDialog"/>
+
         </v-dialog>
         <CameraForm
           :dialogCam.sync="dialogCam"
@@ -169,6 +164,7 @@ import GooglePicker from 'google-drive-picker';
 import CameraForm from "./camForm.vue";
 import Vue from "vue";
 import moment from "moment";
+import modalDialog from './Common/InvoiceModal.vue';
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -179,9 +175,7 @@ Vue.filter("formatDate", function (value) {
 let gapi = window.gapi;
 export default {
     name: "invoice-form",
-    components:{
-      CameraForm
-    },
+    components:{ CameraForm, modalDialog },
     data() {
       return {
         loadTable,
@@ -204,7 +198,7 @@ export default {
         projectName: [], // remark
         supplierName: [], 
         invoice: [],
-        isModalOpen: false, 
+        // isModalOpen: false, 
         iframeSrc: '', 
         folderId:localStorage.getItem('folderId'),
         token:localStorage.getItem('googleAccessToken'),
@@ -216,19 +210,24 @@ export default {
       openCameraDialog(){
         this.dialogCam = true;
       },
+
       async copyToClipboard(link) {
         var fileview = `https://docs.google.com/file/d/${link}/preview?usp=drivesdk`
           await navigator.clipboard.writeText(fileview);
       },
-      clickToView(link) {
-          var fileview = `https://docs.google.com/file/d/${link}/preview?usp=drivesdk`
-          this.filelink = fileview;    
-          this.iframeSrc = fileview;
-          this.isModalOpen = true;    
+
+      async clickToView(link) {
+        var fileview = `https://docs.google.com/file/d/${link}/preview?usp=drivesdk`
+        await this.$refs.modalDialog.open(fileview);
+        // this.filelink = fileview;    
+        // this.iframeSrc = fileview;
+        // this.isModalOpen = true;    
       },
+
       deleteLink(){
           this.invoice.link = null;
       },
+
       open(invoice, isNewInvoice) {
         this.isNewInvoice = isNewInvoice;
         this.invoice = invoice 
@@ -241,6 +240,7 @@ export default {
           this.resolve = resolve;
         });
       },
+
       copyToNew() {
         this.isNewInvoice = true
         this.invoice._id = null
@@ -321,14 +321,16 @@ export default {
         this.invoice.payments.splice(index, 1);
       },
 
-      openModal() {
-        this.iframeSrc = this.invoice.link; // Set iframe source
-        this.isModalOpen = true; // Show modal
-      },
-      closeModal() {
-        this.isModalOpen = false; // Hide modal
-        this.iframeSrc = ''; // Clear iframe source
-      },
+      // openModal() {
+      //   this.iframeSrc = this.invoice.link; // Set iframe source
+      //   this.isModalOpen = true; // Show modal
+      // },
+
+      // closeModal() {
+      //   this.isModalOpen = false; // Hide modal
+      //   this.iframeSrc = ''; // Clear iframe source
+      // },
+
       loadPickerApi() {
         if (gapi) {
           gapi.load("picker", { callback: this.createPicker });
@@ -336,23 +338,22 @@ export default {
           console.error("Google API not initialized");
         }
       },
-      openDrive() {
-        this.createPicker();  // Open the picker directly
-      },
+
+      // openDrive() {
+      //   this.createPicker();  // Open the picker directly
+      // },
+
       async createPicker() {
         const token = this.token;  // Use the saved access token directly
-
         if (!token) {
           console.error('Access token is missing!');
           return;
         }
-        
         const response = await checkGoogleStatus();
         console.log("connecting....");
         if (response.data.connected) {
           this.token = response.data.access_token;
         }
-
         const picker = new google.picker.PickerBuilder()
                           .addView(
                             new google.picker.DocsView(google.picker.ViewId.DRIVE)
@@ -363,11 +364,9 @@ export default {
                           .setDeveloperKey(this.developerKey)
                           .setCallback(this.pickerCallback)
                           .build();
-
-        
         picker.setVisible(true);
-        
       },
+
       pickerCallback(data) {
         if (data.action === google.picker.Action.PICKED) {
           const fileId = data.docs[0].id;
@@ -378,6 +377,7 @@ export default {
         }
       },
     },
+    
     async mounted(){
       this.companyName = (await loadTable(1)).map((code) => code.description)
       this.projectName = (await loadTable(2)).map((code) => code.description)
@@ -425,13 +425,13 @@ export default {
   /* z-index: 1000; */
 }
 
-/* .modal-content {
+.modal-content {
   background: #fff;
   padding: 20px;
   border-radius: 10px;
   position: relative;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-} */
+}
 
 .close-btn {
   position: absolute;
