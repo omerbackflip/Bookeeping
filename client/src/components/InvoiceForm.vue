@@ -23,8 +23,29 @@
                     <v-col cols="4">
                       <v-combobox v-model="invoice.supplier" :items="supplierName" label="ספק" dense></v-combobox>
                     </v-col>
+                    <v-col cols="3">
+                      <v-text-field v-model="invoice.group" label="קובץ" required @focus="$event.target.select()"></v-text-field>
+                    </v-col>
+                    <v-col cols="3">
+                      <v-dialog ref="dateDialog" v-model="dateModal" :return-value.sync="invoice.date" persistent width="290px">
+                        <template v-slot:activator="{ on, attrs }">
+                          <v-text-field v-model="invoice.date" label="תאריך" readonly v-bind="attrs" v-on="on">
+                          </v-text-field>
+                        </template>
+                        <v-date-picker @input="onDateChange" v-model="invoice.date" scrollable>
+                          <v-spacer></v-spacer>
+                          <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
+                          <v-btn text color="primary" @click="$refs.dateDialog.save(invoice.date)"> OK </v-btn>
+                        </v-date-picker>
+                      </v-dialog>
+                    </v-col>
+                    <v-col cols="3">
+                      <v-text-field v-model="invoice.year" label="שנה" @focus="$event.target.select()"></v-text-field>
+                    </v-col>
+                    <v-col cols="3">
+                      <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
+                    </v-col>
                     <v-col cols="6" class="no-padding">
-                      <label>Invoice</label>
                       <div v-if="!invoice.link" class="invoice-box">
                         <v-text-field disabled  placeholder="Upload Invoice">
                           <template v-slot:prepend>
@@ -64,28 +85,6 @@
                     </v-col>
                     <v-col cols="3">
                       <v-text-field v-model="invoice.invoiceId" label="חשבונית" @focus="$event.target.select()"></v-text-field>
-                    </v-col>
-                    <v-col cols="3">
-                      <v-text-field v-model="invoice.group" label="קובץ" required @focus="$event.target.select()"></v-text-field>
-                    </v-col>
-                    <v-col cols="3">
-                      <v-dialog ref="dateDialog" v-model="dateModal" :return-value.sync="invoice.date" persistent width="290px">
-                        <template v-slot:activator="{ on, attrs }">
-                          <v-text-field v-model="invoice.date" label="תאריך" readonly v-bind="attrs" v-on="on">
-                          </v-text-field>
-                        </template>
-                        <v-date-picker @input="onDateChange" v-model="invoice.date" scrollable>
-                          <v-spacer></v-spacer>
-                          <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
-                          <v-btn text color="primary" @click="$refs.dateDialog.save(invoice.date)"> OK </v-btn>
-                        </v-date-picker>
-                      </v-dialog>
-                    </v-col>
-                    <v-col cols="3">
-                      <v-text-field v-model="invoice.year" label="שנה" @focus="$event.target.select()"></v-text-field>
-                    </v-col>
-                    <v-col cols="3">
-                      <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
                     </v-col>
                     <v-col cols="12" class="hebrew">
                       <v-textarea v-model="invoice.remark" label="הערה" auto-grow rows="1" @focus="$event.target.select()"></v-textarea>
@@ -235,6 +234,7 @@ export default {
         this.invoice.payments.map((item) => {
           item.date = moment(item.date).format('YYYY-MM-DD')
         })
+        console.log("year", this.invoice.year)
         this.dialogInvForm = true;
         return new Promise((resolve) => {
           this.resolve = resolve;
@@ -282,27 +282,33 @@ export default {
       },
 
       onAmountChange() {
-        let { amount } = this.invoice;
-        if(amount && amount !== 0) {
-          this.invoice.vat = ((parseFloat(amount) * VAT_PERCENTAGE)/100)
-          this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
-        } else {
-          this.invoice.amount = 0;
-          this.invoice.vat = 0;
-          this.invoice.total = 0;
-        }
+        if (this.invoice.year) {
+          let vat = this.invoice.year >= 2025 ? 18 : 17
+          let { amount } = this.invoice;
+          if(amount && amount !== 0) {
+            this.invoice.vat = ((parseFloat(amount) * vat)/100)
+            this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
+          } else {
+            this.invoice.amount = 0;
+            this.invoice.vat = 0;
+            this.invoice.total = 0;
+          }
+        } else window.alert("Invoice Year is missing")
       },
 
       onTotalChange() {
-        let { total } = this.invoice;
-        if(total && total !== 0) {
-          this.invoice.amount = (parseFloat(total)/(1+VAT_PERCENTAGE/100)).toFixed(0);
-          this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
-        } else {
-          this.invoice.amount = 0;
-          this.invoice.vat = 0;
-          this.invoice.total = 0;
-        }
+        if (this.invoice.year) {
+          let vat = this.invoice.year >= 2025 ? 18 : 17
+          let { total } = this.invoice;
+          if(total && total !== 0) {
+            this.invoice.amount = (parseFloat(total)/(1+vat/100)).toFixed(0);
+            this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
+          } else {
+            this.invoice.amount = 0;
+            this.invoice.vat = 0;
+            this.invoice.total = 0;
+          }
+        } else window.alert("Invoice Year is missing")
       },
 
       addPaymentRow() {
@@ -333,7 +339,7 @@ export default {
 
       loadPickerApi() {
         if (gapi) {
-          gapi.load("picker", { callback: this.createPicker });
+          gapi.load('picker', { 'callback': this.createPicker });
         } else {
           console.error("Google API not initialized");
         }

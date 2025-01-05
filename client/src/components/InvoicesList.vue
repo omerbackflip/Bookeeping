@@ -511,37 +511,37 @@ export default {
 			return classes;
 		},
 
-    addPaymentRow() {
-			this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
-		},
+    // addPaymentRow() {
+		// 	this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
+		// },
 
-    onAmountChange() {
-      let { amount } = this.invoice;
-      if(amount && amount >= 0) {
-          this.invoice.vat = ((parseFloat(amount) * VAT_PERCENTAGE)/100)
-          this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
-      } else {
-          this.invoice.amount = 0;
-          this.invoice.vat = 0;
-          this.invoice.total = 0;
-      }
-    },
+    // onAmountChange() {
+    //   let { amount } = this.invoice;
+    //   if(amount && amount >= 0) {
+    //       this.invoice.vat = ((parseFloat(amount) * VAT_PERCENTAGE)/100)
+    //       this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
+    //   } else {
+    //       this.invoice.amount = 0;
+    //       this.invoice.vat = 0;
+    //       this.invoice.total = 0;
+    //   }
+    // },
 
-    onTotalChange() {
-      let { total } = this.invoice;
-      if(total && total >= 0) {
-          this.invoice.amount = (parseFloat(total)/(1+VAT_PERCENTAGE/100)).toFixed(0);
-          this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
-      } else {
-          this.invoice.amount = 0;
-          this.invoice.vat = 0;
-          this.invoice.total = 0;
-      }
-    },
+    // onTotalChange() {
+    //   let { total } = this.invoice;
+    //   if(total && total >= 0) {
+    //       this.invoice.amount = (parseFloat(total)/(1+VAT_PERCENTAGE/100)).toFixed(0);
+    //       this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
+    //   } else {
+    //       this.invoice.amount = 0;
+    //       this.invoice.vat = 0;
+    //       this.invoice.total = 0;
+    //   }
+    // },
 
-    onDateChange() {
-      this.invoice.year = new Date((this.invoice.date)).getFullYear();
-    },
+    // onDateChange() {
+    //   this.invoice.year = new Date((this.invoice.date)).getFullYear();
+    // },
 
     selectRow() {
       // this.selected[0] ? this.$emit('lookForMatch', this.selected[0]) : ''
