@@ -71,7 +71,8 @@ export const NEW_INVOICE = {
         excelRecID: null,
         year: null,
         payments: [],
-        link: null,
+        GDFileId: null,
+        GDFileName: null,
 };
 
 export const HOLDER_HEADERS = [

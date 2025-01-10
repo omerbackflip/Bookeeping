@@ -45,33 +45,35 @@
                     <v-col cols="3">
                       <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
                     </v-col>
-                    <v-col cols="6" class="no-padding">
-                      <div v-if="!invoice.link" class="invoice-box">
-                        <v-text-field disabled  placeholder="Upload Invoice">
-                          <template v-slot:prepend>
-                              <v-icon x-small>mdi-link-variant</v-icon>
-                          </template>
+                    <v-col cols="4" class="no-padding">
+                      <div v-if="invoice.GDFileId" class="invoice-box">
+                        <v-text-field v-model="invoice.GDFileName" :disabled="false" readonly>
+                          <!-- <template v-slot:prepend>
+                            <v-icon @click="copyToClipboard(invoice.GDFileId)" x-small>mdi-content-copy</v-icon>
+                          </template> -->
                         </v-text-field>
-                        <v-btn x-small @click="openCameraDialog" class="ml-1">
-                          <v-icon x-small>mdi-camera</v-icon>
-                        </v-btn>
-                        <v-btn x-small @click="loadPickerApi()" class="ml-1">
-                          <v-icon x-small>mdi-google-drive</v-icon>
-                        </v-btn>
+                        <v-col>
+                          <v-btn x-small @click="clickToView(invoice.GDFileId)" class="ml-1">
+                            <v-icon x-small>mdi-eye-outline</v-icon>
+                          </v-btn>
+                          <v-btn x-small @click="deleteLink" class="ml-1">
+                            <v-icon x-small>mdi-delete</v-icon>
+                          </v-btn>
+                        </v-col>
                       </div>
-                      <span v-else>
-                        <v-text-field v-model="invoice.link" label="Link" @focus="$event.target.select()" :disabled="false" readonly>
-                          <template v-slot:append>
-                            <v-icon @click="clickToView(invoice.link)">mdi-eye-outline</v-icon>
-                            <v-icon @click="deleteLink">mdi-delete</v-icon>
-                          </template>
-                          <template v-slot:prepend>
-                            <v-icon @click="copyToClipboard(invoice.link)">mdi-content-copy</v-icon>
-                          </template>
-                        </v-text-field>
-                      </span>
+                      <div v-else class="invoice-box">
+                        <v-text-field disabled placeholder="Upload Invoice"></v-text-field>
+                        <v-col>
+                          <v-btn x-small @click="openCameraDialog" class="ml-1">
+                            <v-icon x-small>mdi-camera</v-icon>
+                          </v-btn>
+                          <v-btn x-small @click="loadPickerApi()" class="ml-1">
+                            <v-icon x-small>mdi-google-drive</v-icon>
+                          </v-btn>
+                        </v-col>
+                      </div>
                     </v-col>
-                    <v-col cols="6">
+                    <v-col cols="8">
                       <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                     </v-col>
                     <v-col cols="3">
@@ -94,37 +96,37 @@
               </v-container>
             </v-card-text>
             <div class="payments-wrapper">
-                <h6>Payments</h6>
-                <v-container>
-                    <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
-                        <v-row>
-                            <v-col cols="3">
-                                <v-text-field label="checkID" v-model="inv.checkID" @focus="$event.target.select()"></v-text-field>
-                            </v-col>
-                            <v-col cols="3">
-                                <v-text-field label="Payment" v-model="inv.payment" @focus="$event.target.select()"></v-text-field>
-                            </v-col>
-                            <v-col cols="4" class="padding-date">
-                              <v-dialog ref="dateDialog" v-model="dateModal" :return-value.sync="inv.date" persistent width="290px">
+              <h6>Payments</h6>
+              <v-container>
+                <div v-for="(inv, i) in invoice.payments" :key="i" class="text-fields-row">
+                  <v-row>
+                    <v-col cols="3">
+                      <v-text-field label="checkID" v-model="inv.checkID" @focus="$event.target.select()"></v-text-field>
+                    </v-col>
+                    <v-col cols="3">
+                      <v-text-field label="Payment" v-model="inv.payment" @focus="$event.target.select()"></v-text-field>
+                    </v-col>
+                    <v-col cols="4" class="padding-date">
+                      <v-dialog ref="datePicker1" v-model="dateModal1" :return-value.sync="inv.date" persistent width="290px">
                         <template v-slot:activator="{ on, attrs }">
                           <v-text-field v-model="inv.date" label="תאריך" readonly v-bind="attrs" v-on="on">
                           </v-text-field>
                         </template>
-                        <v-date-picker @input="onDateChange" v-model="inv.date" scrollable>
+                        <v-date-picker ref="datePicker1" v-model="inv.date" scrollable>
                           <v-spacer></v-spacer>
-                          <v-btn text color="primary" @click="dateModal = false"> Cancel </v-btn>
-                          <v-btn text color="primary" @click="$refs.dateDialog.save(inv.date)"> OK </v-btn>
+                          <v-btn text color="primary" @click="dateModal1 = false"> Cancel </v-btn>
+                          <v-btn text color="primary" @click="$refs.datePicker1.save(inv.date)"> OK </v-btn>
                         </v-date-picker>
                       </v-dialog>
-                      </v-col>
-                            <v-col cols="2" style="margin-top: 0px; padding-top: 0px;">
-                                <v-checkbox v-model="inv.redeemed"></v-checkbox>
-                                <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small>mdi-delete</v-icon></v-btn>
-                            </v-col>
-                        </v-row>
-                    </div>                    
-                    <v-btn @click="addPaymentRow" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>					
-                </v-container>
+                    </v-col>
+                    <v-col cols="2" style="margin-top: 0px; padding-top: 0px;">
+                      <v-checkbox v-model="inv.redeemed"></v-checkbox>
+                      <v-btn @click="removePaymentRec(i)" class="error" x-small><v-icon small>mdi-delete</v-icon></v-btn>
+                    </v-col>
+                  </v-row>
+                </div>                    
+                <v-btn @click="addPaymentRow" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>					
+              </v-container>
             </div>
 
             <v-card-actions>
@@ -192,6 +194,7 @@ export default {
         },
         selectedFile:null,
         dateModal : false,
+        dateModal1 : false,
         invoiceID: 0,
         companyName: [], // need to fatch refdata
         projectName: [], // remark
@@ -210,13 +213,13 @@ export default {
         this.dialogCam = true;
       },
 
-      async copyToClipboard(link) {
-        var fileview = `https://docs.google.com/file/d/${link}/preview?usp=drivesdk`
+      async copyToClipboard(GDFileId) {
+        var fileview = `https://docs.google.com/file/d/${GDFileId}/preview?usp=drivesdk`
           await navigator.clipboard.writeText(fileview);
       },
 
-      async clickToView(link) {
-        var fileview = `https://docs.google.com/file/d/${link}/preview?usp=drivesdk`
+      async clickToView(GDFileId) {
+        var fileview = `https://docs.google.com/file/d/${GDFileId}/preview?usp=drivesdk`
         await this.$refs.modalDialog.open(fileview);
         // this.filelink = fileview;    
         // this.iframeSrc = fileview;
@@ -224,7 +227,7 @@ export default {
       },
 
       deleteLink(){
-          this.invoice.link = null;
+          this.invoice.GDFileId = null;
       },
 
       open(invoice, isNewInvoice) {
@@ -234,7 +237,7 @@ export default {
         this.invoice.payments.map((item) => {
           item.date = moment(item.date).format('YYYY-MM-DD')
         })
-        console.log("year", this.invoice.year)
+        // console.log("year", this.invoice.year)
         this.dialogInvForm = true;
         return new Promise((resolve) => {
           this.resolve = resolve;
@@ -328,7 +331,7 @@ export default {
       },
 
       // openModal() {
-      //   this.iframeSrc = this.invoice.link; // Set iframe source
+      //   this.iframeSrc = this.invoice.GDFileId; // Set iframe source
       //   this.isModalOpen = true; // Show modal
       // },
 
@@ -356,7 +359,7 @@ export default {
           return;
         }
         const response = await checkGoogleStatus();
-        console.log("connecting....");
+        console.log("connecting to picker....");
         if (response.data.connected) {
           this.token = response.data.access_token;
         }
@@ -375,11 +378,15 @@ export default {
 
       pickerCallback(data) {
         if (data.action === google.picker.Action.PICKED) {
-          const fileId = data.docs[0].id;
-          this.invoice.link = fileId;
-          const group = this.invoice.group;
-          this.invoice.group = 22;
-          this.invoice.group = group;
+          // const fileId = data.docs[0].id;
+          this.invoice.GDFileId = data.docs[0].id;
+          this.invoice.GDFileName = data.docs[0].name;
+          this.$nextTick(() => { // this is needed to refresh the DOM
+            console.log('DOM Updated with File ID:', this.invoice.GDFileId);
+          });
+          // const group = this.invoice.group;
+          // this.invoice.group = 22;
+          // this.invoice.group = group;
         }
       },
     },
@@ -453,5 +460,8 @@ export default {
 .invoice-box{
   display: flex;
   align-items: center;
+}
+.v-input__slot {
+  background-color: lightgreen;
 }
 </style>

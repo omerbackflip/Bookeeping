@@ -22,10 +22,10 @@
                             v-model="selectedYear"
                             :items="yearList"
                             @change="onYearChange"
-                            :value="2024"
                             dense
                             solo
                             elevation="3"
+                            hide-details
                         ></v-select>
                     <div v-if="this.$route.name==='invoicesList'">
                         <v-btn x-small @click="callAddNewInvoice">

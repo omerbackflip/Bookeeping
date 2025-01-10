@@ -59,7 +59,8 @@ exports.getInvoicesToSave = (data) => {
                 remark: item.remark,
                 excelRecID: item.excelRecID,
                 year: item.year,
-                link: item.link,
+                GDFileId: item.GDFileId,
+                GDFileName: item.GDFileName,
                 payments:[],
             };
             if (item.payments){

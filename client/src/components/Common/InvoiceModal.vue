@@ -17,9 +17,9 @@
       };
     },
     methods: {
-      open(link) {
-        // window.open(link, '_blank');  // this is open the invoice in a new tab
-        this.fileLink = link;
+      open(GDFileId) {
+        // window.open(GDFileId, '_blank');  // this is open the invoice in a new tab
+        this.fileLink = GDFileId;
         this.isOpen = true;
       },
       close() {

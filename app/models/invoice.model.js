@@ -21,7 +21,8 @@ module.exports = mongoose => {
         date: Date,
         redeemed: Boolean,
 			}],
-      link: String,
+      GDFileId: String,
+      GDFileName: String,
     },
     { timestamps: true }
   );

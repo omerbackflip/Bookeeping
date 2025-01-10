@@ -56,12 +56,7 @@
             <span style="margin-left: 0.5rem"> {{ item.date | formatDate }}</span>
           </template>
           <template v-slot:[`item.total`]="{ item }">
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on }">
-                <span v-on="on">{{ item.total ? item.total.toLocaleString() : "" }}</span>
-              </template>
-              <span>Budget - </span>
-            </v-tooltip>
+            <span>{{ item.total ? item.total.toLocaleString() : "" }}</span>
           </template>
           <template v-slot:[`item.vat`]="{ item }">
             <span> {{ item.vat ? item.vat.toLocaleString() : "" }}</span>
@@ -97,7 +92,7 @@
               <div>
               <td @click.stop>
                 <span v-if="isMobile()" style="margin-left: 0.7rem; font-size: small"
-                :class="item.link ? 'summary' : ''" @click.stop="item.link ? clickToView(item.link) : null">{{ item.invoiceId }}</span>
+                :class="item.GDFileId ? 'summary' : ''" @click.stop="item.GDFileId ? clickToView(item.GDFileId) : null">{{ item.invoiceId }}</span>
               </td>
             </div>
           </template>
@@ -122,10 +117,15 @@
             </td>
           </template>
           <template v-slot:[`item.invoiceId`]="{ item }">
-          <td>
-            <span :class="item.link ? 'summary' : ''" @click.stop="item.link ? clickToView(item.link) : null">{{ item.invoiceId }}</span>
-          </td>
-        </template>
+            <!-- <td> -->
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on }">
+                  <span v-on="on" :class="item.GDFileId ? 'summary' : ''" @click.stop="item.GDFileId ? clickToView(item.GDFileId) : null">{{ item.invoiceId }}</span>
+                </template>
+                <span>{{item.GDFileName}}</span>
+              </v-tooltip>
+            <!-- </td> -->
+          </template>
         </v-data-table>
         
         <v-btn v-if="$route.params.project || $route.params.supplier" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
@@ -405,7 +405,12 @@ export default {
       }
 			if (response && response.data) {
 				this.invoiceList = response.data;
-        this.invoiceList.sort((a, b) => b.group - a.group);
+        // this.invoiceList.sort((a, b) => b.group - a.group);
+        this.invoiceList.sort((a, b) => {
+          if (b.group !== a.group) {return b.group - a.group;} // Sort by group
+          if (a.date !== b.date) {return new Date(b.date) - new Date(a.date);} // If group is the same, sort by date
+          return new Date(b.createdAt) - new Date(a.createdAt); // If date is also the same, sort by createdAt
+        });
         this.pending = this.invoiceList.filter((item) =>{
           return (item.published === false)
         }).reduce ((pendingTotal, item1) => {
@@ -601,8 +606,8 @@ export default {
       this.notPayedList = !this.notPayedList
     },
 
-    async clickToView(link) {
-      var fileview = `https://docs.google.com/file/d/${link}/preview?usp=drivesdk`
+    async clickToView(GDFileId) {
+      var fileview = `https://docs.google.com/file/d/${GDFileId}/preview?usp=drivesdk`
       await this.$refs.modalDialog.open(fileview);
     },
 
