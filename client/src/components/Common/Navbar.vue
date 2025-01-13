@@ -109,7 +109,7 @@ export default {
                 { title: 'Clear ExcelRecID', onClick: this.onMenuItemClick },
             ],
             toggleCompany : 'ביצועים',
-            selectedYear: 2024,
+            selectedYear: '2025',
             yearList: [],
             lastBkup:'',
             local: false,
@@ -123,7 +123,7 @@ export default {
 
         onYearChange(event) {
             // this.query = { year: event };
-            // router.push({query: this.query});
+            // this.$router.push({query: this.query});
             this.$root.$emit('yearChange',event);
         },
 
@@ -163,6 +163,7 @@ export default {
         navigate(link) {
             if(link.route) {
                 if (this.$route.path != link.route) { // avoid calling same route
+                    // this.query = { year: this.selectedYear };
                     this.$router.push({ path: link.route , query: this.query || {}});
                 }
             } else {
@@ -197,8 +198,7 @@ export default {
     },
 
     async mounted() {
-        this.yearList = (await loadTable(4)).map((code) => code.description)
-        this.selectedYear = 2024;
+        this.yearList = (await loadTable(4)).map((code) => code.description).slice().reverse()
         this.getDatabaseInformation();
         this.checkGoogleConnection();
         this.getLastBkup();

@@ -64,11 +64,11 @@
                       <div v-else class="invoice-box">
                         <v-text-field disabled placeholder="Upload Invoice"></v-text-field>
                         <v-col>
-                          <v-btn x-small @click="openCameraDialog" class="ml-1">
-                            <v-icon x-small>mdi-camera</v-icon>
-                          </v-btn>
                           <v-btn x-small @click="loadPickerApi()" class="ml-1">
                             <v-icon x-small>mdi-google-drive</v-icon>
+                          </v-btn>
+                          <v-btn x-small @click="openCameraDialog" class="ml-1">
+                            <v-icon x-small>mdi-camera</v-icon>
                           </v-btn>
                         </v-col>
                       </div>
@@ -80,7 +80,7 @@
                       <v-text-field @input="onAmountChange" v-model="invoice.amount" label="סכום" required @focus="$event.target.select()"></v-text-field>
                     </v-col>
                     <v-col cols="3">
-                      <v-text-field v-model="invoice.vat" label="מע'מ" @focus="$event.target.select()"></v-text-field>
+                      <v-text-field v-model="invoice.vat" :label="(invoice.year && invoice.year < 2025) ? '17% מעמ' : '18% מעמ'" @focus="$event.target.select()"></v-text-field>
                     </v-col>
                     <v-col cols="3">
                       <v-text-field @input="onTotalChange" v-model="invoice.total" label="סה'כ" required @focus="$event.target.select()"></v-text-field>
@@ -228,6 +228,7 @@ export default {
 
       deleteLink(){
           this.invoice.GDFileId = null;
+          this.invoice.GDFileName = null;
       },
 
       open(invoice, isNewInvoice) {
@@ -460,8 +461,5 @@ export default {
 .invoice-box{
   display: flex;
   align-items: center;
-}
-.v-input__slot {
-  background-color: lightgreen;
 }
 </style>

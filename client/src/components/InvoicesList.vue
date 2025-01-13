@@ -300,7 +300,7 @@ export default {
 			msg: "",
 			isLoading: true,
 			itemToEdit: "",
-			selectedYear: 2024,
+			selectedYear: '2025',
 			selectedCompany: 'ביצועים',
       bookInfo: '',
       dateModal : false,
@@ -372,7 +372,7 @@ export default {
     },
 
 		async retrieveInvoices() {
-			// console.log(this.$route.params)
+			// console.log(this.$router)
 			if (this.$route.query.year) {
         this.selectedYear = this.$route.query.year
       }

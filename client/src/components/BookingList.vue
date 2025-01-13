@@ -195,7 +195,7 @@ export default {
 				bs_group_id: null,
 			},
 			isLoading: true,
-			selectedYear: '2024',
+			selectedYear: '2025',
 			selectedCompany: 'ביצועים',
 			searchedBooks: [],
 			summaryDialog: false,
