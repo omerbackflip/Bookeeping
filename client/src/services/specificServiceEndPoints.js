@@ -24,15 +24,6 @@ class SpecificServiceEndPoints {
     });
   }
 
-  async uploadInvoiceToGoogleDrive(formData) {
-    
-    return await axios.post(`${baseUrl}/specific/upload-to-google-drive`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
-  }
-
   async saveRevenuesBulk(bulk) {
     var formData = new FormData(); // FormData is being used because need to transfer file to server
     formData.append("file", bulk);
@@ -68,8 +59,16 @@ class SpecificServiceEndPoints {
 		return await axios.get(`${baseUrl}/specific/get-database-info`);
 	}
 
-  async uploadToGDrive() {
-    return await axios.post(`${baseUrl}/specific/upload-invoices-to-gdrive`);
+  async Backup2GDrive() { //called from invoiceList.vue - used to call to backend to generate excel of whole invoices to upload to GoogleDrive
+    return await axios.post(`${baseUrl}/specific/backup-to-GDrive`);
+  }
+
+  async uploadInvoiceToGoogleDrive(formData) { //called from camForm.vue - used to upload specific invoice/file (jpg) to GoogleDrive 
+    return await axios.post(`${baseUrl}/specific/upload-to-google-drive`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    });
   }
 
   async getGoogleConnectionStatus(){

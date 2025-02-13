@@ -46,23 +46,46 @@
               </v-form>
             </v-container>
           </v-card-text>
-          <div class="payments-wrapper">
-            <v-col style="text-align-last: justify;"> Payments
-            <v-btn @click="updatePayment()" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>
+          <v-row>
+            <v-col cols="6">
+              <div class="payments-wrapper">
+                <div class="d-flex justify-space-between flex-row-reverse align-center px-10">
+                  <v-btn @click="updatePayment()" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>
+                  <span>תשלומי דירה</span>
+                </div>
+                <v-list two-line class="hebrew">
+                  <v-list-item-group>
+                      <v-list-item v-for="(payment) in homePayments" :key="payment._id">
+                          <v-list-item-content @click="updatePayment(payment)">
+                            <v-list-item-subtitle>{{ payment.description }} - {{ payment.amount ? payment.amount.toLocaleString() :'' }} - חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>הערה: {{ payment.remark }}</v-list-item-subtitle>
+                          </v-list-item-content>
+                      </v-list-item>
+                      <v-divider class="ma-0"></v-divider>
+                  </v-list-item-group>
+                </v-list>
+              </div>
             </v-col>
-            <v-list two-line class="hebrew">
-              <v-list-item-group>
-                  <v-list-item v-for="(payment) in holder.payments" :key="payment._id">
-                      <v-list-item-content @click="updatePayment(payment)">
-                        <v-list-item-title >{{ payment.description }}</v-list-item-title>
-                        <v-list-item-subtitle>סכום {{ payment.amount ? payment.amount.toLocaleString() :'' }} ש"ח , חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
-                        <v-list-item-subtitle>הערה: {{ payment.remark }}</v-list-item-subtitle>
-                      </v-list-item-content>
-                  </v-list-item>
-                  <v-divider class="ma-0"></v-divider>
-              </v-list-item-group>
-            </v-list>
-          </div>
+            <v-col cols="6">
+              <div class="payments-wrapper">
+                <div class="d-flex justify-space-between flex-row-reverse align-center px-10">
+                  <v-btn @click="updatePayment()" class="primary" x-small><v-icon small>mdi-plus</v-icon></v-btn>
+                  <span>שינויי דיירים</span>
+                </div>
+                <v-list two-line class="hebrew">
+                  <v-list-item-group>
+                      <v-list-item v-for="(payment) in changePayments" :key="payment._id">
+                          <v-list-item-content @click="updatePayment(payment)">
+                            <v-list-item-subtitle>{{ payment.description }} - {{ payment.amount ? payment.amount.toLocaleString() :'' }} - חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>הערה: {{ payment.remark }}</v-list-item-subtitle>
+                          </v-list-item-content>
+                      </v-list-item>
+                      <v-divider class="ma-0"></v-divider>
+                  </v-list-item-group>
+                </v-list>
+              </div>
+            </v-col>
+          </v-row>
           <v-card-actions>
             <v-spacer></v-spacer>
             <v-btn small @click="saveHolder()" :loading="isLoading">
@@ -189,6 +212,15 @@ export default {
 
     async mounted(){
 
+    },
+
+    computed: {
+      homePayments() {
+        return this.holder.payments ? this.holder.payments.filter(payment => payment.paymentType === "תשלומי דירה") : null;
+      },
+      changePayments() {
+        return this.holder.payments ? this.holder.payments.filter(payment => payment.paymentType === "שינויי דיירים") : null;
+      }
     }
 };
 </script>

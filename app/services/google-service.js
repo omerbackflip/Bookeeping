@@ -109,7 +109,7 @@ exports.getUser = async (oAuth2Client) => {
   }
 }
 
-exports.uploadToGoogleDrive = async (oAuth2Client, filename) => {
+exports.uploadBackup2GDrive = async (oAuth2Client, filename) => {
   const drive = google.drive({ version: 'v3', auth: oAuth2Client }); // auth object was "require" above...
 
   const filePath = path.join(ServerApp.uploadFolderPath, filename);

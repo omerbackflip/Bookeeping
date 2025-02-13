@@ -46,7 +46,7 @@
                 <v-col>
                   <!-- <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> don't need because there is "fetchData"-->
                   <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
-                  <v-btn @click="upload2GDrive" x-small class="mx-3">backup</v-btn>
+                  <v-btn @click="uploadBackup2GDrive" x-small class="mx-3">backup</v-btn>
                 </v-col>
                 </v-row>
               </div>
@@ -175,6 +175,19 @@
               <template v-slot:[`item.date`]="{ item }">
                 <span> {{ item.date | formatDate }}</span>
               </template>
+              <template v-slot:[`item.published`]="{ item }">
+                <td @click.stop>
+                  <v-checkbox v-model="item.published" @click="togglePublished(item)"></v-checkbox>
+                </td>
+              </template>
+              <template v-slot:[`item.invoiceId`]="{ item }">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on }">
+                      <span v-on="on" :class="item.GDFileId ? 'summary' : ''" @click.stop="item.GDFileId ? clickToView(item.GDFileId) : null">{{ item.invoiceId }}</span>
+                    </template>
+                    <span>{{item.GDFileName}}</span>
+                  </v-tooltip>
+              </template>
             </v-data-table>
           </v-flex>
         </v-card>
@@ -267,7 +280,8 @@ export default {
 				{ text: "Supplier", value: "supplier", align: "right", class: "hdr-styles" },
 				{ text: "Invoice", value: "invoiceId", align: "right", class: "hdr-styles" },
 				{ text: "Date", value: "date", align: "right", class: "hdr-styles" },
-				{ text: "G", value: "group", align: "right", class: "hdr-styles" },
+				{ text: "Group", value: "group", align: "right", class: "hdr-styles" },
+				{ text: "P", value: "published", align: "right", class: "hdr-styles" },
 			],
       bookHeaders: [
         { text: "Record_ID", value: "record_id", aligh: "right"},
@@ -293,7 +307,7 @@ export default {
 				חשבונית: "invoiceId",
 				excelRecID: "excelRecID",
 				הערה: "remark", 
-				נשלח: "published",
+				נפרע: "published",
         year: "year",
 			},
 			invoice: [],
@@ -583,9 +597,9 @@ export default {
         return data;
     },
 
-    async upload2GDrive(){
+    async uploadBackup2GDrive(){
       this.isLoading = true;
-      const response = await SpecificServiceEndPoints.uploadToGDrive();
+      const response = await SpecificServiceEndPoints.Backup2GDrive();
       if(response.data.file_id){
         window.alert('file saved to GDrive');
         await apiService.findOneAndUpdate({description: `last bckp - ${moment (new Date()).format('DD/MM/YYYY')}`},

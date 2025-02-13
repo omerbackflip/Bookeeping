@@ -1,7 +1,7 @@
 <template>
       <div>
         <v-dialog v-model="dialogInvForm" >
-          <v-card>
+          <v-card :class="bck_grnd(invoice._id)">
             <v-card-title>
               <span class="text-h5">{{ invoice._id ? "Update" : "Add New" }}</span>
               <v-spacer></v-spacer>
@@ -13,7 +13,7 @@
             <v-card-text>
               <v-container>
                 <v-form ref="form">
-                  <v-row>
+                  <v-row :style="{ backgroundColor: invoice.excelRecID ? 'lightgreen' : 'transparent' }">
                     <v-col cols="4">
                       <v-combobox v-model="invoice.company" :items="companyName" label="חברה" dense></v-combobox>
                     </v-col>
@@ -248,6 +248,9 @@ export default {
       copyToNew() {
         this.isNewInvoice = true
         this.invoice._id = null
+        this.invoice.GDFileId = null
+        this.invoice.GDFileName = null
+        this.invoice.excelRecID = null
         this.invoice.published = false
       },
 
@@ -390,6 +393,11 @@ export default {
           // this.invoice.group = group;
         }
       },
+
+      bck_grnd(item) {
+        let classes = item ? "bg-beige" :"";
+        return classes;
+      },
     },
     
     async mounted(){
@@ -461,5 +469,8 @@ export default {
 .invoice-box{
   display: flex;
   align-items: center;
+}
+.bg-beige {
+  background-color: beige !important;
 }
 </style>

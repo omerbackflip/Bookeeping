@@ -317,33 +317,24 @@ exports.getDbInfo = (req,res) => {
 	}
 };
 
-exports.uploadInvoicesToGDrive = async (req, res) => {
+exports.backup2GDrive = async (req, res) => { // upload Backup Excel
 	try {
-
 		const model = ServerApp.models.invoice;
 		const invoices = await dbService.getMultipleItems(db[model], req.query);
-		
 		if (invoices) {
-
 			let invoiceData = specificService.getInvoicesToExcelExport(invoices);
-
 			let invoiceExecelFile =  createExcel(invoiceData);
-
 			if(invoiceExecelFile){
 				auth = googleService.getAuth();
-				const file = await googleService.uploadToGoogleDrive(auth, invoiceExecelFile.filename);
+				const file = await googleService.uploadBackup2GDrive(auth, invoiceExecelFile.filename);
 				if(file.id){ // after uploading the excel file, remove the tmporary excel file from "upload" directory
 					fs.unlinkSync(invoiceExecelFile.filePath);
 				}
-
 				res.send({success: true, file_id: file});
 			}else{
 				res.send({success: false, message: "Error! While generating invoice file."});
 			}
-
-
 		}
-
 	} catch (error) {
 		console.log(error)
 		res.status(500).send({
@@ -352,33 +343,25 @@ exports.uploadInvoicesToGDrive = async (req, res) => {
 	}	
 };
 
-exports.uploadInvoicesToGoogleDrive = async (req, res) => {
-	
+exports.uploadInvoicesToGoogleDrive = async (req, res) => { // upload specific invoice/gpj
 	const file = req.file;
 	if (!req.file) {
 	    return res.status(500).send({ message: "No file uploaded" });
 	}
-
 	const originalFileName = file.originalname; // Original file name
-
     const newFileName = path.basename(originalFileName, path.extname(originalFileName)) + '.png'; // Add or change to `.pdf`
     const newFilePath = path.join(file.destination, newFileName); // New file path
 
     // Rename or copy the file with the new name
     fs.renameSync(file.path, newFilePath);
-
-	
 	const {group} = req.body;
-
 	let filepath = `${group}`;
-	
 	const auth = googleService.getAuth();
 	const uploadedFile = await googleService.uploadInvoiceToGoogleDrive(auth, newFileName,filepath);
 	fs.unlinkSync(newFilePath);
 	if (!uploadedFile || !uploadedFile.id) {
 	    return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
 	}
-
 	res.send({success: true , uploadedFile:uploadedFile});
 }
 
