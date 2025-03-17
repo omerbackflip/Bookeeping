@@ -7,12 +7,12 @@ exports.getBooksToSave = (data, company) => {
         let books = [];
         data.forEach((item) => {
             if (item.asmchta_date) { // weedout the "יתרת פתיחה"
-                const { year, asmacta1, record_id } = item;
-                if (company && year && asmacta1 != '') { // update excelRecID with inoiceId...
-                    let invoiceId = asmacta1;
-                    let excelRecID = record_id;
-                    Invoice.findOneAndUpdate({company, year, invoiceId},{ excelRecID });
-                }
+                // const { year, asmacta1, record_id } = item;
+                // if (company && year && asmacta1 != '') { // update excelRecID with inoiceId...
+                //     let invoiceId = asmacta1;
+                //     let excelRecID = record_id;
+                //     Invoice.findOneAndUpdate({company, year, invoiceId},{ excelRecID });
+                // }
                 let book = {
                     company: company,
                     asmchta_date: !isNaN(Date.parse(item['asmchta_date'])) ? moment(item['asmchta_date']).add(1,'days') : new Date(),

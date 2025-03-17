@@ -95,6 +95,7 @@ export default {
 							&& this.importYear && this.file.name.includes(this.importYear)) {
 								if (window.confirm("confirm delete all book data of this year but DOESNOT clear excelRecID in INVOICE")) {
 									response = await SpecificServiceEndPoints.saveBooksBulk(this.file,this.company,this.importYear) ;
+									window.confirm(response.data.message)
 								}
 						} else alert("company or year does not fits")
 						break
