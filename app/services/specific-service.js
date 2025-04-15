@@ -85,6 +85,28 @@ exports.getInvoicesToSave = (data) => {
     }
 },
 
+exports.getRevenuesToSave = (data, company) => {
+    try {
+        let revenues = [];
+        data.forEach((item) => {
+            let revenue = {
+                project: item.project,
+                flatId: item.flatId,
+                description: item.description,
+                invoiceId: item.invoiceId,
+                amount: item.amount,
+                date: item.date,
+                paymentType: item.paymentType,
+            }
+            revenues.push(revenue);
+        });
+        return revenues;
+    } catch (error) {
+        console.log(error)
+        throw error;
+    }
+},
+
 exports.getInvoicesToExcelExport = (invoices) => { // used during upload to GDrive
     try{
         let formatedInvoices = [];

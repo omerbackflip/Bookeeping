@@ -133,11 +133,12 @@ export default {
 				this.holdersList = response.data;
 			}
       this.holdersList.forEach(async (item) => {
-        // if(item.holderName) {
+        item.flatId = (item.flatId).substring(4, 6)
+        if(item.holderName) {
           this.holdersCount += 1
-          this.totalSales += item.signPrice
+          this.totalSales = this.totalSales + item.signPrice
           item.signDate = moment(item.signDate).format('YYYY-MM-DD');
-          let payments = await apiService.getMany({model: REVENUE_MODEL, flatId: item.flatId});
+          let payments = await apiService.getMany({model: REVENUE_MODEL, project:'גדות פ"ת', flatId: item.flatId});
           if (payments && payments.data) { // there are payments for this flatId
             payments.data.forEach((item1) => {
               item1.date = moment(item1.date).format('YYYY-MM-DD');
@@ -145,7 +146,7 @@ export default {
             })
             item.payments = payments.data;
           }
-        // }
+        }
       })
       this.isLoading = false
 		},

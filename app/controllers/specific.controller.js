@@ -106,6 +106,32 @@ exports.saveRevenuesBulk = async (req, res) => {
 	}
 };
 
+exports.saveRevenuesBulk1 = async (req, res) => {
+	try {
+        await Revenue.deleteMany();
+		var workbook = XLSX.readFile(`uploads/${req.file.filename}`,{type: 'binary', cellDates: true, dateNF: 'dd/mm/yyyy;@'});
+		var sheet_name_list = workbook.SheetNames;
+		const data = transformCSVData(sheet_name_list , workbook);
+        let revenues = specificService.getRevenuesToSave(data[0]);
+		if (revenues) {
+			const result = await Revenue.insertMany(revenues, { ordered: true });
+			unLinkFile(`uploads/${req.file.filename}`);
+			if (result) {
+				return res.send({
+					success: true,
+					message: `Total ${result.length} REVENUES successfully Imported`
+				})
+			}
+		}
+
+	} catch (error) {
+		console.log(error)
+		res.status(500).send({
+			message: "Error saving bulk of Books"
+		});
+	}
+};
+
 // Run whole asmacta1 in Book table, and find maching asnacta1=invoiceId in Invoice table and update excelRecID in Invoice with record_id
 exports.batchBooksInvoices = async (req, res) => {
 	if (!req.body) {

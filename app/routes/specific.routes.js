@@ -9,7 +9,7 @@ module.exports = app => {
 
   router.post("/save-invoices-bulk",upload.single('file'), specific.saveInvoicesBulk1);
   router.post("/save-books-bulk",upload.single('file') , specific.saveBooksBulk1);
-  router.post("/save-revenues-bulk",upload.single('file') , specific.saveRevenuesBulk);
+  router.post("/save-revenues-bulk",upload.single('file') , specific.saveRevenuesBulk1);
   router.post("/batch-book-invoice", specific.batchBooksInvoices);
   router.post("/batch-invoice-book", specific.batchInvoicesBooks);
   router.post("/batch-clear-ExcelRecID", specific.batchClearExcelRecID);

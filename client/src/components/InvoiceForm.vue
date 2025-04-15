@@ -73,7 +73,7 @@
                         </v-col>
                       </div>
                     </v-col>
-                    <v-col cols="8">
+                    <v-col cols="8"  class="hebrew">
                       <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
                     </v-col>
                     <v-col cols="3">
@@ -140,12 +140,6 @@
               <v-icon color="red" @click="dialogInvForm = false">mdi-close-box</v-icon>
             </v-card-actions>
           </v-card>
-          <!-- <div v-if="isModalOpen" class="modal">
-            <div class="modal-content">
-              <button class="close-btn" @click="closeModal">X</button>
-              <iframe :src="iframeSrc" width="800" height="800"></iframe>
-            </div>
-          </div> -->
           <modal-dialog ref="modalDialog"/>
 
         </v-dialog>

@@ -4,8 +4,6 @@
         <v-card class="hebrew">
           <v-card-title>
             <span class="text-h5">{{ holder._id ? "Update" : "Add New" }}</span>
-            <v-spacer></v-spacer>
-            <v-btn v-show="holder._id" @click="copyToNew"> Copy </v-btn>
           </v-card-title>
           <v-card-text style="padding: 0px;">
             <v-container>
@@ -46,41 +44,41 @@
               </v-form>
             </v-container>
           </v-card-text>
-          <v-row>
-            <v-col cols="6">
+          <v-row class="mx-0">
+            <v-col cols="12" md="6" class="px-2">
               <div class="payments-wrapper">
-                <div class="d-flex justify-space-between flex-row-reverse align-center px-10">
+                <div class="d-flex justify-space-between flex-row-reverse align-center px-4">
                   <v-btn @click="updatePayment()" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>
-                  <span>תשלומי דירה</span>
+                  <span>תשלומי דירה - {{ totalHomePayments ? totalHomePayments.toLocaleString() : ''}}</span>
                 </div>
                 <v-list two-line class="hebrew">
                   <v-list-item-group>
                       <v-list-item v-for="(payment) in homePayments" :key="payment._id">
                           <v-list-item-content @click="updatePayment(payment)">
                             <v-list-item-subtitle>{{ payment.description }} - {{ payment.amount ? payment.amount.toLocaleString() :'' }} - חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
-                            <v-list-item-subtitle>הערה: {{ payment.remark }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>{{ payment.remark || '-' }}</v-list-item-subtitle>
+                            <v-divider class="ma-0" color="black"></v-divider>
                           </v-list-item-content>
                       </v-list-item>
-                      <v-divider class="ma-0"></v-divider>
                   </v-list-item-group>
                 </v-list>
               </div>
             </v-col>
-            <v-col cols="6">
+            <v-col cols="12" md="6" class="px-2">
               <div class="payments-wrapper">
-                <div class="d-flex justify-space-between flex-row-reverse align-center px-10">
+                <div class="d-flex justify-space-between flex-row-reverse align-center px-4">
                   <v-btn @click="updatePayment()" class="primary" x-small><v-icon small>mdi-plus</v-icon></v-btn>
-                  <span>שינויי דיירים</span>
+                  <span>שינויי דיירים - {{ totalChangePayments ? totalChangePayments.toLocaleString() : ''}}</span>
                 </div>
                 <v-list two-line class="hebrew">
                   <v-list-item-group>
                       <v-list-item v-for="(payment) in changePayments" :key="payment._id">
                           <v-list-item-content @click="updatePayment(payment)">
                             <v-list-item-subtitle>{{ payment.description }} - {{ payment.amount ? payment.amount.toLocaleString() :'' }} - חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
-                            <v-list-item-subtitle>הערה: {{ payment.remark }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>{{ payment.remark || '-' }}</v-list-item-subtitle>
+                            <v-divider class="ma-0" color="black"></v-divider>
                           </v-list-item-content>
                       </v-list-item>
-                      <v-divider class="ma-0"></v-divider>
                   </v-list-item-group>
                 </v-list>
               </div>
@@ -143,15 +141,9 @@ export default {
         this.isNewHolder = isNewHolder;
         this.holder = holder 
         this.dialogHolderForm = true;
-        console.log(this.holder)
         return new Promise((resolve) => {
           this.resolve = resolve;
         });
-      },
-
-      copyToNew() {
-        this.isNewHolder = true
-        this.holder._id = null
       },
 
       async saveHolder() {
@@ -218,9 +210,15 @@ export default {
       homePayments() {
         return this.holder.payments ? this.holder.payments.filter(payment => payment.paymentType === "תשלומי דירה") : null;
       },
+      totalHomePayments() {
+        return this.homePayments ? this.homePayments.reduce((total, payment) => total + (payment.amount || 0), 0) : null;
+      },
       changePayments() {
         return this.holder.payments ? this.holder.payments.filter(payment => payment.paymentType === "שינויי דיירים") : null;
-      }
+      },
+      totalChangePayments() {
+        return this.changePayments ? this.changePayments.reduce((total, payment) => total + (payment.amount || 0), 0) : null;
+      },
     }
 };
 </script>
