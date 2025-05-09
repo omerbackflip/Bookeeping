@@ -31,6 +31,9 @@
                         <v-btn x-small @click="callAddNewInvoice">
                                 <v-icon small>mdi-plus</v-icon>
                         </v-btn>
+                        <v-btn x-small @click="$emit('logout')" icon>
+                            <v-icon small>mdi-logout</v-icon>
+                        </v-btn>
                         <v-menu offset-y>
                             <template v-slot:activator="{ on, attrs }">
                                 <v-btn icon v-bind="attrs" v-on="on">
