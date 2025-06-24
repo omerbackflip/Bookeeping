@@ -36,6 +36,9 @@
               </v-btn> -->
             </v-toolbar>
           </template>
+          <template v-slot:[`item.flatId`]="{ item }">
+            <span style="margin-left: 0.5rem"> {{ String(item.flatId).padStart(2, '0') }}</span>
+          </template>
           <template v-slot:[`item.signDate`]="{ item }">
             <span style="margin-left: 0.5rem"> {{ item.signDate | formatDate }}</span>
           </template>
@@ -128,12 +131,13 @@ export default {
 		async getHolders() {
       this.isLoading = true
       this.holdersCount = 0;
+      this.totalSales = 0;
+      this.totalPayed = 0;
 			let response = await apiService.getMany({model: HOLDER_MODEL});
 			if (response.data) {
 				this.holdersList = response.data;
 			}
       this.holdersList.forEach(async (item) => {
-        item.flatId = (item.flatId).substring(4, 6)
         if(item.holderName) {
           this.holdersCount += 1
           this.totalSales = this.totalSales + item.signPrice

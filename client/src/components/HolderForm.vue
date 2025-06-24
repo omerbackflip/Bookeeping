@@ -10,7 +10,7 @@
               <v-form ref="form">
                 <v-row>
                   <v-col cols="2">
-                    <v-text-field v-model="holder.flatId" label="דירה" disabled></v-text-field>
+                    <v-text-field :value="String(holder.flatId).padStart(2, '0')" @input="val => holder.flatId = Number(val)" label="דירה" disabled/>
                   </v-col>
                   <v-col cols="6">
                     <v-text-field v-model="holder.holderName" label="שם הדייר" @focus="$event.target.select()"></v-text-field>

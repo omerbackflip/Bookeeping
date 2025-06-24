@@ -110,11 +110,11 @@ export default {
 	margin: 12px;
 }
 
-.v-text-field{input 
+.v-text-field input 
   {
     color: blue;
   }
-}
+
 
 .hebrew {
     direction: rtl;

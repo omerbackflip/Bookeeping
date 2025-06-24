@@ -2,7 +2,7 @@ module.exports = mongoose => {
   var schema = mongoose.Schema(
     {
       project: String,
-      flatId: String,
+      flatId: Number,
       description: String,
       invoiceId: Number,
       amount: Number,
