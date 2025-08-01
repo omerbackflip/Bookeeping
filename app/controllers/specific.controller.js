@@ -238,7 +238,7 @@ exports.backup2GDrive = async (req, res) => { // upload Backup Excel
 			let invoiceData = specificService.getInvoicesToExcelExport(invoices);
 			let invoiceExecelFile =  createExcel(invoiceData);
 			if(invoiceExecelFile){
-				auth = googleService.getAuth();
+				auth = await googleService.getAuth();
 				const file = await googleService.uploadBackup2GDrive(auth, invoiceExecelFile.filename);
 				if(file.id){ // after uploading the excel file, remove the tmporary excel file from "upload" directory
 					fs.unlinkSync(invoiceExecelFile.filePath);
@@ -269,7 +269,7 @@ exports.uploadInvoicesToGoogleDrive = async (req, res) => { // upload specific i
     fs.renameSync(file.path, newFilePath);
 	const {group} = req.body;
 	let filepath = `${group}`;
-	const auth = googleService.getAuth();
+	const auth = await googleService.getAuth();
 	const uploadedFile = await googleService.uploadInvoiceToGoogleDrive(auth, newFileName,filepath);
 	fs.unlinkSync(newFilePath);
 	if (!uploadedFile || !uploadedFile.id) {
@@ -280,7 +280,7 @@ exports.uploadInvoicesToGoogleDrive = async (req, res) => { // upload specific i
 
 exports.googleConnectionStatus = async (req, res) => {
 	try{
-		let auth = googleService.getAuth();
+		let auth = await googleService.getAuth();
 		
 		if(auth instanceof google.auth.OAuth2){
 			

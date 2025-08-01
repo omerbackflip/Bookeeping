@@ -38,14 +38,33 @@ exports.getAuthClient = () => {
   return oAuth2Client;
 }
 
-exports.getAuth = () => {
+exports.getAuth = async () => {
 
   const oAuth2Client = this.getAuthClient();
 
   if (fs.existsSync(TOKEN_PATH)) {
-    const token = fs.readFileSync(TOKEN_PATH);
+    let token = fs.readFileSync(TOKEN_PATH);
     oAuth2Client.setCredentials(JSON.parse(token));
-    return oAuth2Client;
+
+    console.log('oAuth2Client.isTokenExpiring()', oAuth2Client.isTokenExpiring());
+    
+    //Checking If access token is expired
+    if(oAuth2Client.isTokenExpiring()){
+      try{
+        //Requesting, new access token.
+        await this.refreshAccessToken(oAuth2Client, JSON.parse(token)['refresh_token']);
+        const oAuth2ClientUpd = await this.getAuthClient();
+        token = fs.readFileSync(TOKEN_PATH);
+        oAuth2ClientUpd.setCredentials(JSON.parse(token));
+
+        return oAuth2ClientUpd;
+      }catch(authError){
+        //authError.message
+        //console.log("Auth Error:", authError.message);
+      }
+    }else{
+      return oAuth2Client;
+    }
   }
 
   return getNewToken(oAuth2Client);
@@ -79,6 +98,11 @@ exports.refreshAccessToken = async (oAuth2Client,refreshToken) => {
     return response.res.data;
   } catch (error) {
     console.error("Error refreshing access token:", error);
+
+    if(error.message == 'invalid_grant'){
+      return false;
+    }
+
     throw error;
   }
 };

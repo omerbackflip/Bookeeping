@@ -367,7 +367,7 @@ export default {
                               .setParent(this.folderId)
                               .setIncludeFolders(true)
                           )
-                          .setOAuthToken(token)
+                          .setOAuthToken(this.token)
                           .setDeveloperKey(this.developerKey)
                           .setCallback(this.pickerCallback)
                           .build();
@@ -382,9 +382,6 @@ export default {
           this.$nextTick(() => { // this is needed to refresh the DOM
             console.log('DOM Updated with File ID:', this.invoice.GDFileId);
           });
-          // const group = this.invoice.group;
-          // this.invoice.group = 22;
-          // this.invoice.group = group;
         }
       },
 
