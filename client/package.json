@@ -5,7 +5,7 @@
   "scripts": {
     "serve:development": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve --mode development",
     "serve:production": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve --mode production",
-    "build:production": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build --mode production --no-clean",
+    "build:production": "vue-cli-service build --mode production --no-clean",
     "build:development": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build --mode development",
     "lint": "vue-cli-service lint"
   },
