@@ -1,3 +1,4 @@
 [submodule "client/src/components/shared/login"]
 	path = client/src/components/shared/login
 	url = https://github.com/omerbackflip/login.git
+	branch = master
