@@ -133,7 +133,7 @@ export default {
       this.holdersCount = 0;
       this.totalSales = 0;
       this.totalPayed = 0;
-			let response = await apiService.getMany({model: HOLDER_MODEL});
+			let response = await apiService.clientGetEntities(HOLDER_MODEL);
 			if (response.data) {
 				this.holdersList = response.data;
 			}
@@ -142,7 +142,7 @@ export default {
           this.holdersCount += 1
           this.totalSales = this.totalSales + item.signPrice
           item.signDate = moment(item.signDate).format('YYYY-MM-DD');
-          let payments = await apiService.getMany({model: REVENUE_MODEL, project:'גדות פ"ת', flatId: item.flatId});
+          let payments = await apiService.clientGetEntities(REVENUE_MODEL, { project:'גדות פ"ת', flatId: item.flatId });
           if (payments && payments.data) { // there are payments for this flatId
             payments.data.forEach((item1) => {
               item1.date = moment(item1.date).format('YYYY-MM-DD');

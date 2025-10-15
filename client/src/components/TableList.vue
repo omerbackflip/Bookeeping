@@ -316,7 +316,7 @@ export default {
 
   methods: {
     retrieveTables() {
-      apiService.getMany({model: TABLE_MODEL})
+      apiService.clientGetEntities(TABLE_MODEL)
         .then((response) => {
           this.tables = response.data;
           this.tableID = response.data.filter(item => item.table_id === 99);
@@ -352,7 +352,12 @@ export default {
     },
 
     updateOne(item) {
-      apiService.update(item._id, item, {model: TABLE_MODEL})
+      // apiService.update(item._id, item, {model: TABLE_MODEL})
+      apiService.updateEntity(
+        { _id: item._id },   // filter
+        item,                // data
+        { model: TABLE_MODEL } // query params
+      )
         .then(response => {
           console.log(response.data);
           this.message = 'The updateOne() updated successfully!';
@@ -399,10 +404,10 @@ export default {
         let response = ''
         switch (item.table_id) {
           case 5 : // take summary from bank records
-            response = await apiService.getMany({model:BOOKS_MODEL, asmacta1:item.table_code})
+            response = await apiService.clientGetEntities(BOOKS_MODEL, { asmacta1:item.table_code })
             break;
           case 6 : // take summary from the exported data
-            response = await apiService.getMany({model:BOOKS_MODEL, cust_id:item.table_code})
+            response = await apiService.clientGetEntities(BOOKS_MODEL, { cust_id:item.table_code })
             break;           
         }
         this.summaryData = response.data; 
@@ -430,7 +435,7 @@ export default {
 
     async showPratim (item) {
       this.isLoading = true;
-      let response = await apiService.getMany({model:BOOKS_MODEL, pratim:item.pratim})
+      let response = await apiService.clientGetEntities(BOOKS_MODEL, { pratim:item.pratim })
       this.pratimData = response.data; 
       this.pratimHeader = item.pratim
       this.isLoading = false;

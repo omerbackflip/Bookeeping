@@ -256,7 +256,12 @@ export default {
           if (this.isNewInvoice)  {
             response = await apiService.create(this.invoice, {model: INVOICE_MODEL});
           } else {
-            response = await apiService.update(this.invoice._id, this.invoice, { model: INVOICE_MODEL });
+            // response = await apiService.update(this.invoice._id, this.invoice, { model: INVOICE_MODEL });
+            response = await apiService.updateEntity(
+              { _id: this.invoice._id },  // 🔹 filter: which document(s) to update
+              this.invoice,               // 🔹 data: the fields to update
+              { model: INVOICE_MODEL }    // 🔹 params: passed as query string (?model=...)
+            );
           } 
           if (response) {
             this.dialogInvForm = false;

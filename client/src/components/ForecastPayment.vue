@@ -100,7 +100,7 @@ export default {
 		async getPayments() {
       this.isLoading = true
       this.paymentList = []
-      const response = await apiService.getMany({model: INVOICE_MODEL, company: this.selectedCompany});
+      const response = await apiService.clientGetEntities(INVOICE_MODEL, {company: this.selectedCompany });
       if (response.data) {
         response.data.filter((item) => {
             return (item.payments.length > 0) // filter only invoices with payments

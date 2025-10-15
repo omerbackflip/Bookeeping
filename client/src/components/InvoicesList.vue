@@ -344,20 +344,20 @@ export default {
       switch (summaryField) {
         case 'project':
           // fatch all paymanets for this project cross years.
-          response = await apiService.getMany({model: INVOICE_MODEL,project: summaryItem})
+          response = await apiService.clientGetEntities(INVOICE_MODEL, { project: summaryItem })
           this.summaryFilter = response.data
           break;
         case 'supplier':
           // fatch all paymanets for this supplier cross years.
-          response = await apiService.getMany({model: INVOICE_MODEL,supplier: summaryItem})
+          response = await apiService.clientGetEntities(INVOICE_MODEL, { supplier: summaryItem })
           this.summaryFilter = response.data
           // get the busget of this supplier
-          response = await apiService.getMany({model: TABLE_MODEL, table_id: 3, description: summaryItem})
+          response = await apiService.clientGetEntities(TABLE_MODEL, { table_id: 3, description: summaryItem })
           this.summaryBudget = response.data[0].table_code
           break;
         case 'group':
           // fatch all paymanets for this group cross years.
-          response = await apiService.getMany({model: INVOICE_MODEL,group: summaryItem})
+          response = await apiService.clientGetEntities(INVOICE_MODEL, { group: summaryItem })
           this.summaryFilter = response.data
           break;
         default : break;
@@ -376,11 +376,7 @@ export default {
 		},
 
     async retriveBookData(item){
-      const response = await apiService.getMany({ model: BOOKS_MODEL,
-                                              // record_id:item.excelRecID,
-                                              asmacta1: item.invoiceId,
-                                              year: item.year,
-                                              company: item.company});
+      const response = await apiService.clientGetEntities(BOOKS_MODEL,{ asmacta1: item.invoiceId, year: item.year, company: item.company});
       this.bookInfo = response.data;
       this.bookDialog = true;
     },
@@ -395,25 +391,15 @@ export default {
       const screen = this.$route.params
       switch (true) {
         case ('project' in screen):
-          response = await apiService.getMany({
-            model: INVOICE_MODEL,
-            project: this.$route.params.project,
-          });
+          response = await apiService.clientGetEntities(INVOICE_MODEL, { project: this.$route.params.project });
           this.header = this.$route.params.project
           break;
         case ('supplier' in screen):
-          response = await apiService.getMany({
-            model: INVOICE_MODEL,
-            supplier: this.$route.params.supplier,
-          });
+          response = await apiService.clientGetEntities(INVOICE_MODEL, { supplier: this.$route.params.supplier });
           this.header = this.$route.params.supplier
           break;
         default :
-          response = await apiService.getMany({
-            model: INVOICE_MODEL,
-            year: this.selectedYear,
-            company: this.selectedCompany,
-          });
+          response = await apiService.clientGetEntities(INVOICE_MODEL, { year: this.selectedYear, company: this.selectedCompany });
           this.header = this.selectedYear + ' ' + this.selectedCompany
           break;     
       }
@@ -492,11 +478,16 @@ export default {
 
     // called @click on toggle "published" field
 		async togglePublished(item) {
-			await apiService.update(
-				item._id,
-				{ published: item.published },
-				{ model: INVOICE_MODEL }
-			);
+			// await apiService.update(
+			// 	item._id,
+			// 	{ published: item.published },
+			// 	{ model: INVOICE_MODEL }
+			// );
+      await apiService.updateEntity(
+        { _id: item._id },                 // filter
+        { published: item.published },     // data
+        { model: INVOICE_MODEL }           // query params
+      );
 			this.itemToEdit = "";
       if (item.published) {
         this.pending = this.pending - item.total
@@ -508,14 +499,19 @@ export default {
     // run this batch to update 
     async scriptUpdate() {
       if (window.confirm("Change supplier xxx to yyy")) {
-        let response = await apiService.getMany({model: INVOICE_MODEL, supplier: 'אייל'})
+        let response = await apiService.clientGetEntities(INVOICE_MODEL, { supplier: 'אייל' })
         if(response.data){
-          response.data.map((item) => {
-            apiService.update(
-              item._id,
-              { supplier: '' },
-              { model: INVOICE_MODEL }          
-            )
+          response.data.map(async (item) => {
+            // apiService.update(
+            //   item._id,
+            //   { supplier: '' },
+            //   { model: INVOICE_MODEL }          
+            // )
+            await apiService.updateEntity(
+              { _id: item._id },       // filter (which document to update)
+              { supplier: '' },        // data (fields to change)
+              { model: INVOICE_MODEL } // query params (?model=invoice)
+            );
           })
         }
       }
@@ -570,7 +566,7 @@ export default {
     async exportAll() {
       let response = '';
 			this.isLoading = true;
-      response = await apiService.getMany({ model: INVOICE_MODEL });
+      response = await apiService.clientGetEntities(INVOICE_MODEL);
 			if (response && response.data) {
 				this.invoiceList = response.data;
         this.invoiceList.sort((a, b) => b.group - a.group);
@@ -581,7 +577,7 @@ export default {
 
     async fetchData(){  // used during extract all data to "vue-excel-export"
         this.isLoading = true;
-        const response = await apiService.getMany({model:INVOICE_MODEL})
+        const response = await apiService.clientGetEntities(INVOICE_MODEL);
         let data = response.data.map((item) => {
           item.date = new Date (item.date).toLocaleDateString('en-GB')
           return ({...item, payments: item.payments.length
@@ -602,8 +598,11 @@ export default {
       const response = await SpecificServiceEndPoints.Backup2GDrive();
       if(response.data.file_id){
         window.alert('file saved to GDrive');
-        await apiService.findOneAndUpdate({description: `last bckp - ${moment (new Date()).format('DD/MM/YYYY')}`},
-                                          {model:TABLE_MODEL, table_id: 99, table_code: 80})
+        await apiService.updateEntity(
+          { table_id: 99, table_code: 80 },                                 // filter
+          { description: `last bckp - ${moment().format('DD/MM/YYYY')}` },  // data
+          { model: TABLE_MODEL }                                            // params (query)
+        );
       }
       this.isLoading = false;
     },

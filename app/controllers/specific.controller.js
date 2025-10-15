@@ -12,7 +12,7 @@ const { url } = require("../config/db.config");
 const { version } = require("../config/db.config");
 const specificService = require("../services/specific-service");
 const { ServerApp } = require("../config/constants");
-const dbService = require("../services/db-service");
+const dbService = require("../shared/mongoose/services/db-service");
 const { google } = require('googleapis');
 const googleService = require('../services/google-service');
 
@@ -234,7 +234,7 @@ exports.getDbInfo = (req,res) => {
 exports.backup2GDrive = async (req, res) => { // upload Backup Excel
 	try {
 		const model = ServerApp.models.invoice;
-		const invoices = await dbService.getMultipleItems(db[model], req.query);
+		const invoices = await dbService.getEntities({ model: db[model], filter: req.query });
 		if (invoices) {
 			let invoiceData = specificService.getInvoicesToExcelExport(invoices);
 			let invoiceExecelFile =  createExcel(invoiceData);

@@ -153,10 +153,15 @@ export default {
           if (this.isNewHolder)  {
             response = await apiService.create(this.holder, {model: HOLDER_MODEL});
           } else {
-            response = await apiService.update(this.holder._id, this.holder, { model: HOLDER_MODEL });
+            response = await apiService.updateEntity({_id: this.holder._id}, {...this.holder}, { model: HOLDER_MODEL });
             if (this.holder.payments) {
               this.holder.payments.forEach(async (item) => {
-                await apiService.update(item._id, item, { model: REVENUE_MODEL, upsert: true}); //upsert = true so in case of new payment to create new payment
+                // await apiService.update(item._id, item, { model: REVENUE_MODEL, upsert: true}); //upsert = true so in case of new payment to create new payment
+                await apiService.updateEntity(
+                  { _id: item._id },        // filter (יכול להיות גם לפי שדה אחר)
+                  item,                     // data (השדות שצריך לעדכן)
+                  { model: REVENUE_MODEL, upsert: true } // query params
+                );
               }) 
             }
           } 

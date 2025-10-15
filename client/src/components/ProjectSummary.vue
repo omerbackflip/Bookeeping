@@ -190,7 +190,7 @@ export default {
 	methods: {
 		async mainSummary() {
       this.isLoading = true
-			let response = await apiService.getMany({model: INVOICE_MODEL});
+			let response = await apiService.clientGetEntities(INVOICE_MODEL);
 			if (response.data) {
 				this.invoices = response.data; // put all invoices data in invoices
         this.projectList = this.projectList.map((item1) => { // add to projectList the total for each project
@@ -200,7 +200,7 @@ export default {
           return({...item1, total:totalProject}) // concatinate the totalProject
         })  
 			}
-      response = await apiService.getMany({model: REVENUE_MODEL});
+      response = await apiService.clientGetEntities(REVENUE_MODEL);
       if (response.data) {
 				this.revenues = response.data; // put all revenues data in revenues
         this.projectList = this.projectList.map((item1) => {

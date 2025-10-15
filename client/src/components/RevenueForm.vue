@@ -73,7 +73,12 @@ export default {
 				if(this.isNewRevenue) {
 					await apiService.create(this.revenue , {model:REVENUE_MODEL});
 				} else {
-					await apiService.update(this.revenue._id , this.revenue , {model:REVENUE_MODEL});
+					// await apiService.update(this.revenue._id , this.revenue , {model:REVENUE_MODEL});
+                    await apiService.updateEntity(
+                        { _id: this.revenue._id },  // filter
+                        this.revenue,               // data
+                        { model: REVENUE_MODEL }    // query params
+                    );
 				}
                 this.showMessage = true;
                 setTimeout(() => {

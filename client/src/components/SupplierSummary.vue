@@ -71,7 +71,7 @@ export default {
 	methods: {
 		async mainSummary() {
       this.isLoading = true
-			let response = await apiService.getMany({model: INVOICE_MODEL});
+			let response = await apiService.clientGetEntities(INVOICE_MODEL);
 			if (response.data) {
 				this.invoices = response.data; // put all invoices data in invoices
         this.supplierList = this.supplierList.map((item1) => { // add to supplierList the total for each supplier

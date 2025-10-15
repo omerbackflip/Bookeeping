@@ -111,7 +111,7 @@ export const isMobile = () => {
 
 export const loadTable = async (table_id) => {
     try {
-        const response = await apiService.getMany({ table_id, model: TABLE_MODEL });
+        const response = await apiService.clientGetEntities(TABLE_MODEL, { table_id });
         if (response.data.length > 0) {
             return (response.data)
             // return (response.data.map((code) => code.description))

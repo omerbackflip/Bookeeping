@@ -17,38 +17,58 @@ exports.create = async (req, res) => {
 	}
 };
 
-exports.findAll = async (req, res) => {
+// exports.findAll = async (req, res) => {
+// 	try {
+// 		const query = {... req.query};
+// 		const model = req.query.model;
+// 		delete query.model;
+// 		return res.send(await dbService.getMultipleItems(db[model], req.query));
+// 	} catch (error) {
+// 		res.status(500).send({message: error.message || "Some error occurred while retrieving entity."});		
+// 	}
+// };
+
+
+// //Find a single entity with an id:
+// exports.findOne = async (req, res) => {
+// 	try {
+// 		const id = req.params.id;
+// 		return res.send(await dbService.getSingleItem(db[req.query.model], {_id: id}));
+// 	} catch (error) {
+// 		res.status(500).send({ message: "Error retrieving entity!"});		
+// 	}
+// };
+
+// //Find a single entity with specific field(s) in the req.query
+// exports.getOne = async (req, res) => {
+// 	try {
+// 		let modelName = req.query.model;
+// 		delete req.query.model
+// 		return res.send(await dbService.getSingleItem(db[modelName], req.query));
+// 	} catch (error) {
+// 		res.status(500).send({ message: "Error retrieving entity!"});		
+// 	}
+// };
+
+exports.getEntities = async (req, res) => {
 	try {
-		const query = {... req.query};
-		const model = req.query.model;
-		delete query.model;
-		return res.send(await dbService.getMultipleItems(db[model], req.query));
+		const { model, ...filter } = req.query;
+		if (!model) return res.status(400).send({ message: "Missing 'model' parameter" });
+
+		const result = await dbService.getEntities({ model: db[model], filter });
+
+		if (!result || (Array.isArray(result) && result.length === 0)) {
+			return res.status(404).send({ message: "No results found" });
+		}
+
+		res.send(result);
 	} catch (error) {
-		res.status(500).send({message: error.message || "Some error occurred while retrieving entity."});		
+		console.error(error);
+		res.status(500).send({ message: "Error retrieving data", error: error.message });
 	}
 };
 
 
-//Find a single entity with an id:
-exports.findOne = async (req, res) => {
-	try {
-		const id = req.params.id;
-		return res.send(await dbService.getSingleItem(db[req.query.model], {_id: id}));
-	} catch (error) {
-		res.status(500).send({ message: "Error retrieving entity!"});		
-	}
-};
-
-//Find a single entity with specific field(s) in the req.query
-exports.getOne = async (req, res) => {
-	try {
-		let modelName = req.query.model;
-		delete req.query.model
-		return res.send(await dbService.getSingleItem(db[modelName], req.query));
-	} catch (error) {
-		res.status(500).send({ message: "Error retrieving entity!"});		
-	}
-};
 
 //Update a entity identified by the id in the request:
 exports.update = async (req, res) => {

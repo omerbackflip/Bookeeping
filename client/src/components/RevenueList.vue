@@ -115,7 +115,7 @@ export default {
 	methods: {
 		async getRevenues() {
       this.isLoading = true
-      const response = await apiService.getMany({model: REVENUE_MODEL});
+      const response = await apiService.clientGetEntities(REVENUE_MODEL);
       if (response.data) {
 				this.revenueList = response.data; // put all revenueList data in revenueList
 			}

@@ -42,7 +42,12 @@ export default {
 		async updateExcelRecId() {
 			this.invoiceMerge.excelRecID = this.bookMerge.record_id;
 			this.invoiceMerge.invoiceId = this.bookMerge.asmacta1;
-			await apiService.update(this.invoiceMerge._id, this.invoiceMerge, { model: INVOICE_MODEL });
+			// await apiService.update(this.invoiceMerge._id, this.invoiceMerge, { model: INVOICE_MODEL });
+			await apiService.updateEntity(
+				{ _id: this.invoiceMerge._id },  // filter
+				this.invoiceMerge,               // data
+				{ model: INVOICE_MODEL }         // query params
+			);
             // await this.$root.$emit('invoiceUpdate',this.invoiceMerge);
 
 		}

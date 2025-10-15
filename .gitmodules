@@ -2,3 +2,7 @@
 	path = client/src/components/shared/login
 	url = https://github.com/omerbackflip/login.git
 	branch = master
+[submodule "app/shared/mongoose"]
+	path = app/shared/mongoose
+	url = https://github.com/omerbackflip/mongoose
+	branch = master

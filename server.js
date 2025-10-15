@@ -41,7 +41,11 @@ app.get("/", (req, res) => {
 });
 
 require("./app/routes/specific.routes")(app);
-require("./app/routes/generic.routes")(app);
+// require("./app/routes/generic.routes")(app);
+// ✅ New: Use shared mongoose submodule router
+const mongooseRouter = require("./app/shared/mongoose/routes/generic.routes");
+app.use("/api/generic", mongooseRouter);
+
 
 // set port, listen for requests
 const PORT = process.env.PORT || 3001;

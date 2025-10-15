@@ -194,7 +194,7 @@ export default {
         },
 
         async getLastBkup() {
-            const response = await apiService.getOne({ table_id: 99, table_code:80, model: TABLE_MODEL });
+            const response = await apiService.clientGetEntities(TABLE_MODEL, { table_id: 99, table_code:80 });
             this.lastBkup = response.data.description;
         }
 

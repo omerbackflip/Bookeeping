@@ -233,11 +233,7 @@ export default {
 		async retrieveBooks() {
 			this.selectedYear = this.$route.query.year || this.selectedYear;
 			this.isLoading = true;
-			const response = await apiService.getMany({
-				model: BOOKS_MODEL,
-				year: this.selectedYear,
-				company: this.selectedCompany,
-			});
+			const response = await apiService.clientGetEntities(BOOKS_MODEL,{year: this.selectedYear, company: this.selectedCompany});
 			if (response && response.data) {
 				this.bookList = response.data;
 				this.filteredList = this.bookList.sort((a,b) => {return a.cust_id - b.cust_id});
@@ -274,7 +270,7 @@ export default {
 			switch (summaryField) {
 				case 'cust':
 					// fatch all paymanets for this project cross years.
-					response = await apiService.getMany({model: BOOKS_MODEL, cust_lname: summaryItem , company: this.selectedCompany})
+					response = await apiService.clientGetEntities(BOOKS_MODEL, {cust_lname: summaryItem , company: this.selectedCompany})
 					this.summaryFilter = response.data
 					this.summaryFilter.sort((a, b) => new Date(b.asmchta_date) - new Date(a.asmchta_date)); // sort the summary by date
 					break;
