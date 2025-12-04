@@ -10,6 +10,9 @@
 	FRONTEND
 	- cd ../home/bookeeping
 	- git pull origin master 		// (ignore this if you have latest code)
+
+	- git submodule update --init --recursive --remote // ignore this if you don't have changes to submodules
+
 	- cd client
 	- ls     				// to check if there are which files in the folder
 	- rm -rf ./dist 			// this is to remove dist folder (only in case it exsist)
