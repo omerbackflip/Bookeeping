@@ -11,7 +11,7 @@
 	- cd ../home/bookeeping
 	- git pull origin master 		// (ignore this if you have latest code)
 
-	- git submodule update --init --recursive --remote // ignore this if you don't have changes to submodules
+	- git submodule update --init --recursive  // ignore this if you don't have changes to submodules
 
 	- cd client
 	- ls     				// to check if there are which files in the folder
