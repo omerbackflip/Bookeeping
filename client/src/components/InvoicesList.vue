@@ -56,10 +56,10 @@
             <span style="margin-left: 0.5rem"> {{ item.date | formatDate }}</span>
           </template>
           <template v-slot:[`item.total`]="{ item }">
-            <span>{{ item.total ? item.total.toLocaleString() : "" }}</span>
+            <span :style="{ color: item.total < 0 ? 'red' : 'inherit' }">{{ item.total ? item.total.toLocaleString() : "" }}</span>
           </template>
           <template v-slot:[`item.vat`]="{ item }">
-            <span> {{ item.vat ? item.vat.toLocaleString() : "" }}</span>
+            <span :style="{ color: item.vat < 0 ? 'red' : 'inherit' }"> {{ item.vat ? item.vat.toLocaleString() : "" }}</span>
           </template>
           <template v-slot:[`item.payments[0].payment`]="{ item }">
             <span> {{ item.payments[0] ? item.payments[0].payment.toLocaleString() : '' }}</span>
@@ -80,7 +80,7 @@
           </template>
           <template v-slot:[`item.amount`]="{ item }">
             <div class="amount-width d-grid">
-              <span>{{ item.amount ? item.amount.toLocaleString("en", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : "" }}</span>
+              <span :style="{ color: item.amount < 0 ? 'red' : 'inherit' }">{{ item.amount ? item.amount.toLocaleString("en", {minimumFractionDigits: 0, maximumFractionDigits: 0}) : "" }}</span>
             </div>
           </template>
           <template v-slot:[`item.supplier`]="{ item }">
@@ -160,7 +160,7 @@
                       class="mt-3">
                       <v-toolbar-title>
                         <div>
-                          <span>{{ summaryName }} - {{ summaryTotal.toLocaleString() }}  </span>
+                          <span>{{ summaryName }} - {{ summaryTotal.toLocaleString() }} (Left: {{ summaryLeft.toLocaleString() }})</span>
                           <span v-if="summaryBudget">{{ ' ------------ תקציב - '  + summaryBudget.toLocaleString()}}</span>
                           <v-btn small class="btn btn-danger"> <v-icon>mdi-download</v-icon> </v-btn>
                         </div>
@@ -268,6 +268,7 @@ export default {
       bookDialog: false,
 			summaryDialog: false,
       summaryTotal: 0,
+      summaryLeft: 0,
       summaryBudget: 0,
 			summaryFilter: [],
 			summaryName: "",
@@ -368,6 +369,9 @@ export default {
       this.summaryName = summaryItem;
       this.summaryTotal = this.summaryFilter.reduce((currentTotal, item) =>{
         return item.total + currentTotal
+      }, 0)
+      this.summaryLeft = this.summaryFilter.reduce((leftTotal, item) => {
+        return (!item.published) ? leftTotal + (item.total || 0) : leftTotal
       }, 0)
       if (!this.summaryDialog) {
         this.summaryDialog = true;
