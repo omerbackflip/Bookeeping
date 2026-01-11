@@ -112,7 +112,7 @@ export default {
                 { title: 'Clear ExcelRecID', onClick: this.onMenuItemClick },
             ],
             toggleCompany : 'ביצועים',
-            selectedYear: '2025',
+            selectedYear: '2026',
             yearList: [],
             lastBkup:'',
             local: false,
