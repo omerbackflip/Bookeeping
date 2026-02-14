@@ -36,15 +36,13 @@
               <div v-show="!isMobile()">
                 <v-row>
                   <v-col>
-                  <export-excel :data="invoiceList" type="xlsx" name="all-data">
-                  <!-- <export-excel :fetch="fetchData" type="xlsx" name="all-data"> -->
+                  <export-excel :data="exportData" type="xlsx" :name="header">
                     <v-btn x-small class="btn btn-danger">
                       <v-icon small>mdi-download</v-icon>
                     </v-btn>
                   </export-excel>
                 </v-col>
                 <v-col>
-                  <!-- <v-btn @click="exportAll" x-small class="mx-3">All</v-btn> don't need because there is "fetchData"-->
                   <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
                   <v-btn @click="uploadBackup2GDrive" x-small class="mx-3">backup</v-btn>
                 </v-col>
@@ -151,12 +149,9 @@
                 <v-toolbar>
                   <v-spacer />
                     <export-excel
-                      :data="summaryFilter"
-                      :fields="xlsHeders"
+                      :data="exportData"
                       type="xlsx"
                       :name="summaryName.toLocaleString()"
-                      :title="summaryName"
-                      :footer="summaryTotal.toLocaleString()"
                       class="mt-3">
                       <v-toolbar-title>
                         <div>
@@ -295,22 +290,22 @@ export default {
 			search: "",
 			headers: [],
       paymentDateDialog: false,
-			xlsHeders: {
-				חברה: "company",
-				פרויקט: "project",
-				תאור: "description",
-				סכום: "amount",
-				"מע-מ": "vat",
-				"סה-כ": "total",
-				קיבוץ: "group",
-				תאריך: "date",
-				ספק: "supplier",
-				חשבונית: "invoiceId",
-				excelRecID: "excelRecID",
-				הערה: "remark", 
-				נפרע: "published",
-        year: "year",
-			},
+			// xlsHeders: {
+			// 	חברה: "company",
+			// 	פרויקט: "project",
+			// 	תאור: "description",
+			// 	סכום: "amount",
+			// 	"מע-מ": "vat",
+			// 	"סה-כ": "total",
+			// 	קיבוץ: "group",
+			// 	תאריך: "date",
+			// 	ספק: "supplier",
+			// 	חשבונית: "invoiceId",
+			// 	excelRecID: "excelRecID",
+			// 	הערה: "remark", 
+			// 	נפרע: "published",
+      //   year: "year",
+			// },
 			invoice: [],
 			msg: "",
 			isLoading: true,
@@ -339,45 +334,47 @@ export default {
 			}
 		},
 		
-		async getSummary(summaryField, summaryItem) {
+    async getSummary(summaryField, summaryItem) {
       this.isLoading = true
-      let response = "";
+      let invoiceQuery = null
+      let response = null
+
       switch (summaryField) {
         case 'project':
-          // fatch all paymanets for this project cross years.
-          response = await apiService.clientGetEntities(INVOICE_MODEL, { project: summaryItem })
-          this.summaryFilter = response.data
-          break;
+          invoiceQuery = { project: summaryItem }
+          break
         case 'supplier':
-          // fatch all paymanets for this supplier cross years.
-          response = await apiService.clientGetEntities(INVOICE_MODEL, { supplier: summaryItem })
-          this.summaryFilter = response.data
-          // get the busget of this supplier
-          response = await apiService.clientGetEntities(TABLE_MODEL, { table_id: 3, description: summaryItem })
-          this.summaryBudget = response.data[0].table_code
-          break;
+          invoiceQuery = { supplier: summaryItem }
+          break
         case 'group':
-          // fatch all paymanets for this group cross years.
-          response = await apiService.clientGetEntities(INVOICE_MODEL, { group: summaryItem })
-          this.summaryFilter = response.data
-          break;
-        default : break;
+          invoiceQuery = { group: summaryItem }
+          break
+        default:
+          this.isLoading = false
+          return
       }
 
-      this.summaryFilter.sort((a, b) => new Date(b.date) - new Date(a.date)); // sort the summary by date
+      response = await apiService.clientGetEntities(INVOICE_MODEL, invoiceQuery)
+      this.summaryFilter = response.data
 
-      this.summaryName = summaryItem;
-      this.summaryTotal = this.summaryFilter.reduce((currentTotal, item) =>{
-        return item.total + currentTotal
-      }, 0)
-      this.summaryLeft = this.summaryFilter.reduce((leftTotal, item) => {
-        return (!item.published) ? leftTotal + (item.total || 0) : leftTotal
-      }, 0)
-      if (!this.summaryDialog) {
-        this.summaryDialog = true;
+      // 🔹 Supplier-only extra logic
+      if (summaryField === 'supplier') {
+        const budgetResponse = await apiService.clientGetEntities(TABLE_MODEL, { table_id: 3, description: summaryItem })
+        this.summaryBudget = budgetResponse.data[0]?.table_code || 0
       }
+
+      this.summaryFilter.sort((a, b) => new Date(b.date) - new Date(a.date))
+      this.exportData = this.summaryFilter.map((item) => {
+        return {...item, date: item.date ? this.toExcelDate(item.date) : ''}
+      })
+      this.summaryName = summaryItem
+      this.summaryTotal = this.summaryFilter.reduce((total, item) => total + (item.total || 0), 0)
+      this.summaryLeft  = this.summaryFilter.reduce((left, item) => (!item.published ? left + (item.total || 0) : left), 0)
+
+      if (!this.summaryDialog) { this.summaryDialog = true }
       this.isLoading = false
-		},
+    },
+
 
     async retriveBookData(item){
       const response = await apiService.clientGetEntities(BOOKS_MODEL,{ asmacta1: item.invoiceId, year: item.year, company: item.company});
@@ -409,12 +406,14 @@ export default {
       }
 			if (response && response.data) {
 				this.invoiceList = response.data;
-        // this.invoiceList.sort((a, b) => b.group - a.group);
         this.invoiceList.sort((a, b) => {
           if (b.group !== a.group) {return b.group - a.group;} // Sort by group
           if (a.date !== b.date) {return new Date(b.date) - new Date(a.date);} // If group is the same, sort by date
           return new Date(b.createdAt) - new Date(a.createdAt); // If date is also the same, sort by createdAt
         });
+        this.exportData = this.invoiceList.map((item) => {
+          return {...item, date: item.date ? this.toExcelDate(item.date) : ''}
+        })
         this.pending = this.invoiceList.filter((item) =>{
           return (item.published === false)
         }).reduce ((pendingTotal, item1) => {
@@ -482,11 +481,6 @@ export default {
 
     // called @click on toggle "published" field
 		async togglePublished(item) {
-			// await apiService.update(
-			// 	item._id,
-			// 	{ published: item.published },
-			// 	{ model: INVOICE_MODEL }
-			// );
       await apiService.updateEntity(
         { _id: item._id },                 // filter
         { published: item.published },     // data
@@ -506,11 +500,6 @@ export default {
         let response = await apiService.clientGetEntities(INVOICE_MODEL, { supplier: 'אייל' })
         if(response.data){
           response.data.map(async (item) => {
-            // apiService.update(
-            //   item._id,
-            //   { supplier: '' },
-            //   { model: INVOICE_MODEL }          
-            // )
             await apiService.updateEntity(
               { _id: item._id },       // filter (which document to update)
               { supplier: '' },        // data (fields to change)
@@ -530,72 +519,40 @@ export default {
 			return classes;
 		},
 
-    // addPaymentRow() {
-		// 	this.invoice.payments.push({ checkID: 0, payment: 0, date: moment(new Date()).format('YYYY-MM-DD') });
-		// },
-
-    // onAmountChange() {
-    //   let { amount } = this.invoice;
-    //   if(amount && amount >= 0) {
-    //       this.invoice.vat = ((parseFloat(amount) * VAT_PERCENTAGE)/100)
-    //       this.invoice.total = (this.invoice.vat + parseFloat(amount)).toFixed(0);
-    //   } else {
-    //       this.invoice.amount = 0;
-    //       this.invoice.vat = 0;
-    //       this.invoice.total = 0;
-    //   }
-    // },
-
-    // onTotalChange() {
-    //   let { total } = this.invoice;
-    //   if(total && total >= 0) {
-    //       this.invoice.amount = (parseFloat(total)/(1+VAT_PERCENTAGE/100)).toFixed(0);
-    //       this.invoice.vat = (parseFloat(total)- this.invoice.amount).toFixed(0);
-    //   } else {
-    //       this.invoice.amount = 0;
-    //       this.invoice.vat = 0;
-    //       this.invoice.total = 0;
-    //   }
-    // },
-
-    // onDateChange() {
-    //   this.invoice.year = new Date((this.invoice.date)).getFullYear();
-    // },
-
     selectRow() {
       // this.selected[0] ? this.$emit('lookForMatch', this.selected[0]) : ''
       this.$emit('lookForMatch', this.selected[0] || '')
     },
 
-    async exportAll() {
-      let response = '';
-			this.isLoading = true;
-      response = await apiService.clientGetEntities(INVOICE_MODEL);
-			if (response && response.data) {
-				this.invoiceList = response.data;
-        this.invoiceList.sort((a, b) => b.group - a.group);
-        this.header = 'All Invoices '
-				this.isLoading = false;
-			}
-    },
+    // async exportAll() {
+    //   let response = '';
+		// 	this.isLoading = true;
+    //   response = await apiService.clientGetEntities(INVOICE_MODEL);
+		// 	if (response && response.data) {
+		// 		this.invoiceList = response.data;
+    //     this.invoiceList.sort((a, b) => b.group - a.group);
+    //     this.header = 'All Invoices '
+		// 		this.isLoading = false;
+		// 	}
+    // },
 
-    async fetchData(){  // used during extract all data to "vue-excel-export"
-        this.isLoading = true;
-        const response = await apiService.clientGetEntities(INVOICE_MODEL);
-        let data = response.data.map((item) => {
-          item.date = new Date (item.date).toLocaleDateString('en-GB')
-          return ({...item, payments: item.payments.length
-            ? item.payments.map((item1) => {
-                let redeemed = item1.redeemed ? true : false;
-                return (["checkID",item1.checkID,
-                        "date",new Date (item1.date).toLocaleDateString('en-GB'),
-                        "payment",item1.payment,
-                        "redeemed", redeemed])}) 
-            : ''})
-        })
-        this.isLoading = false;
-        return data;
-    },
+    // async fetchData(){  // used during extract all data to "vue-excel-export"
+    //     this.isLoading = true;
+    //     const response = await apiService.clientGetEntities(INVOICE_MODEL);
+    //     let data = response.data.map((item) => {
+    //       item.date = new Date (item.date).toLocaleDateString('en-GB')
+    //       return ({...item, payments: item.payments.length
+    //         ? item.payments.map((item1) => {
+    //             let redeemed = item1.redeemed ? true : false;
+    //             return (["checkID",item1.checkID,
+    //                     "date",new Date (item1.date).toLocaleDateString('en-GB'),
+    //                     "payment",item1.payment,
+    //                     "redeemed", redeemed])}) 
+    //         : ''})
+    //     })
+    //     this.isLoading = false;
+    //     return data;
+    // },
 
     async uploadBackup2GDrive(){
       this.isLoading = true;
@@ -628,46 +585,14 @@ export default {
       await this.$refs.modalDialog.open(fileview);
     },
 
-    // loadPickerApi() {
-    //   if (gapi) {
-    //     gapi.load("picker", { callback: this.createPicker });
-    //   } else {
-    //     console.error("Google API not initialized");
-    //   }
-    // },
-
-    // openDrive() {
-    //   this.createPicker();  // Open the picker directly
-    // },
-
-    // async createPicker() {
-    //   const token = this.token;  // Use the saved access token directly
-
-    //   if (!token) {
-    //     console.error('Access token is missing!');
-    //     return;
-    //   }
-      
-    //   const response = await checkGoogleStatus();
-    //   console.log("connecting....");
-    //   if (response.data.connected) {
-    //     this.token = response.data.access_token;
-    //   }
-
-    //   const picker = new google.picker.PickerBuilder()
-    //                     .addView(
-    //                       new google.picker.DocsView(google.picker.ViewId.DRIVE)
-    //                         .setParent(this.folderId)
-    //                         .setIncludeFolders(true)
-    //                     )
-    //                     .setOAuthToken(token)
-    //                     .setDeveloperKey(this.developerKey)
-    //                     .build();
-
-      
-    //  // picker.setVisible(true);
-      
-    // },
+    toExcelDate(isoString) {
+      if (!isoString) return null
+      // Important: remove timezone shift if this is a pure business date
+      const [year, month, day] = isoString.substring(0, 10).split('-')
+      return (day + '/' + month + '/' + year) 
+      // return new Date(year, month - 1, day) 
+      // local date, no UTC shift
+    },
 	},
 
 	async mounted() {
