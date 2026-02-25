@@ -29,7 +29,7 @@
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
               <v-spacer></v-spacer>
-              <div @click="toggleList" :class="{'hdr-styles' : notPayedList}">
+              <div @click="toggleList" style="cursor: pointer;">
                 To pay = {{ pending.toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,}) }}
               </div>
               <v-spacer></v-spacer>
@@ -129,64 +129,31 @@
         <v-btn v-if="$route.params.project || $route.params.supplier" @click="$router.go(-1)" class="mt-2 ml-10">back</v-btn>
       </v-flex>
 
-      <!-- SummaryDialog for supplier/Project/Group -->
-      <v-dialog v-model="summaryDialog" max-width="1100px">
-        <v-card>
-          <v-flex>
-            <v-data-table
-              :headers="summaryHeaders"
-              :items="summaryFilter"
-              disable-pagination
-              hide-default-footer
-              fixed-header
-              :item-class="itemRowBackground"
-              mobile-breakpoint="0"
-              @click:row="getInvoiceForEdit"
-              class="elevation-3 list"
-              dense
-              height="70vh">
-              <template v-slot:top>
-                <v-toolbar>
-                  <v-spacer />
-                    <export-excel
-                      :data="exportData"
-                      type="xlsx"
-                      :name="summaryName.toLocaleString()"
-                      class="mt-3">
-                      <v-toolbar-title>
-                        <div>
-                          <span>{{ summaryName }} - {{ summaryTotal.toLocaleString() }} (Left: {{ summaryLeft.toLocaleString() }})</span>
-                          <span v-if="summaryBudget">{{ ' ------------ תקציב - '  + summaryBudget.toLocaleString()}}</span>
-                          <v-btn small class="btn btn-danger"> <v-icon>mdi-download</v-icon> </v-btn>
-                        </div>
-                      </v-toolbar-title>
-                    </export-excel>
-                  <v-spacer />
-                </v-toolbar>
-              </template>
-              <template v-slot:[`item.total`]="{ item }">
-                <span>{{ item.total ? item.total.toLocaleString() : "" }}</span>
-              </template>
-              <template v-slot:[`item.date`]="{ item }">
-                <span> {{ item.date | formatDate }}</span>
-              </template>
-              <template v-slot:[`item.published`]="{ item }">
-                <td @click.stop>
-                  <v-checkbox v-model="item.published" @click="togglePublished(item)"></v-checkbox>
-                </td>
-              </template>
-              <template v-slot:[`item.invoiceId`]="{ item }">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on }">
-                      <span v-on="on" :class="item.GDFileId ? 'summary' : ''" @click.stop="item.GDFileId ? clickToView(item.GDFileId) : null">{{ item.invoiceId }}</span>
-                    </template>
-                    <span>{{item.GDFileName}}</span>
-                  </v-tooltip>
-              </template>
-            </v-data-table>
-          </v-flex>
-        </v-card>
-      </v-dialog>
+      <!-- Unpaid suppliers summary dialog (component) -->
+      <UnpaidSummaryDialog
+        :open="unpaidSummaryDialog"
+        :items="unpaidSummaryData"
+        :pending="pending"
+        @close="unpaidSummaryDialog = false"
+        @supplier-selected="unpaidClick" />
+
+
+      <!-- Invoice summary dialog (component) -->
+      <InvoiceSummaryDialog
+        :open="summaryDialog"
+        :items="summaryFilter"
+        :headers="summaryHeaders"
+        :title="summaryName"
+        :total="summaryTotal"
+        :left="summaryLeft"
+        :budget="summaryBudget"
+        :exportData="exportData"
+        :itemClass="itemRowBackground"
+        :hideLeft="summaryHideLeft"
+        @close="summaryDialog = false"
+        @row-clicked="getInvoiceForEdit"
+        @toggle-published="togglePublished"
+        @view-file="clickToView" />
 
       <invoice-form ref="invoiceForm"/>
 
@@ -237,6 +204,8 @@ import invoiceForm from "./InvoiceForm.vue"
 import { isMobile } from '@/constants/constants';
 Vue.use(excel);
 import modalDialog from './Common/InvoiceModal.vue';
+import UnpaidSummaryDialog from './Dialogs/UnpaidSummaryDialog.vue';
+import InvoiceSummaryDialog from './Dialogs/InvoiceSummaryDialog.vue';
 
 Vue.filter("formatDate", function (value) {
 	if (value) {
@@ -248,19 +217,20 @@ let gapi = window.gapi;
 export default {
 	name: "invoicesList",
   props: ['showSelect'],
-	components: { invoiceForm, modalDialog },
+	components: { invoiceForm, modalDialog, UnpaidSummaryDialog, InvoiceSummaryDialog },
 	data() {
 		return {
       isMobile,
       loadTable,
 			invoiceList: [],
-			previusList: [], // used to store the prevoius invoiceList
 			companyName: [],
 			projectName: [],
 			supplierName: [],
 			invoiceID: 0,
 			dialog: false,
       bookDialog: false,
+      unpaidSummaryDialog: false,
+      unpaidSummaryData: [],
 			summaryDialog: false,
       summaryTotal: 0,
       summaryLeft: 0,
@@ -290,22 +260,6 @@ export default {
 			search: "",
 			headers: [],
       paymentDateDialog: false,
-			// xlsHeders: {
-			// 	חברה: "company",
-			// 	פרויקט: "project",
-			// 	תאור: "description",
-			// 	סכום: "amount",
-			// 	"מע-מ": "vat",
-			// 	"סה-כ": "total",
-			// 	קיבוץ: "group",
-			// 	תאריך: "date",
-			// 	ספק: "supplier",
-			// 	חשבונית: "invoiceId",
-			// 	excelRecID: "excelRecID",
-			// 	הערה: "remark", 
-			// 	נפרע: "published",
-      //   year: "year",
-			// },
 			invoice: [],
 			msg: "",
 			isLoading: true,
@@ -316,7 +270,6 @@ export default {
       dateModal : false,
       selected: [],
       header: '',
-      notPayedList: false,
       pending: '',
       folderId:localStorage.getItem('folderId'),
       token:localStorage.getItem('googleAccessToken'),
@@ -370,7 +323,8 @@ export default {
       this.summaryName = summaryItem
       this.summaryTotal = this.summaryFilter.reduce((total, item) => total + (item.total || 0), 0)
       this.summaryLeft  = this.summaryFilter.reduce((left, item) => (!item.published ? left + (item.total || 0) : left), 0)
-
+      // when called via getSummary (not from unpaid-click)
+      this.summaryHideLeft = false
       if (!this.summaryDialog) { this.summaryDialog = true }
       this.isLoading = false
     },
@@ -524,36 +478,6 @@ export default {
       this.$emit('lookForMatch', this.selected[0] || '')
     },
 
-    // async exportAll() {
-    //   let response = '';
-		// 	this.isLoading = true;
-    //   response = await apiService.clientGetEntities(INVOICE_MODEL);
-		// 	if (response && response.data) {
-		// 		this.invoiceList = response.data;
-    //     this.invoiceList.sort((a, b) => b.group - a.group);
-    //     this.header = 'All Invoices '
-		// 		this.isLoading = false;
-		// 	}
-    // },
-
-    // async fetchData(){  // used during extract all data to "vue-excel-export"
-    //     this.isLoading = true;
-    //     const response = await apiService.clientGetEntities(INVOICE_MODEL);
-    //     let data = response.data.map((item) => {
-    //       item.date = new Date (item.date).toLocaleDateString('en-GB')
-    //       return ({...item, payments: item.payments.length
-    //         ? item.payments.map((item1) => {
-    //             let redeemed = item1.redeemed ? true : false;
-    //             return (["checkID",item1.checkID,
-    //                     "date",new Date (item1.date).toLocaleDateString('en-GB'),
-    //                     "payment",item1.payment,
-    //                     "redeemed", redeemed])}) 
-    //         : ''})
-    //     })
-    //     this.isLoading = false;
-    //     return data;
-    // },
-
     async uploadBackup2GDrive(){
       this.isLoading = true;
       const response = await SpecificServiceEndPoints.Backup2GDrive();
@@ -569,15 +493,27 @@ export default {
     },
 
     toggleList() {
-      if (this.notPayedList) {
-        this.invoiceList = this.previusList;
+      // compute unpaid suppliers and open dialog; main list remains unchanged
+      const unpaidInvoices = this.invoiceList.filter(item => !item.published);
+      // compute totals and counts per supplier
+      const summaryObj = unpaidInvoices.reduce((acc, inv) => {
+        const supplier = inv.supplier || 'Unknown';
+        const amount = parseFloat(inv.total) || 0;
+        if (!acc[supplier]) acc[supplier] = { total: 0, count: 0 };
+        acc[supplier].total += amount;
+        acc[supplier].count += 1;
+        return acc;
+      }, {});
+
+      this.unpaidSummaryData = Object.entries(summaryObj).map(
+        ([supplier, { total, count }]) => ({ supplier, total, count })
+      );
+
+      if (this.unpaidSummaryData.length === 0) {
+        window.alert('There are no unpaid invoices.');
       } else {
-        this.previusList = this.invoiceList
-        this.invoiceList = this.invoiceList.filter((item) => {
-          return item.published === false
-        })
+        this.unpaidSummaryDialog = true;
       }
-      this.notPayedList = !this.notPayedList
     },
 
     async clickToView(GDFileId) {
@@ -592,6 +528,25 @@ export default {
       return (day + '/' + month + '/' + year) 
       // return new Date(year, month - 1, day) 
       // local date, no UTC shift
+    },
+
+    unpaidClick(item) {
+      // open detailed list of NOT PAID invoices for the supplier clicked
+      this.unpaidSummaryDialog = false;
+      const supplier = item.supplier;
+      // source the filtered invoices from current invoiceList (already showing unpaid)
+      const invoices = this.invoiceList.filter(inv => inv.supplier === supplier && !inv.published);
+      if (invoices.length > 0) {
+        this.summaryFilter = invoices;
+        this.summaryName = supplier;
+        this.summaryTotal = invoices.reduce((t,i) => t + (i.total || 0), 0);
+        this.summaryLeft = this.summaryTotal;
+        this.summaryBudget = 0; // not relevant here
+        this.summaryHideLeft = true; // hide left since same as total
+        if (!this.summaryDialog) { this.summaryDialog = true; }
+      } else {
+        window.alert(`No unpaid invoices found for ${supplier}`);
+      }
     },
 	},
 
@@ -608,12 +563,10 @@ export default {
 		});
 
     this.$root.$on("yearChange", (year) => {
-      this.notPayedList = false;
 			this.selectedYear = year;
 		});
 
     this.$root.$on("companyChange", (company) => {
-      this.notPayedList = false;
 			this.selectedCompany = company;
 		});
 
