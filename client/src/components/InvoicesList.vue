@@ -150,7 +150,9 @@
         :exportData="exportData"
         :itemClass="itemRowBackground"
         :hideLeft="summaryHideLeft"
-        @close="summaryDialog = false"
+        :isNestedDialog="invoiceSummaryFromUnpaid"
+        @close="handleInvoiceSummaryClose"
+        @back="handleInvoiceSummaryBack"
         @row-clicked="getInvoiceForEdit"
         @toggle-published="togglePublished"
         @view-file="clickToView" />
@@ -231,6 +233,7 @@ export default {
       bookDialog: false,
       unpaidSummaryDialog: false,
       unpaidSummaryData: [],
+      invoiceSummaryFromUnpaid: false,
 			summaryDialog: false,
       summaryTotal: 0,
       summaryLeft: 0,
@@ -532,7 +535,6 @@ export default {
 
     unpaidClick(item) {
       // open detailed list of NOT PAID invoices for the supplier clicked
-      this.unpaidSummaryDialog = false;
       const supplier = item.supplier;
       // source the filtered invoices from current invoiceList (already showing unpaid)
       const invoices = this.invoiceList.filter(inv => inv.supplier === supplier && !inv.published);
@@ -543,10 +545,19 @@ export default {
         this.summaryLeft = this.summaryTotal;
         this.summaryBudget = 0; // not relevant here
         this.summaryHideLeft = true; // hide left since same as total
+        this.invoiceSummaryFromUnpaid = true;
         if (!this.summaryDialog) { this.summaryDialog = true; }
       } else {
         window.alert(`No unpaid invoices found for ${supplier}`);
       }
+    },
+    handleInvoiceSummaryClose() {
+      this.summaryDialog = false;
+      this.invoiceSummaryFromUnpaid = false;
+    },
+    handleInvoiceSummaryBack() {
+      this.summaryDialog = false;
+      this.unpaidSummaryDialog = true;
     },
 	},
 

@@ -31,7 +31,9 @@
                 class="mt-3">
                 <v-btn small class="btn btn-danger"> <v-icon>mdi-download</v-icon> </v-btn>
               </export-excel>
-              <v-spacer />
+              <v-btn icon small @click="closeDialog" style="padding-right: 30px;">
+                <v-icon>mdi-close</v-icon>
+              </v-btn>
             </v-toolbar>
           </template>
           <template v-slot:[`item.total`]="{ item }">
@@ -79,6 +81,10 @@ export default {
     hideLeft: {
       type: Boolean,
       default: false
+    },
+    isNestedDialog: {
+      type: Boolean,
+      default: false
     }
   },
   data() {
@@ -91,10 +97,16 @@ export default {
       this.internalOpen = val;
     },
     internalOpen(val) {
-      if (!val) this.$emit('close');
+      if (!val) {
+        this.$emit(this.isNestedDialog ? 'back' : 'close');
+      }
     }
   },
   methods: {
+    closeDialog() {
+      this.$emit(this.isNestedDialog ? 'back' : 'close');
+      this.internalOpen = false;
+    },
     rowClicked(item) {
       this.$emit('row-clicked', item);
     },

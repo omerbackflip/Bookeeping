@@ -14,6 +14,7 @@
           :items="items"
           disable-pagination
           hide-default-footer
+          fixed-header
           class="elevation-2"
           @click:row="rowClicked"
           dense>
@@ -67,5 +68,8 @@ export default {
 </script>
 
 <style scoped>
-/* reuse any needed styles, or none */
+::v-deep .v-data-table__wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+}
 </style>
