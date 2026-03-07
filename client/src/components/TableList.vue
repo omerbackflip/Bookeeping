@@ -188,19 +188,26 @@
               loader-height="20"
               height="70vh">
               <template v-slot:top>
-                <v-toolbar style="font-size: x-large;">
-                  <v-btn-toggle v-model="company" @change="onCompanyChange" color="primary" dense group mandatory>
+                <v-toolbar color="primary" dark dense class="summary-toolbar">
+
+                  <div class="d-flex align-center">
+                    <v-chip small> זכות: {{ summaryZchut.toLocaleString() }}</v-chip>
+                    <v-chip small> חובה: {{ summaryHova.toLocaleString() }}</v-chip>
+                    <v-chip small :color="(summaryZchut - summaryHova) < 0 ? 'red' : ''" text-color="white">הפרש: {{ (summaryZchut - summaryHova).toLocaleString() }}</v-chip>
+                    <v-chip small> ספירה: {{ filteredData.length }}</v-chip>
+                  </div>
+                  <v-spacer></v-spacer>
+                  <v-toolbar-title class="summary-header">{{ summaryHeader }}</v-toolbar-title>
+                  <v-spacer></v-spacer>                  <export-excel :data="filteredData" type="xlsx" name="summary-data" title="Summary Data" footer="Exported from Book App">
+                    <v-btn icon small color="white">
+                      <v-icon small>mdi-download</v-icon>
+                    </v-btn>
+                  </export-excel>                  <v-btn-toggle v-model="company" @change="onCompanyChange" dense group mandatory>
                     <v-btn value="ביצועים" text small> ביצועים </v-btn>
                     <v-btn value="יזמות"   text small> יזמות   </v-btn>
                   </v-btn-toggle>
-                  <v-spacer></v-spacer>
-                  Zhcut : {{ summaryZchut.toLocaleString() }}
-                  <v-spacer></v-spacer>
-                  <v-text-field v-model="summaryHeader" solo disabled hide-details dense style="text-align-last: center;">  {{summaryHeader}} </v-text-field>
-                  <v-spacer></v-spacer>
-                  Hova : {{ summaryHova.toLocaleString() }}
-                  <v-spacer></v-spacer>
-                  Count : {{ filteredData.length }}
+                  <v-divider vertical class="mx-3"></v-divider>
+
                 </v-toolbar>
               </template>
               <template v-slot:[`item.asmchta_date`]="{ item }">
@@ -427,6 +434,8 @@ export default {
       this.filteredData = this.summaryData.filter((item) => {
         return item.company === this.company
       })
+      // Sort by date ascending
+      this.filteredData.sort((a, b) => new Date(b.asmchta_date) - new Date(a.asmchta_date))
       this.summaryHova = this.filteredData.reduce((currentTotal, item) => {
             return (item.schum_hova + currentTotal) },0);
       this.summaryZchut = this.filteredData.reduce((currentTotal, item) => {
@@ -475,5 +484,19 @@ font-size: 16px;
 }
 .v-toolbar__content {
   justify-content: center;
+}
+
+/* cosmetic improvements for summary toolbar */
+.summary-toolbar {
+  font-size: 1.1rem;
+}
+
+.summary-header {
+  max-width: 300px;
+  text-align: center;
+}
+
+.summary-toolbar .v-chip {
+  font-weight: bold;
 }
 </style>
