@@ -89,7 +89,6 @@
 <script>
 import Vue from "vue";
 import moment from "moment";
-import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
@@ -97,7 +96,6 @@ import { INVOICE_MODEL, REVENUE_MODEL, SUMMARY_PROJECT_WEB_HEADERS, SUMMARY_PROJ
 import { isMobile } from '../constants/constants';
 // import ApexCharts from 'apexcharts';
 import VueApexCharts from 'vue-apexcharts'
-Vue.use(excel);
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')

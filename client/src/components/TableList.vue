@@ -264,11 +264,8 @@
 <script>
 import { BOOKS_MODEL, TABLE_MODEL } from '../constants/constants';
 import apiService from '../services/apiService';
-import excel from "vue-excel-export";
 import Vue from "vue";
 import moment from "moment";
-
-Vue.use(excel);
 
 Vue.filter("formatDate", function (value) {
 	if (value) {

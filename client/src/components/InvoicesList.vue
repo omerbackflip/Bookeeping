@@ -196,7 +196,6 @@
 <script>
 import Vue from "vue";
 import moment from "moment";
-import excel from "vue-excel-export";
 import apiService from "@/services/apiService";
 import SpecificServiceEndPoints from "@/services/specificServiceEndPoints";
 import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, 
@@ -204,7 +203,6 @@ import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS,
           loadTable} from "@/constants/constants";
 import invoiceForm from "./InvoiceForm.vue"
 import { isMobile } from '@/constants/constants';
-Vue.use(excel);
 import modalDialog from './Common/InvoiceModal.vue';
 import UnpaidSummaryDialog from './Dialogs/UnpaidSummaryDialog.vue';
 import InvoiceSummaryDialog from './Dialogs/InvoiceSummaryDialog.vue';

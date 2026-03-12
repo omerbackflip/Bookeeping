@@ -44,11 +44,8 @@
 <script>
 import Vue from "vue";
 import moment from "moment";
-import excel from "vue-excel-export";
 import apiService from "../services/apiService";
 import { INVOICE_MODEL, SUMMARY_SUPPLIER_HEADERS, loadTable } from "../constants/constants";
-
-Vue.use(excel);
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')

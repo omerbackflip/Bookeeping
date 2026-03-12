@@ -119,13 +119,9 @@
 <script>
 import Vue from "vue";
 import moment from "moment";
-import excel from "vue-excel-export";
 // import VueVirtualTable from 'vue-virtual-table'
 import apiService from '../services/apiService';
 import { BOOKS_MODEL, loadTable } from '../constants/constants';
-
-
-Vue.use(excel);
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')

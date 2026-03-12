@@ -16,23 +16,27 @@
           height="70vh">
           <template v-slot:top>
             <v-toolbar>
+              <export-excel
+                :data="exportData"
+                type="xlsx"
+                :name="title.toLocaleString()"
+                class="mt-1 ml-5">
+                <v-btn small class="btn btn-danger"> <v-icon small>mdi-download</v-icon> </v-btn>
+              </export-excel>
+
+
+
               <v-toolbar-title class="text-center" style="width:100%;">
                 <div>
                   <span>{{ title }} - {{ total.toLocaleString() }}<span v-if="!hideLeft"> (Left: {{ left.toLocaleString() }})</span></span>
                   <span v-if="budget">{{ ' ------------ תקציב - '  + budget.toLocaleString()}}</span>
                 </div>
               </v-toolbar-title>
+
+
               <v-spacer />
-              <!-- export button separated so header still renders even if export fails -->
-              <export-excel
-                :data="exportData"
-                type="xlsx"
-                :name="title.toLocaleString()"
-                class="mt-3">
-                <v-btn small class="btn btn-danger"> <v-icon>mdi-download</v-icon> </v-btn>
-              </export-excel>
-              <v-btn icon small @click="closeDialog" style="padding-right: 30px;">
-                <v-icon>mdi-close</v-icon>
+              <v-btn small @click="closeDialog" class="btn btn-danger mr-3">
+                <v-icon small>mdi-close</v-icon>
               </v-btn>
             </v-toolbar>
           </template>
@@ -63,11 +67,10 @@
 
 <script>
 import modalDialog from '../Common/InvoiceModal.vue';
-import exportExcel from 'vue-excel-export';
 
 export default {
   name: 'InvoiceSummaryDialog',
-  components: { modalDialog, exportExcel },
+  components: { modalDialog },
   props: {
     open: Boolean,
     items: Array,
