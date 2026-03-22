@@ -6,3 +6,6 @@
 	path = app/shared/mongoose
 	url = https://github.com/omerbackflip/mongoose
 	branch = master
+[submodule "google"]
+	path = google
+	url = https://github.com/omerbackflip/google.git
