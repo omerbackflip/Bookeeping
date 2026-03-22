@@ -15,6 +15,8 @@ const { ServerApp } = require("../config/constants");
 const dbService = require("../shared/mongoose/services/db-service");
 const { google } = require('googleapis');
 const googleService = require('../services/google-service');
+const googleSubmoduleService = require('../services/google-submodule-service');
+
 
 exports.saveInvoicesBulk1 = async (req, res) => {
 	try {
@@ -239,8 +241,7 @@ exports.backup2GDrive = async (req, res) => { // upload Backup Excel
 			let invoiceData = specificService.getInvoicesToExcelExport(invoices);
 			let invoiceExecelFile =  createExcel(invoiceData);
 			if(invoiceExecelFile){
-				auth = await googleService.getAuth();
-				const file = await googleService.uploadBackup2GDrive(auth, invoiceExecelFile.filename);
+				const file = await googleSubmoduleService.uploadBackupExcelToDrive(invoiceExecelFile.filename);
 				if(file.id){ // after uploading the excel file, remove the tmporary excel file from "upload" directory
 					fs.unlinkSync(invoiceExecelFile.filePath);
 				}

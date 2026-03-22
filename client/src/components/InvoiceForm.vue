@@ -154,8 +154,9 @@
 import { INVOICE_MODEL, loadTable, VAT_PERCENTAGE } from "@/constants/constants";
 import apiService from "@/services/apiService";
 import specificService from "@/services/specificServiceEndPoints";
-import { checkGoogleStatus } from "@/utils/commonService";
-import GooglePicker from 'google-drive-picker';
+// import { checkGoogleStatus } from "@/utils/commonService";
+// import GooglePicker from 'google-drive-picker';
+import { openPicker } from "../../../google/frontend/index.js";
 import CameraForm from "./camForm.vue";
 import Vue from "vue";
 import moment from "moment";
@@ -197,8 +198,8 @@ export default {
         // isModalOpen: false, 
         iframeSrc: '', 
         folderId:localStorage.getItem('folderId'),
-        token:localStorage.getItem('googleAccessToken'),
-        developerKey:localStorage.getItem('developerKey'),
+        // token:localStorage.getItem('googleAccessToken'),
+        // developerKey:localStorage.getItem('developerKey'),
       };
     },
 
@@ -343,40 +344,68 @@ export default {
       //   this.iframeSrc = ''; // Clear iframe source
       // },
 
-      loadPickerApi() {
-        if (gapi) {
-          gapi.load('picker', { 'callback': this.createPicker });
-        } else {
-          console.error("Google API not initialized");
-        }
-      },
-
-      // openDrive() {
-      //   this.createPicker();  // Open the picker directly
+      // loadPickerApi() {
+      //   if (gapi) {
+      //     gapi.load('picker', { 'callback': this.createPicker });
+      //   } else {
+      //     console.error("Google API not initialized");
+      //   }
       // },
 
-      async createPicker() {
-        const token = this.token;  // Use the saved access token directly
-        if (!token) {
-          console.error('Access token is missing!');
-          return;
+      // // openDrive() {
+      // //   this.createPicker();  // Open the picker directly
+      // // },
+
+      // async createPicker() {
+      //   const token = this.token;  // Use the saved access token directly
+      //   if (!token) {
+      //     console.error('Access token is missing!');
+      //     return;
+      //   }
+      //   const response = await checkGoogleStatus();
+      //   console.log("connecting to picker....");
+      //   if (response.data.connected) {
+      //     this.token = response.data.access_token;
+      //   }
+      //   const picker = new google.picker.PickerBuilder()
+      //                     .addView(
+      //                       new google.picker.DocsView(google.picker.ViewId.DRIVE)
+      //                         .setParent(this.folderId)
+      //                         .setIncludeFolders(true)
+      //                     )
+      //                     .setOAuthToken(this.token)
+      //                     .setDeveloperKey(this.developerKey)
+      //                     .setCallback(this.pickerCallback)
+      //                     .build();
+      //   picker.setVisible(true);
+      // },
+
+      async loadPickerApi() {
+        console.log('loadPickerApi clicked');
+
+        try {
+          const file = await openPicker({
+            clientId: '114393767822-2c83o787qugs9crttnlosskgfkb8jqsv.apps.googleusercontent.com',
+            apiKey: 'AIzaSyBCJ6lUVaALeWkjO6NiYNztOqjQbQWebM8',
+            appId: '114393767822',
+            scope: 'https://www.googleapis.com/auth/drive.readonly'
+          });
+
+          console.log('openPicker returned:', file);
+
+          if (!file) {
+            return;
+          }
+
+          this.invoice.GDFileId = file.fileId;
+          this.invoice.GDFileName = file.name;
+
+          this.$nextTick(() => {
+            console.log('DOM Updated with File ID:', this.invoice.GDFileId);
+          });
+        } catch (error) {
+          console.error('Google Picker error:', error);
         }
-        const response = await checkGoogleStatus();
-        console.log("connecting to picker....");
-        if (response.data.connected) {
-          this.token = response.data.access_token;
-        }
-        const picker = new google.picker.PickerBuilder()
-                          .addView(
-                            new google.picker.DocsView(google.picker.ViewId.DRIVE)
-                              .setParent(this.folderId)
-                              .setIncludeFolders(true)
-                          )
-                          .setOAuthToken(this.token)
-                          .setDeveloperKey(this.developerKey)
-                          .setCallback(this.pickerCallback)
-                          .build();
-        picker.setVisible(true);
       },
 
       pickerCallback(data) {
@@ -384,7 +413,7 @@ export default {
           // const fileId = data.docs[0].id;
           this.invoice.GDFileId = data.docs[0].id;
           this.invoice.GDFileName = data.docs[0].name;
-          this.$nextTick(() => { // this is needed to refresh the DOM
+          this.$nextTick(() => { // this was added because sometime DOM wasnt refreshed
             console.log('DOM Updated with File ID:', this.invoice.GDFileId);
           });
         }
