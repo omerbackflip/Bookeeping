@@ -14,7 +14,7 @@ const specificService = require("../services/specific-service");
 const { ServerApp } = require("../config/constants");
 const dbService = require("../shared/mongoose/services/db-service");
 const { google } = require('googleapis');
-const googleService = require('../services/google-service');
+// const googleService = require('../services/google-service');
 const googleSubmoduleService = require('../services/google-submodule-service');
 
 
@@ -271,8 +271,38 @@ exports.uploadInvoicesToGoogleDrive = async (req, res) => { // upload specific i
     fs.renameSync(file.path, newFilePath);
 	const {group} = req.body;
 	let filepath = `${group}`;
-	const auth = await googleService.getAuth();
-	const uploadedFile = await googleService.uploadInvoiceToGoogleDrive(auth, newFileName,filepath);
+
+	// const auth = await googleService.getAuth();
+	// const uploadedFile = await googleService.uploadInvoiceToGoogleDrive(auth, newFileName,filepath);
+
+	const { createOAuthClient, createFileTokenStore, uploadFile } = require('../../google/backend');
+	const tokenStore = createFileTokenStore(
+	path.join(process.cwd(), 'app/config/token.json')
+	);
+
+	const oAuth2Client = createOAuthClient({
+	clientId: process.env.GOOGLE_CLIENT_ID,
+	clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+	redirectUri: process.env.GOOGLE_REDIRECT_URI
+	});
+
+	const tokens = tokenStore.load();
+
+	if (!tokens) {
+	return res.status(401).send({ message: 'Google not connected' });
+	}
+
+	oAuth2Client.setCredentials(tokens);
+
+	const uploadedFile = await uploadFile({
+	oAuth2Client,
+	name: newFileName,
+	mimeType: 'image/png', // adjust if needed
+	body: fs.createReadStream(newFilePath),
+	folderId: ServerApp.google.storeInvoiceFolderIds[0]
+	});
+
+
 	fs.unlinkSync(newFilePath);
 	if (!uploadedFile || !uploadedFile.id) {
 	    return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
@@ -281,69 +311,40 @@ exports.uploadInvoicesToGoogleDrive = async (req, res) => { // upload specific i
 }
 
 exports.googleConnectionStatus = async (req, res) => {
-	try{
-		let auth = await googleService.getAuth();
-		
-		if(auth instanceof google.auth.OAuth2){
-			
-			const userInfo = await googleService.getUser(auth);
-			const username = (userInfo != false ? userInfo.name : null);
-			let token = JSON.parse(fs.readFileSync(ServerApp.configFolderPath + 'token.json'));
-			const { access_token,refresh_token } = token;
-			
-			//if(!username){
-				 await googleService.refreshAccessToken(auth,refresh_token);
-				 token = JSON.parse(fs.readFileSync(ServerApp.configFolderPath + 'token.json'));
-			//}
+  try {
+    const tokenPath = ServerApp.configFolderPath + 'token.json';
+    const credentialsPath = ServerApp.configFolderPath + 'google-credentials.json';
 
-			const credentials = JSON.parse(fs.readFileSync(ServerApp.configFolderPath + 'google-credentials.json'));
-			
-  
-  			const { client_secret, client_id,developer_key } = credentials.web;
-  			
+    const tokenExists = fs.existsSync(tokenPath);
+	const client_secret = process.env.GOOGLE_CLIENT_SECRET;
+	const client_id = process.env.GOOGLE_CLIENT_ID;
+	const developerKey = process.env.VUE_APP_GOOGLE_API_KEY || null;
 
-			res.send({
-				connected: true,
-				username: username,
-				client_secret:client_secret,
-				client_id:client_id,
-				developerKey:developer_key,
-				access_token:access_token,
-				folderId:ServerApp.google.storeInvoiceFolderIds
-			});
+    if (!tokenExists) {
+      return res.send({
+        connected: false,
+        authUrl: '/api/google/auth'
+      });
+    }
+    const token = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
+    const { access_token } = token;
 
-		}else{
-			res.send({
-				connected: false,
-				authUrl: auth
-			});
-		}
-
-	} catch (error) {
-		console.log(error)
-		res.status(500).send({
-			message: "Error while checking google connection."
-		});
-	}
+    return res.send({
+      connected: true,
+      username: null,
+      client_secret,
+      client_id,
+      developerKey: developerKey,
+      access_token,
+      folderId: ServerApp.google.storeInvoiceFolderIds
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({
+      message: "Error while checking google connection."
+    });
+  }
 };
-
-exports.googleAuthHandler = async (req, res) => {
-	try{
-		
-		const oAuth2Client = googleService.getAuthClient();
-		const code = req.query.code;
-
-		googleService.getToken(oAuth2Client, code);
-		
-		res.redirect(`${process.env.CLIENT_URL}?success=true`);
-		
-	} catch (error) {
-		console.log(error)
-		res.status(500).send({
-			message: "Error while checking google connection."
-		});
-	}
-}
 
 function unLinkFile(path) {
 	fs.unlinkSync(path);

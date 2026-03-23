@@ -161,6 +161,8 @@ import CameraForm from "./camForm.vue";
 import Vue from "vue";
 import moment from "moment";
 import modalDialog from './Common/InvoiceModal.vue';
+import { pickGoogleDriveFile } from '../../../google/frontend';
+
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -381,28 +383,14 @@ export default {
       // },
 
       async loadPickerApi() {
-        console.log('loadPickerApi clicked');
-
         try {
-          const file = await openPicker({
-            clientId: '114393767822-2c83o787qugs9crttnlosskgfkb8jqsv.apps.googleusercontent.com',
-            apiKey: 'AIzaSyBCJ6lUVaALeWkjO6NiYNztOqjQbQWebM8',
-            appId: '114393767822',
-            scope: 'https://www.googleapis.com/auth/drive.readonly'
-          });
+          const file = await pickGoogleDriveFile();
 
-          console.log('openPicker returned:', file);
-
-          if (!file) {
-            return;
-          }
+          if (!file) return;
 
           this.invoice.GDFileId = file.fileId;
           this.invoice.GDFileName = file.name;
 
-          this.$nextTick(() => {
-            console.log('DOM Updated with File ID:', this.invoice.GDFileId);
-          });
         } catch (error) {
           console.error('Google Picker error:', error);
         }

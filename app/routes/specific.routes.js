@@ -22,7 +22,6 @@ module.exports = app => {
   router.post("/backup-to-GDrive", specific.backup2GDrive); // upload Backup Excel 
   router.post("/upload-to-google-drive",upload.single('file') , specific.uploadInvoicesToGoogleDrive) // upload specific invoice/gpj 
   router.get("/get-google-connection-status", specific.googleConnectionStatus);
-  router.get("/google-auth-handler", specific.googleAuthHandler);
 
   app.use('/api/specific', router);
 };

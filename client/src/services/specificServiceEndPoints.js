@@ -74,6 +74,14 @@ class SpecificServiceEndPoints {
   async getGoogleConnectionStatus(){
     return await axios.get(`${baseUrl}/specific/get-google-connection-status`);
   }
+
+  async getPickerToken() {
+    return await axios.get(`${baseUrl.replace('/specific', '')}/google/picker-token`);
+  }
+
+  // async getPickerToken() {
+  //   return await axios.get(`${process.env.VUE_APP_API_URL.replace(/\/specific$/, '')}/google/picker-token`);
+  // }
 }
 
 export default new SpecificServiceEndPoints();

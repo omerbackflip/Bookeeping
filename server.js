@@ -1,5 +1,6 @@
 require('dotenv').config(); // Load environment variables from .env file
-
+const { createGoogleRouter, createFileTokenStore } = require('./google/backend');
+const path = require('path');
 const express = require("express");
 const cors = require("cors");
 
@@ -16,6 +17,18 @@ app.use(express.json());
 
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+
+const tokenStore = createFileTokenStore(
+  path.join(__dirname, 'app/config/token.json')
+);
+
+app.use('/api/google', createGoogleRouter({
+  clientId: process.env.GOOGLE_CLIENT_ID,
+  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+  redirectUri: process.env.GOOGLE_REDIRECT_URI,
+  scopes: process.env.GOOGLE_SCOPES,
+  tokenStore
+}));
 
 
 // Don’t forget to call connect() method in server.js (here, this file):

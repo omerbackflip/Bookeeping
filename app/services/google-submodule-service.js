@@ -1,7 +1,6 @@
 const path = require('path');
 const fs = require('fs');
 const { ServerApp } = require('../config/constants');
-const googleCredentials = require('../config/google-credentials.json');
 
 const {
   createOAuthClient,
@@ -14,12 +13,10 @@ const tokenStore = createFileTokenStore(
 );
 
 function getOAuthClientFromStoredTokens() {
-  const web = googleCredentials.web;
-
   const oAuth2Client = createOAuthClient({
-    clientId: web.client_id,
-    clientSecret: web.client_secret,
-    redirectUri: web.redirect_uris[0]
+    clientId: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    redirectUri: process.env.GOOGLE_REDIRECT_URI
   });
 
   const tokens = tokenStore.load();
