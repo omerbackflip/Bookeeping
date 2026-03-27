@@ -151,7 +151,7 @@
 </template>
 
 <script>
-import { INVOICE_MODEL, loadTable, VAT_PERCENTAGE } from "@/constants/constants";
+import { INVOICE_MODEL, loadTable, VAT_PERCENTAGE, GOOGLE_PICKER_INVOICE_CONFIG } from "@/constants/constants";
 import apiService from "@/services/apiService";
 import specificService from "@/services/specificServiceEndPoints";
 // import { checkGoogleStatus } from "@/utils/commonService";
@@ -162,7 +162,6 @@ import Vue from "vue";
 import moment from "moment";
 import modalDialog from './Common/InvoiceModal.vue';
 import { pickGoogleDriveFile } from '../../../google/frontend';
-
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -384,7 +383,11 @@ export default {
 
       async loadPickerApi() {
         try {
-          const file = await pickGoogleDriveFile();
+          const file = await pickGoogleDriveFile({
+            folderId: GOOGLE_PICKER_INVOICE_CONFIG.folderId,
+            includeFolders: GOOGLE_PICKER_INVOICE_CONFIG.includeFolders,
+            multiselect: false
+          });
 
           if (!file) return;
 
