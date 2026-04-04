@@ -64,9 +64,12 @@
                       <div v-else class="invoice-box">
                         <v-text-field disabled placeholder="Upload Invoice"></v-text-field>
                         <v-col>
-                          <v-btn x-small @click="loadPickerApi()" class="ml-1">
-                            <v-icon x-small>mdi-google-drive</v-icon>
-                          </v-btn>
+                        <GooglePicker
+                          :folderId="GOOGLE_PICKER_PARAMS.folderId"
+                          :includeFolders="GOOGLE_PICKER_PARAMS.includeFolders"
+                          :multiselect="false"
+                          @picked="onInvoiceFilePicked"
+                        />
                           <v-btn x-small @click="openCameraDialog" class="ml-1">
                             <v-icon x-small>mdi-camera</v-icon>
                           </v-btn>
@@ -151,17 +154,13 @@
 </template>
 
 <script>
-import { INVOICE_MODEL, loadTable, VAT_PERCENTAGE, GOOGLE_PICKER_INVOICE_CONFIG } from "@/constants/constants";
+import { INVOICE_MODEL, loadTable, GOOGLE_PICKER_PARAMS } from "@/constants/constants";
 import apiService from "@/services/apiService";
-import specificService from "@/services/specificServiceEndPoints";
-// import { checkGoogleStatus } from "@/utils/commonService";
-// import GooglePicker from 'google-drive-picker';
-import { openPicker } from "../../../google/frontend/index.js";
 import CameraForm from "./camForm.vue";
 import Vue from "vue";
 import moment from "moment";
 import modalDialog from './Common/InvoiceModal.vue';
-import { pickGoogleDriveFile } from '../../../google/frontend';
+import GooglePicker from "./GooglePicker.vue";
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -169,13 +168,13 @@ Vue.filter("formatDate", function (value) {
 	}
 });
 
-let gapi = window.gapi;
 export default {
     name: "invoice-form",
-    components:{ CameraForm, modalDialog },
+    components:{ CameraForm, modalDialog, GooglePicker },
     data() {
       return {
         loadTable,
+        GOOGLE_PICKER_PARAMS,
         showDrive:false,
         dialogCam:false,
         dialogInvForm: false,
@@ -335,84 +334,16 @@ export default {
         this.invoice.payments.splice(index, 1);
       },
 
-      // openModal() {
-      //   this.iframeSrc = this.invoice.GDFileId; // Set iframe source
-      //   this.isModalOpen = true; // Show modal
-      // },
-
-      // closeModal() {
-      //   this.isModalOpen = false; // Hide modal
-      //   this.iframeSrc = ''; // Clear iframe source
-      // },
-
-      // loadPickerApi() {
-      //   if (gapi) {
-      //     gapi.load('picker', { 'callback': this.createPicker });
-      //   } else {
-      //     console.error("Google API not initialized");
-      //   }
-      // },
-
-      // // openDrive() {
-      // //   this.createPicker();  // Open the picker directly
-      // // },
-
-      // async createPicker() {
-      //   const token = this.token;  // Use the saved access token directly
-      //   if (!token) {
-      //     console.error('Access token is missing!');
-      //     return;
-      //   }
-      //   const response = await checkGoogleStatus();
-      //   console.log("connecting to picker....");
-      //   if (response.data.connected) {
-      //     this.token = response.data.access_token;
-      //   }
-      //   const picker = new google.picker.PickerBuilder()
-      //                     .addView(
-      //                       new google.picker.DocsView(google.picker.ViewId.DRIVE)
-      //                         .setParent(this.folderId)
-      //                         .setIncludeFolders(true)
-      //                     )
-      //                     .setOAuthToken(this.token)
-      //                     .setDeveloperKey(this.developerKey)
-      //                     .setCallback(this.pickerCallback)
-      //                     .build();
-      //   picker.setVisible(true);
-      // },
-
-      async loadPickerApi() {
-        try {
-          const file = await pickGoogleDriveFile({
-            folderId: GOOGLE_PICKER_INVOICE_CONFIG.folderId,
-            includeFolders: GOOGLE_PICKER_INVOICE_CONFIG.includeFolders,
-            multiselect: false
-          });
-
-          if (!file) return;
-
-          this.invoice.GDFileId = file.fileId;
-          this.invoice.GDFileName = file.name;
-
-        } catch (error) {
-          console.error('Google Picker error:', error);
-        }
-      },
-
-      pickerCallback(data) {
-        if (data.action === google.picker.Action.PICKED) {
-          // const fileId = data.docs[0].id;
-          this.invoice.GDFileId = data.docs[0].id;
-          this.invoice.GDFileName = data.docs[0].name;
-          this.$nextTick(() => { // this was added because sometime DOM wasnt refreshed
-            console.log('DOM Updated with File ID:', this.invoice.GDFileId);
-          });
-        }
-      },
-
       bck_grnd(item) {
         let classes = item ? "bg-beige" :"";
         return classes;
+      },
+
+      onInvoiceFilePicked(file) {
+        if (!file) return;
+
+        this.invoice.GDFileId = file.fileId;
+        this.invoice.GDFileName = file.name;
       },
     },
     

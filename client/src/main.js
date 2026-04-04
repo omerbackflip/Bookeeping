@@ -7,11 +7,11 @@ import excel from 'vue-excel-export'
 import { setGoogleConfig } from '../../google/frontend';
 
 setGoogleConfig({
-  pickerTokenUrl: `${process.env.VUE_APP_API_URL.replace(/\/specific$/, '')}/google/picker-token`,
-  clientId: '114393767822-2c83o787qugs9crttnlosskgfkb8jqsv.apps.googleusercontent.com',
-  apiKey: 'AIzaSyBCJ6lUVaALeWkjO6NiYNztOqjQbQWebM8',
-  appId: '114393767822',
-  scope: 'https://www.googleapis.com/auth/drive.readonly'
+  pickerTokenUrl: `${process.env.VUE_APP_API_URL.replace('/specific', '')}/google/picker-token`,
+  clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+  apiKey: process.env.VUE_APP_GOOGLE_API_KEY,
+  appId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+  scope: process.env.VUE_APP_GOOGLE_SCOPE,
 });
 
 Vue.use(excel)

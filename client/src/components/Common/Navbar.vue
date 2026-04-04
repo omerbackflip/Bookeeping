@@ -62,7 +62,7 @@
                         <v-list-item-title class="white--text">{{link.text}}</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item @click="checkGoogleConnection()">
+                <!-- <v-list-item @click="checkGoogleConnection()">
                     <v-list-item-action>
                         <v-icon class="white--text">
                             links
@@ -73,7 +73,7 @@
                             {{ googleConnectMenuItem }}
                         </v-list-item-title>
                     </v-list-item-content>
-                </v-list-item>
+                </v-list-item> -->
             </v-list>
         </v-navigation-drawer>
         <template v-if="openImportModal">

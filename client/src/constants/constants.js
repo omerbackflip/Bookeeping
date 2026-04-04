@@ -120,7 +120,7 @@ export const loadTable = async (table_id) => {
     }
 };
 
-export const GOOGLE_PICKER_INVOICE_CONFIG = {
+export const GOOGLE_PICKER_PARAMS = {
   folderId: '1_rZaYVFJQVsyHq_8diKmU_dqb5lbNEyJ',
   includeFolders: true
 };
