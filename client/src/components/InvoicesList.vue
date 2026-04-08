@@ -36,7 +36,7 @@
               <div v-show="!isMobile()">
                 <v-row>
                   <v-col>
-                  <export-excel :data="exportData" type="xlsx" :name="header">
+                  <export-excel :data="$formatDataForExport(exportData)" type="xlsx" :name="header">
                     <v-btn x-small class="btn btn-danger">
                       <v-icon small>mdi-download</v-icon>
                     </v-btn>

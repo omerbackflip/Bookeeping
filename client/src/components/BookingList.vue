@@ -84,7 +84,7 @@
 						<v-toolbar>
 						<v-spacer />
 							<export-excel
-								:data="summaryFilter"
+								:data="$formatDataForExport(summaryFilter)"
 								type="xlsx"
 								:name="summaryName"
 								:title="summaryName"
@@ -191,7 +191,7 @@ export default {
 				bs_group_id: null,
 			},
 			isLoading: true,
-			selectedYear: '2025',
+			selectedYear: ['2025','2026'],
 			selectedCompany: 'ביצועים',
 			searchedBooks: [],
 			summaryDialog: false,

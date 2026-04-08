@@ -21,7 +21,7 @@
               <v-toolbar-title> Forecast Payments Count - {{paymentList.length.toLocaleString()}} </v-toolbar-title>
               <v-spacer></v-spacer>
               <export-excel
-                :data="paymentList"
+                :data="$formatDataForExport(paymentList)"
                 type="xlsx"
                 name="all-payments"
                 title="All Payments"

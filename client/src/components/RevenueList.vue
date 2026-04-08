@@ -29,7 +29,7 @@
 							</v-btn>
 
               <export-excel
-                :data="revenueList"
+                :data="$formatDataForExport(revenueList)"
                 type="xlsx"
                 name="all-revenues"
                 title="All Revenues"

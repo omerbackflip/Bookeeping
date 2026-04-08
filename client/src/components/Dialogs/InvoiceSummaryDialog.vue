@@ -17,7 +17,7 @@
           <template v-slot:top>
             <v-toolbar>
               <export-excel
-                :data="exportData"
+                :data="$formatDataForExport(exportData)"
                 type="xlsx"
                 :name="title.toLocaleString()"
                 class="mt-1 ml-5">
