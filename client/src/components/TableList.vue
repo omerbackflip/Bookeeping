@@ -255,30 +255,48 @@
       <!-- filter on PRATIM from BOOK table -->
       <v-dialog v-model="pratimDialog" max-width="1100px">
         <v-card outlined class="pa-2">
-          <v-card-title class="subtitle-1 mb-0">
-            <v-text-field v-model="pratimHeader" solo disabled hide-details dense style="text-align-last: center;">  {{pratimHeader}} </v-text-field>
-          </v-card-title>
-          <v-data-table
-            :headers="summaryHeaders"
-            :items="pratimData"
-            disable-pagination
-            hide-default-footer
-            fixed-header
-            mobile-breakpoint="0"
-            class="elevation-3 list hebrew"
-            dense
-            :loading="isLoading"
-            loading-text="Loading... Please wait"
-            loader-height="20"
-            height="50vh">
+            <v-card-title class="subtitle-1 mb-0">
+                  <div class="d-flex align-center">
+                    <v-chip small color="primary" text-color="white"> זכות: {{ pratimZchut.toLocaleString() }}</v-chip>
+                    <v-chip small color="primary" text-color="white"> חובה: {{ pratimHova.toLocaleString() }}</v-chip>
+                    <v-chip small :color="(pratimZchut - pratimHova) < 0 ? 'error' : 'primary'" text-color="white">הפרש: {{ (pratimZchut - pratimHova).toLocaleString() }}</v-chip>
+                    <v-chip small color="primary" text-color="white"> ספירה: {{ pratimFilteredData.length }}</v-chip>
+                  </div>
+                  <v-spacer></v-spacer>
+                  <v-toolbar-title class="summary-header">{{ pratimHeader }}</v-toolbar-title>
+                  <v-spacer></v-spacer>                  
+                  <export-excel :data="$formatDataForExport(pratimFilteredData)" type="xlsx" name="pratim-data" title="Pratim Data" footer="Exported from Book App">
+                    <v-btn icon small color="white">
+                      <v-icon small>mdi-download</v-icon>
+                    </v-btn>
+                  </export-excel>                  
+                  <v-btn-toggle v-model="company" @change="onPratimCompanyChange" dense group mandatory>
+                    <v-btn value="ביצועים" text small> ביצועים </v-btn>
+                    <v-btn value="יזמות"   text small> יזמות   </v-btn>
+                  </v-btn-toggle>
+                  <v-divider vertical class="mx-3"></v-divider>
+            </v-card-title>
+            <v-data-table
+              :headers="summaryHeaders"
+              :items="pratimFilteredData"
+              disable-pagination
+              hide-default-footer
+              fixed-header
+              mobile-breakpoint="0"
+              class="elevation-3 list hebrew"
+              dense
+              :loading="isLoading"
+              loading-text="Loading... Please wait"
+              loader-height="20"
+              height="50vh">
 
-            <template v-slot:[`item.asmchta_date`]="{ item }">
-              <span style="margin-left: 0.5rem"> {{ item.asmchta_date | formatDate }}</span>
-            </template>
-            <template v-slot:[`item.record_schum`]="{ item }">
-              <span> {{ item.record_schum.toLocaleString() }}</span>
-            </template>  
-          </v-data-table>
+              <template v-slot:[`item.asmchta_date`]="{ item }">
+                <span style="margin-left: 0.5rem"> {{ item.asmchta_date | formatDate }}</span>
+              </template>
+              <template v-slot:[`item.record_schum`]="{ item }">
+                <span> {{ item.record_schum.toLocaleString() }}</span>
+              </template>  
+            </v-data-table>
         </v-card>
       </v-dialog>
   </div>
@@ -327,22 +345,26 @@ export default {
       },
       fldRules: [v => !!v || 'Field is required'],
       summaryHeaders:[
+        { text: "year", value: "year", class: 'success title'},
         { text: "asmchta_date", value: "asmchta_date", class: 'success title'},
         { text: "asmacta1", value: "asmacta1", class: 'success title'},
         { text: "schum_zchut", value: "schum_zchut", class: 'success title'},
         { text: "schum_hova", value: "schum_hova", class: 'success title'},
-        { text: "year", value: "year", class: 'success title'},
         { text: "pratim", value: "pratim", class: 'success title', align: "right"},
+        { text: "record_schum", value: "record_schum", class: 'success title'},
       ],
 			summaryDialog: false,
       pratimDialog: false,
       summaryData:[],
       filteredData:[],
       pratimData:[],
+      pratimFilteredData:[],
       summaryHeader: '',
       pratimHeader: '',
       summaryHova: 0,
       summaryZchut: 0,
+      pratimHova: 0,
+      pratimZchut: 0,
       company: 'ביצועים'
     };
   },
@@ -480,7 +502,7 @@ export default {
             break;           
         }
         this.summaryData = response.data; 
-        this.summaryHeader = item.description
+        this.summaryHeader = item.description + ' - ' + item.table_code
         this.filterCompany()
         this.isLoading = false;
         this.summaryDialog = true;
@@ -490,6 +512,11 @@ export default {
     onCompanyChange (company) {
       this.company = company
       this.filterCompany()
+    },
+
+    onPratimCompanyChange (company) {
+      this.company = company
+      this.filterPratimCompany()
     },
 
     filterCompany: function () {
@@ -504,11 +531,24 @@ export default {
             return (item.schum_zchut + currentTotal) },0);
     },
 
+    filterPratimCompany: function () {
+      this.pratimFilteredData = this.pratimData.filter((item) => {
+        return item.company === this.company
+      })
+      // Sort by date ascending
+      this.pratimFilteredData.sort((a, b) => new Date(b.asmchta_date) - new Date(a.asmchta_date))
+      this.pratimHova = this.pratimFilteredData.reduce((currentTotal, item) => {
+            return (item.schum_hova + currentTotal) },0);
+      this.pratimZchut = this.pratimFilteredData.reduce((currentTotal, item) => {
+            return (item.schum_zchut + currentTotal) },0);
+    },
+
     async showPratim (item) {
       this.isLoading = true;
       let response = await apiService.clientGetEntities(BOOKS_MODEL, { pratim:item.pratim })
       this.pratimData = response.data; 
       this.pratimHeader = item.pratim
+      this.filterPratimCompany();
       this.isLoading = false;
       this.pratimDialog = true;
     },
