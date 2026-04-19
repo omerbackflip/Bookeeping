@@ -14,7 +14,7 @@ const tokenStore = createFileTokenStore(
 
 function getOAuthClientFromStoredTokens() {
   const oAuth2Client = createOAuthClient({
-    clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+    clientId: process.env.GOOGLE_CLIENT_ID || process.env.VUE_APP_GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
     redirectUri: process.env.GOOGLE_REDIRECT_URI
   });
@@ -29,26 +29,68 @@ function getOAuthClientFromStoredTokens() {
   return oAuth2Client;
 }
 
-async function uploadBackupExcelToDrive(filename) {
-  const filePath = path.join(ServerApp.uploadFolderPath, filename);
+function getMimeTypeByFileName(filename) {
+  const ext = path.extname(filename).toLowerCase();
 
+  if (ext === '.xlsx') {
+    return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+  }
+
+  if (ext === '.png') {
+    return 'image/png';
+  }
+
+  if (ext === '.jpg' || ext === '.jpeg') {
+    return 'image/jpeg';
+  }
+
+  if (ext === '.pdf') {
+    return 'application/pdf';
+  }
+
+  if (ext === '.zip') {
+    return 'application/zip';
+  }
+
+  return 'application/octet-stream';
+}
+
+async function uploadFileToDrive(filePath, folderId, explicitMimeType = null, nameOverride = null) {
   if (!fs.existsSync(filePath)) {
-    throw new Error(`Backup file not found: ${filePath}`);
+    throw new Error(`File not found: ${filePath}`);
+  }
+
+  if (!folderId) {
+    throw new Error('folderId is required');
   }
 
   const oAuth2Client = getOAuthClientFromStoredTokens();
+  const filename = nameOverride || path.basename(filePath);
 
   const file = await uploadFile({
     oAuth2Client,
     name: filename,
-    mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    mimeType: explicitMimeType || getMimeTypeByFileName(filename),
     body: fs.createReadStream(filePath),
-    folderId: ServerApp.google.invoiceFolderIds[0]
+    folderId
   });
 
   return file;
 }
 
+async function uploadBackupExcelToDrive(filename) {
+  const filePath = path.join(ServerApp.uploadFolderPath, filename);
+
+  return uploadFileToDrive(
+    filePath,
+    ServerApp.google.invoiceFolderIds[0],
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    filename
+  );
+}
+
 module.exports = {
-  uploadBackupExcelToDrive
+  uploadBackupExcelToDrive,
+  uploadFileToDrive,
+  getOAuthClientFromStoredTokens
 };

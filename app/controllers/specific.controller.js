@@ -259,55 +259,40 @@ exports.backup2GDrive = async (req, res) => { // upload Backup Excel
 };
 
 exports.uploadInvoicesToGoogleDrive = async (req, res) => { // upload specific invoice/gpj
-	const file = req.file;
-	if (!req.file) {
-	    return res.status(500).send({ message: "No file uploaded" });
-	}
-	const originalFileName = file.originalname; // Original file name
-    const newFileName = path.basename(originalFileName, path.extname(originalFileName)) + '.png'; // Add or change to `.pdf`
-    const newFilePath = path.join(file.destination, newFileName); // New file path
+  try {
+    const file = req.file;
 
-    // Rename or copy the file with the new name
+    if (!file) {
+      return res.status(500).send({ message: "No file uploaded" });
+    }
+
+    const originalFileName = file.originalname;
+    const newFileName = path.basename(originalFileName, path.extname(originalFileName)) + '.png';
+    const newFilePath = path.join(file.destination, newFileName);
+
     fs.renameSync(file.path, newFilePath);
-	const {group} = req.body;
-	let filepath = `${group}`;
 
-	// const auth = await googleService.getAuth();
-	// const uploadedFile = await googleService.uploadInvoiceToGoogleDrive(auth, newFileName,filepath);
+    const uploadedFile = await googleSubmoduleService.uploadFileToDrive(
+      newFilePath,
+      ServerApp.google.storeInvoiceFolderIds[0],
+      'image/png',
+      newFileName
+    );
 
-	const { createOAuthClient, createFileTokenStore, uploadFile } = require('../../google/backend');
-	const tokenStore = createFileTokenStore(
-	path.join(process.cwd(), 'app/config/token.json')
-	);
+    fs.unlinkSync(newFilePath);
 
-	const oAuth2Client = createOAuthClient({
-	clientId: process.env.GOOGLE_CLIENT_ID,
-	clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-	redirectUri: process.env.GOOGLE_REDIRECT_URI
-	});
+    if (!uploadedFile || !uploadedFile.id) {
+      return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
+    }
 
-	const tokens = tokenStore.load();
-
-	if (!tokens) {
-	return res.status(401).send({ message: 'Google not connected' });
-	}
-
-	oAuth2Client.setCredentials(tokens);
-
-	const uploadedFile = await uploadFile({
-	oAuth2Client,
-	name: newFileName,
-	mimeType: 'image/png', // adjust if needed
-	body: fs.createReadStream(newFilePath),
-	folderId: ServerApp.google.storeInvoiceFolderIds[0]
-	});
-
-
-	fs.unlinkSync(newFilePath);
-	if (!uploadedFile || !uploadedFile.id) {
-	    return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
-	}
-	res.send({success: true , uploadedFile:uploadedFile});
+    return res.send({ success: true, uploadedFile });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send({
+      message: 'Error while uploading the file to Google Drive.',
+      error: error.message || error
+    });
+  }
 }
 
 exports.googleConnectionStatus = async (req, res) => {
