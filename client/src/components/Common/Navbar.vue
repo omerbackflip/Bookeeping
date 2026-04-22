@@ -88,8 +88,7 @@
 import ImportCSV from '@/components/ImportCSV.vue';
 import { navItems, isMobile, loadTable } from '@/constants/constants';
 import SpecificServiceEndPoints from "@/services/specificServiceEndPoints";
-import { checkGoogleStatus } from "@/utils/commonService";
-
+import { initializeGoogleOnAppLoad } from "../../../../google/frontend";
 import { TABLE_MODEL } from "@/constants/constants";
 import apiService from "@/services/apiService";
 
@@ -188,9 +187,10 @@ export default {
         },
 
         async checkGoogleConnection() {
-             await checkGoogleStatus((menuItem) => {
-                this.googleConnectMenuItem = menuItem;
-            });
+            await initializeGoogleOnAppLoad(SpecificServiceEndPoints.getGoogleConnectionStatus, (menuItem) => {
+                    this.googleConnectMenuItem = menuItem;
+                }
+            );
         },
 
         async getLastBkup() {
