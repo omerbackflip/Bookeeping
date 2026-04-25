@@ -11,7 +11,10 @@
 	- cd ../home/bookeeping
 	- git pull origin master 		// (ignore this if you have latest code)
 
-	- git submodule update --init --recursive  // ignore this if you don't have changes to submodules
+	- git submodule sync --recursive // Align local Git config with .gitmodules
+	- git submodule update --init --recursive // Make the submodules exist and match the exact commit in the parent repo
+	- git submodule update --init --recursive --remote // this only on development after submodule *repo* was updated.
+	
 
 	- cd client
 	- ls     				// to check if there are which files in the folder

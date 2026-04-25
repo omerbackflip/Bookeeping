@@ -13,7 +13,7 @@ const { version } = require("../config/db.config");
 const specificService = require("../services/specific-service");
 const { ServerApp } = require("../config/constants");
 const dbService = require("../shared/mongoose/services/db-service");
-const { google } = require('googleapis');
+// const { google } = require('googleapis');
 const googleSubmoduleService = require('../../google/backend/services/google-submodule-service');
 const backupService = require('../../backup/backend');
 const backupConfig = require('../backup/backup.config');
@@ -235,60 +235,24 @@ exports.getDbInfo = (req,res) => {
 	}
 };
 
-// async function uploadFileToDrive(filePath, folderId, options = {}) {
-//   if (!fs.existsSync(filePath)) {
-//     throw new Error(`File not found: ${filePath}`);
-//   }
-
-//   if (!folderId) {
-//     throw new Error('folderId is required');
-//   }
-
-//   const {
-//     mimeType = null,
-//     nameOverride = null
-//   } = options;
-
-//   const oAuth2Client = getOAuthClientFromStoredTokens();
-//   const filename = nameOverride || path.basename(filePath);
-
-//   const file = await uploadFile({
-//     oAuth2Client,
-//     name: filename,
-//     mimeType: mimeType || getMimeTypeByFileName(filename),
-//     body: fs.createReadStream(filePath),
-//     folderId
-//   });
-
-//   return file;
-// }
-
 exports.googleConnectionStatus = async (req, res) => {
   try {
-    const tokenPath = ServerApp.configFolderPath + 'token.json';
-    const credentialsPath = ServerApp.configFolderPath + 'google-credentials.json';
+    const tokens = googleSubmoduleService.getStoredTokens();
 
-    const tokenExists = fs.existsSync(tokenPath);
-	const client_secret = process.env.GOOGLE_CLIENT_SECRET;
-	const client_id = process.env.GOOGLE_CLIENT_ID;
-	const developerKey = process.env.VUE_APP_GOOGLE_API_KEY || null;
-
-    if (!tokenExists) {
+    if (!tokens) {
       return res.send({
         connected: false,
         authUrl: '/api/google/auth'
       });
     }
-    const token = JSON.parse(fs.readFileSync(tokenPath, 'utf8'));
-    const { access_token } = token;
 
     return res.send({
       connected: true,
       username: null,
-      client_secret,
-      client_id,
-      developerKey: developerKey,
-      access_token,
+      client_id: process.env.VUE_APP_GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID,
+      developerKey: process.env.VUE_APP_GOOGLE_API_KEY || null,
+      locale: process.env.VUE_APP_GOOGLE_PICKER_LOCALE || 'en',
+      access_token: tokens.access_token || null,
       folderId: ServerApp.google.storeInvoiceFolderIds
     });
   } catch (error) {

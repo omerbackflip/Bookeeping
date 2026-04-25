@@ -1,0 +1,27 @@
+#!/bin/bash
+set -e
+
+cd /home/bookeeping
+
+echo "Pulling latest Book code..."
+git pull origin master
+
+echo "Syncing submodules..."
+git submodule sync --recursive
+git submodule update --init --recursive
+
+echo "Building frontend..."
+cd client
+rm -rf dist
+npm run build:production
+
+echo "Restarting frontend PM2: Book..."
+pm2 delete Book || true
+pm2 serve ./dist --name Book --port 8081
+
+echo "Restarting backend PM2: BookServer..."
+cd ..
+pm2 delete BookServer || true
+pm2 start server.js --name BookServer
+
+echo "Book Deployment completed."
