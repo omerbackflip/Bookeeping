@@ -59,10 +59,6 @@ class SpecificServiceEndPoints {
 		return await axios.get(`${baseUrl}/specific/get-database-info`);
 	}
 
-  async Backup2GDrive() { //called from invoiceList.vue - used to call to backend to generate excel of whole invoices to upload to GoogleDrive
-    return await axios.post(`${baseUrl}/specific/backup-to-GDrive`);
-  }
-
   async uploadInvoiceToGoogleDrive(formData) { //called from camForm.vue - used to upload specific invoice/file (jpg) to GoogleDrive 
     return await axios.post(`${baseUrl}/specific/upload-to-google-drive`, formData, {
       headers: {
@@ -79,9 +75,9 @@ class SpecificServiceEndPoints {
     return await axios.get(`${baseUrl.replace('/specific', '')}/google/picker-token`);
   }
 
-  // async getPickerToken() {
-  //   return await axios.get(`${process.env.VUE_APP_API_URL.replace(/\/specific$/, '')}/google/picker-token`);
-  // }
+  async runBackup() {
+    return await axios.post(`${baseUrl}/specific/backup/run`);
+  }
 }
 
 export default new SpecificServiceEndPoints();

@@ -44,7 +44,6 @@
                 </v-col>
                 <v-col>
                   <!-- <v-btn @click="scriptUpdate" x-small class="mx-3">sUpdate</v-btn> -->
-                  <v-btn @click="uploadBackup2GDrive" x-small class="mx-3">backup</v-btn>
                 </v-col>
                 </v-row>
               </div>
@@ -477,20 +476,6 @@ export default {
     selectRow() {
       // this.selected[0] ? this.$emit('lookForMatch', this.selected[0]) : ''
       this.$emit('lookForMatch', this.selected[0] || '')
-    },
-
-    async uploadBackup2GDrive(){
-      this.isLoading = true;
-      const response = await SpecificServiceEndPoints.Backup2GDrive();
-      if(response.data.file_id){
-        window.alert('file saved to GDrive');
-        await apiService.updateEntity(
-          { table_id: 99, table_code: 80 },                                 // filter
-          { description: `last bckp - ${moment().format('DD/MM/YYYY')}` },  // data
-          { model: TABLE_MODEL }                                            // params (query)
-        );
-      }
-      this.isLoading = false;
     },
 
     toggleList() {

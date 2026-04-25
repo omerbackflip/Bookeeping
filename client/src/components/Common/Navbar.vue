@@ -9,9 +9,12 @@
                 <div v-else>
                     {{local ? 'LocalHost' : 'Production'}}
                 </div>
-            &nbsp; {{ lastBkup }}
             </div>
-            <v-spacer></v-spacer>
+            <v-btn v-if="!isMobile()" color="primary" dark :loading="backupLoading" @click="runBackup" class="ml-3" small>
+                <v-icon left>mdi-google-drive</v-icon>
+                {{ lastUpdate }}
+            </v-btn>
+            <v-spacer/>
             <template>
                 <div v-if="showControl" class="mt-2 text-center d-flex">
                         <v-btn-toggle v-model="toggleCompany" group mandatory @change="onCompanyChange" >
@@ -113,9 +116,10 @@ export default {
             toggleCompany : 'ביצועים',
             selectedYear: '2026',
             yearList: [],
-            lastBkup:'',
             local: false,
             version: '',
+            lastUpdate: [],
+            backupLoading: false,
         }
     },
     methods:{
@@ -193,18 +197,41 @@ export default {
             );
         },
 
-        async getLastBkup() {
-            const response = await apiService.clientGetEntities(TABLE_MODEL, { table_id: 99, table_code:80 });
-            this.lastBkup = response.data.description;
-        }
+        async runBackup() {
+            try {
+                this.backupLoading = true;
+                this.lastUpdate = "creating excel...";
+
+                const response = await SpecificServiceEndPoints.runBackup();
+
+                if (response && response.data && response.data.file && response.data.file.filename) {
+                    const filename = response.data.file.filename;
+                    const match = filename.match(/(\d{4})-(\d{2})-(\d{2})/);
+                    const dateStr = match ? `${match[3]}/${match[2]}/${match[1]}` : '';
+
+                    this.lastUpdate = "last backup : " + dateStr;
+
+                    await apiService.updateEntity(
+                        { table_id: 110, table_code: 1 },
+                        { description: this.lastUpdate },
+                        { model: TABLE_MODEL }
+                    );
+                }
+            } catch (error) {
+                console.error(error);
+            } finally {
+                this.backupLoading = false;
+            }
+        },
 
     },
 
     async mounted() {
         this.yearList = (await loadTable(4)).map((code) => code.description).slice().reverse()
         this.getDatabaseInformation();
+        const lastUpdateArr = (await loadTable(110)).map((code) => code.description);
+        this.lastUpdate = lastUpdateArr.length === 1 ? lastUpdateArr[0] : lastUpdateArr;
         this.checkGoogleConnection();
-        this.getLastBkup();
     },
 
     computed: {

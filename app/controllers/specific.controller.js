@@ -14,8 +14,10 @@ const specificService = require("../services/specific-service");
 const { ServerApp } = require("../config/constants");
 const dbService = require("../shared/mongoose/services/db-service");
 const { google } = require('googleapis');
-// const googleService = require('../services/google-service');
 const googleSubmoduleService = require('../services/google-submodule-service');
+const backupService = require('../../backup/backend');
+const backupConfig = require('../backup/backup.config');
+const { getModel } = require('../backup/modelResolver');
 
 
 exports.saveInvoicesBulk1 = async (req, res) => {
@@ -233,67 +235,33 @@ exports.getDbInfo = (req,res) => {
 	}
 };
 
-exports.backup2GDrive = async (req, res) => { // upload Backup Excel
-	try {
-		const model = ServerApp.models.invoice;
-		const invoices = await dbService.getEntities({ model: db[model], filter: req.query });
-		if (invoices) {
-			let invoiceData = specificService.getInvoicesToExcelExport(invoices);
-			let invoiceExecelFile =  createExcel(invoiceData);
-			if(invoiceExecelFile){
-				const file = await googleSubmoduleService.uploadBackupExcelToDrive(invoiceExecelFile.filename);
-				if(file.id){ // after uploading the excel file, remove the tmporary excel file from "upload" directory
-					fs.unlinkSync(invoiceExecelFile.filePath);
-				}
-				res.send({success: true, file_id: file});
-			}else{
-				res.send({success: false, message: "Error! While generating invoice file."});
-			}
-		}
-	} catch (error) {
-		console.log(error)
-		res.status(500).send({
-			message: "Error while uploading invoices to google drive."
-		});
-	}	
-};
+// async function uploadFileToDrive(filePath, folderId, options = {}) {
+//   if (!fs.existsSync(filePath)) {
+//     throw new Error(`File not found: ${filePath}`);
+//   }
 
-exports.uploadInvoicesToGoogleDrive = async (req, res) => { // upload specific invoice/gpj
-  try {
-    const file = req.file;
+//   if (!folderId) {
+//     throw new Error('folderId is required');
+//   }
 
-    if (!file) {
-      return res.status(500).send({ message: "No file uploaded" });
-    }
+//   const {
+//     mimeType = null,
+//     nameOverride = null
+//   } = options;
 
-    const originalFileName = file.originalname;
-    const newFileName = path.basename(originalFileName, path.extname(originalFileName)) + '.png';
-    const newFilePath = path.join(file.destination, newFileName);
+//   const oAuth2Client = getOAuthClientFromStoredTokens();
+//   const filename = nameOverride || path.basename(filePath);
 
-    fs.renameSync(file.path, newFilePath);
+//   const file = await uploadFile({
+//     oAuth2Client,
+//     name: filename,
+//     mimeType: mimeType || getMimeTypeByFileName(filename),
+//     body: fs.createReadStream(filePath),
+//     folderId
+//   });
 
-    const uploadedFile = await googleSubmoduleService.uploadFileToDrive(
-      newFilePath,
-      ServerApp.google.storeInvoiceFolderIds[0],
-      'image/png',
-      newFileName
-    );
-
-    fs.unlinkSync(newFilePath);
-
-    if (!uploadedFile || !uploadedFile.id) {
-      return res.status(500).send({ message: 'Failed to upload the file to Google Drive!' });
-    }
-
-    return res.send({ success: true, uploadedFile });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).send({
-      message: 'Error while uploading the file to Google Drive.',
-      error: error.message || error
-    });
-  }
-}
+//   return file;
+// }
 
 exports.googleConnectionStatus = async (req, res) => {
   try {
@@ -327,6 +295,25 @@ exports.googleConnectionStatus = async (req, res) => {
     console.log(error);
     res.status(500).send({
       message: "Error while checking google connection."
+    });
+  }
+};
+
+exports.runBackup = async (req, res) => {
+  try {
+    const result = await backupService.runBackup({
+      config: backupConfig,
+      getModel,
+      uploader: googleSubmoduleService.uploadFileToDrive,
+      tmpDir: path.resolve(__dirname, '../../tmp')
+    });
+
+    return res.json(result);
+  } catch (error) {
+    console.error('runBackup error:', error);
+    return res.status(500).send({
+      message: 'Error creating backup',
+      error: error.message || error
     });
   }
 };
