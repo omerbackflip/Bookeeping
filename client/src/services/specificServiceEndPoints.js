@@ -78,6 +78,12 @@ class SpecificServiceEndPoints {
   async runBackup() {
     return await axios.post(`${baseUrl}/specific/backup/run`);
   }
+
+  async restoreBackup(formData) {
+    return await axios.post(`${baseUrl}/specific/backup/restore`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    });
+  }
 }
 
 export default new SpecificServiceEndPoints();

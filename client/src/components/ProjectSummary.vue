@@ -42,7 +42,15 @@
             <span> {{ item.revenue ? (item.revenue - item.total).toLocaleString() : '' }}</span>
           </template>
           <template v-slot:[`item.profit`]="{ item }">
-            <span> {{ item.revenue ? ((item.revenue-item.total)/item.revenue*75).toFixed(0) + '%': '' }}</span>
+            <span> {{ item.revenue ? ((item.revenue-item.total)/item.revenue*100).toFixed(0) + '%': '' }}</span>
+          </template>
+          <template v-slot:[`item.ratio`]="{ item }">
+            <v-progress-linear
+              :value="!item.revenue ? 100 : item.revenue ? Math.abs((item.revenue - item.total) / item.revenue * 100) : 0"
+              :color="!item.revenue || (item.revenue && (item.revenue - item.total) < 0) ? 'error' : 'primary'"
+              height="10"
+              :style="!item.revenue || (item.revenue && (item.revenue - item.total) < 0) ? { transform: 'scaleX(-1)' } : {}"
+            ></v-progress-linear>
           </template>
           <template v-slot:[`item.count`]="{ item }">
             <span> {{(item.payedList || '').length || ''}}</span>
@@ -75,8 +83,6 @@
         </v-data-table>
       </v-flex>
 
-      <!-- <v-sparkline :value= graph line-width="1" auto-draw show-labels label-size="3" type="bar"></v-sparkline> -->
-      <apexchart type="bar" width="1000" height="1050" :options="chartOptions" :series="series"></apexchart>
       <revenue-form ref="revenueForm"/>
       <confirm-dialog ref="confirm"/>
 
@@ -94,8 +100,7 @@ import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
 import { INVOICE_MODEL, REVENUE_MODEL, SUMMARY_PROJECT_WEB_HEADERS, SUMMARY_PROJECT_MOBILE_HEADERS, loadTable } from "../constants/constants";
 import { isMobile } from '../constants/constants';
-// import ApexCharts from 'apexcharts';
-import VueApexCharts from 'vue-apexcharts'
+
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -104,7 +109,7 @@ Vue.filter("formatDate", function (value) {
 });
 export default {
 	name: "project-summary",
-	components: { RevenueForm, ConfirmDialog, apexchart: VueApexCharts},
+	components: { RevenueForm, ConfirmDialog },
 	data() {
 		return {
       isMobile,
@@ -113,7 +118,6 @@ export default {
 			revenues: [],
 			projectList: [],
 			dialog: false,
-      graph: [],
 
       revHeaders: [
 				{ text: "Amount", value: "amount", align: "right" },
@@ -127,60 +131,6 @@ export default {
       revenueItem: {},
       dateModal : false,
       isLoading : false,
-      series: [],
-        // {
-        //   name: 'הוצאות',
-        //   data: [44, 55, 57, 56, 61, 58, 63, 60, 66]
-        // }, {
-        //   name: 'הכנסות',
-        //   data: [76, 85, 101, 98, 87, 105, 91, 114, 94]
-        // }],
-      chartOptions: {
-        chart: {
-          type: 'bar',
-          height: 800
-        },
-        plotOptions: {
-          bar: {
-            horizontal: false,
-            columnWidth: '100%',
-            endingShape: 'rounded'
-          },
-        },
-        dataLabels: {
-          enabled: false
-        },
-        stroke: {
-          show: true,
-          width: 2,
-          colors: ['transparent']
-        },
-        xaxis: {
-          // categories: ['Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct'],
-          title: {
-            text: 'פרויקטים'
-          }
-        },
-        yaxis: {
-          title: {
-            text: '$K'
-          }
-        },
-        fill: {
-          opacity: 1
-        },
-        tooltip: {
-          y: {
-            formatter: function (val) {
-              return "$ " + val + " K"
-            }
-          }
-        }
-      },
- 
-
-
-
 		};
 	},
 
@@ -214,18 +164,6 @@ export default {
           return({...item1, revenue:totalRevenue, payedList}) // concatinate the totalRevenue and list of payed projects
         })  
 			}
-      let proj = this.projectList.map((item) =>{
-        return (item.project)
-      })
-      this.chartOptions = ({...this.chartOptions, xaxis:{categories: proj}})
-
-      let revs = this.projectList.map((item) =>{
-        return (Math.round(item.revenue/100)/10)
-      })
-      let exps = this.projectList.map((item) =>{
-        return (Math.round(item.total/100)/10)
-      })
-      this.series = [{name:'הכנסות', data: revs},{name:'הוצאות', data:exps}]
       this.isLoading = false
 		},
 

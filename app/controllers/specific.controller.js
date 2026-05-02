@@ -282,6 +282,48 @@ exports.runBackup = async (req, res) => {
   }
 };
 
+exports.runRestore = async (req, res) => {
+  try {
+    if (!req.file || !req.file.path) {
+      return res.status(400).send({
+        success: false,
+        message: 'Backup ZIP file is required'
+      });
+    }
+
+	if (!req.body || req.body.confirm !== 'YES') {
+	return res.status(400).send({
+		success: false,
+		message: 'Restore requires confirmation: confirm=YES'
+	});
+	}
+
+	const result = await backupService.runRestore({
+	zipPath: req.file.path,
+	config: backupConfig,
+	getModel,
+	tmpDir: path.resolve(__dirname, '../../tmp')
+	});
+
+    unLinkFile(req.file.path);
+
+    return res.json(result);
+  } catch (error) {
+    console.error('runRestore error:', error);
+
+    if (req.file && req.file.path) {
+      try {
+        unLinkFile(req.file.path);
+      } catch (e) {}
+    }
+
+    return res.status(500).send({
+      message: 'Error restoring backup',
+      error: error.message || error
+    });
+  }
+};
+
 function unLinkFile(path) {
 	fs.unlinkSync(path);
 }

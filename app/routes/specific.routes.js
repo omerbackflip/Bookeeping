@@ -13,16 +13,15 @@ module.exports = app => {
   router.post("/batch-book-invoice", specific.batchBooksInvoices);
   router.post("/batch-invoice-book", specific.batchInvoicesBooks);
   router.post("/batch-clear-ExcelRecID", specific.batchClearExcelRecID);
-  // router.put("/add-payments-to-invoice/:invoiceId", specific.addPaymentsToInvoice); // not in used
   router.put("/update-payment-in-invoice/:objIdOfPayment", specific.updatePaymentInInvoice);
   router.get("/get-database-info", specific.getDbInfo);
 
 
   //Google
-  // router.post("/upload-to-google-drive",upload.single('file') , specific.uploadInvoicesToGoogleDrive) // upload specific invoice/gpj 
   router.get("/get-google-connection-status", specific.googleConnectionStatus);
 
   router.post("/backup/run", specific.runBackup);
-
+  router.post("/backup/restore", upload.single('file'), specific.runRestore);
+  
   app.use('/api/specific', router);
 };

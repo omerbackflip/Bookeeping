@@ -37,7 +37,7 @@ exports.transformCSVData = (sheet_name_list, workbook) => {
 	}
 }
 
-exports.convertToJSON = (array) => {
+exports.convertToJSON = (array) => {  // not in use
 	var first = array[0].join()
 	var headers = first.split(',');
   

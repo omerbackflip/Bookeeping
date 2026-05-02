@@ -17,6 +17,7 @@ export const INVOICE_MOBILE_HEADERS = [
 export const SUMMARY_PROJECT_WEB_HEADERS = [
     { text: "תשלומים", value: "count", class: "hdr-styles", align: "right" },
     { text: "רווחיות", value: "profit", class: "hdr-styles", align: "right" },
+    { text: "יחס הכנסות/הוצאות", value: "ratio", class: "hdr-styles", align: "right" },
     { text: "הפרשים", value: "balance", class: "hdr-styles", align: "right" },
     { text: "הכנסות", value: "revenue", class: "hdr-styles", align: "right" },
     { text: "הוצאות", value: "total", class: "hdr-styles", align: "right" },
@@ -24,6 +25,7 @@ export const SUMMARY_PROJECT_WEB_HEADERS = [
 ];
 
 export const SUMMARY_PROJECT_MOBILE_HEADERS = [
+    { text: "יחס", value: "ratio", class: "hdr-styles", align: "right" },
     { text: "הכנסות", value: "revenue", class: "hdr-styles", align: "right" },
     { text: "הוצאות", value: "total", class: "hdr-styles", align: "right" },
     { text: "פרויקט", value: "project", class: "hdr-styles", align: "right" },
