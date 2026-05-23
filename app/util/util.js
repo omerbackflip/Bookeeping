@@ -1,7 +1,3 @@
-const xlsx = require('xlsx');
-const moment = require('moment');
-const { ServerApp } = require("../config/constants");
-
 exports.transformCSVData = (sheet_name_list, workbook) => {
 	try {
 		return sheet_name_list.map((y) => {
@@ -58,35 +54,4 @@ exports.convertToJSON = (array) => {  // not in use
 	}
 	return jsonData;
   };
-
-
- exports.createExcel = (data, filename = '') => {
-
- 	let excelFilename;
-
- 	if(filename === ''){
- 		excelFilename = 'invoices-data-' + moment(Date.now()).format('DD-MM-YYYY') + '.xlsx';
- 	}else{
- 		excelFilename = filename;
- 	}
-
- 	const ws = xlsx.utils.json_to_sheet(data, {cellDates: true, dateNF: 'dd/mm/yyyy', UTC: true});
-	const wb = xlsx.utils.book_new();
-	xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
-
-	try{
-		const filePath = ServerApp.uploadFolderPath +  excelFilename;
-		xlsx.writeFile(wb, filePath);
-
-		let response = {
-			filename: excelFilename,
-			filePath: filePath,
-		};
-
-		return response;
-
-	} catch (error) {
-		return false;
-	}
-
- }
+  
