@@ -199,10 +199,10 @@ import apiService from "@/services/apiService";
 import SpecificServiceEndPoints from "@/services/specificServiceEndPoints";
 import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, 
           TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE, VAT_PERCENTAGE, 
-          loadTable} from "@/constants/constants";
+          loadTable, viewGDFile } from "@/constants/constants";
 import invoiceForm from "./InvoiceForm.vue"
 import { isMobile } from '@/constants/constants';
-import modalDialog from './Common/InvoiceModal.vue';
+import { GoogleFileViewerModal as modalDialog } from '../../../google/frontend';
 import UnpaidSummaryDialog from './Dialogs/UnpaidSummaryDialog.vue';
 import InvoiceSummaryDialog from './Dialogs/InvoiceSummaryDialog.vue';
 
@@ -503,8 +503,7 @@ export default {
     },
 
     async clickToView(GDFileId) {
-      var fileview = `https://docs.google.com/file/d/${GDFileId}/preview?usp=drivesdk`
-      await this.$refs.modalDialog.open(fileview);
+      await viewGDFile(GDFileId, this.$refs.modalDialog);
     },
 
     toExcelDate(isoString) {

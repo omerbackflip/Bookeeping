@@ -154,12 +154,12 @@
 </template>
 
 <script>
-import { INVOICE_MODEL, loadTable, GOOGLE_PICKER_PARAMS } from "@/constants/constants";
+import { INVOICE_MODEL, loadTable, GOOGLE_PICKER_PARAMS, viewGDFile } from "@/constants/constants";
 import apiService from "@/services/apiService";
 import CameraForm from "./camForm.vue";
 import Vue from "vue";
 import moment from "moment";
-import modalDialog from './Common/InvoiceModal.vue';
+import { GoogleFileViewerModal as modalDialog } from '../../../google/frontend';
 import GooglePicker from "./GooglePicker.vue";
 Vue.filter("formatDate", function (value) {
 	if (value) {
@@ -214,11 +214,7 @@ export default {
       },
 
       async clickToView(GDFileId) {
-        var fileview = `https://docs.google.com/file/d/${GDFileId}/preview?usp=drivesdk`
-        await this.$refs.modalDialog.open(fileview);
-        // this.filelink = fileview;    
-        // this.iframeSrc = fileview;
-        // this.isModalOpen = true;    
+        await viewGDFile(GDFileId, this.$refs.modalDialog);
       },
 
       deleteLink(){

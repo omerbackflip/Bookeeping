@@ -5,6 +5,8 @@ export const REVENUE_MODEL = 'revenues';
 export const HOLDER_MODEL = 'holders';
 export const VAT_PERCENTAGE = 17;
 import apiService from "../services/apiService";
+import http from "../http-common";
+import { viewGoogleDriveFile } from "../../../google/frontend";
 
 export const INVOICE_MOBILE_HEADERS = [
     // { text: "G",            value: "group",         class: "hdr-styles",  groupable: false, align: "right"},	
@@ -121,6 +123,17 @@ export const loadTable = async (table_id) => {
         console.log(error);
     }
 };
+
+export async function viewGDFile(fileId, modalDialogRef) {
+  const apiBaseUrl = process.env.VUE_APP_API_URL
+    .replace(/\/$/, '')
+    .replace(/\/specific$/, '');
+
+  return viewGoogleDriveFile(fileId, modalDialogRef, {
+    http,
+    apiBaseUrl,
+  });
+}
 
 export const GOOGLE_PICKER_PARAMS = {
   folderId: '1_rZaYVFJQVsyHq_8diKmU_dqb5lbNEyJ',

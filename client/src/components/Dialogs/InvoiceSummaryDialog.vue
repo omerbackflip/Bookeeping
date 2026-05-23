@@ -66,11 +66,9 @@
 </template>
 
 <script>
-import modalDialog from '../Common/InvoiceModal.vue';
 
 export default {
   name: 'InvoiceSummaryDialog',
-  components: { modalDialog },
   props: {
     open: Boolean,
     items: Array,
