@@ -70,9 +70,9 @@
                           :multiselect="false"
                           @picked="onInvoiceFilePicked"
                         />
-                          <v-btn x-small @click="openCameraDialog" class="ml-1">
-                            <v-icon x-small>mdi-camera</v-icon>
-                          </v-btn>
+                        <v-btn x-small @click="openCameraDialog" class="ml-1" :loading="isUploadingInvoiceFile" :disabled="isUploadingInvoiceFile">
+                          <v-icon x-small>mdi-camera</v-icon>
+                        </v-btn>
                         </v-col>
                       </div>
                     </v-col>
@@ -146,17 +146,15 @@
           <modal-dialog ref="modalDialog"/>
 
         </v-dialog>
-        <CameraForm
-          :dialogCam.sync="dialogCam"
-          :invoice="invoice"
-        />
+        <camera ref="camera" @captured="uploadInvoiceMedia" @camera-error="onCameraError"/>
       </div>
 </template>
 
 <script>
 import { INVOICE_MODEL, loadTable, GOOGLE_PICKER_PARAMS, viewGDFile } from "@/constants/constants";
 import apiService from "@/services/apiService";
-import CameraForm from "./camForm.vue";
+import specificService from "@/services/specificServiceEndPoints";
+import Camera from "../../../camera/frontend";
 import Vue from "vue";
 import moment from "moment";
 import { GoogleFileViewerModal as modalDialog } from '../../../google/frontend';
@@ -170,16 +168,16 @@ Vue.filter("formatDate", function (value) {
 
 export default {
     name: "invoice-form",
-    components:{ CameraForm, modalDialog, GooglePicker },
+    components:{ Camera, modalDialog, GooglePicker },
     data() {
       return {
         loadTable,
         GOOGLE_PICKER_PARAMS,
         showDrive:false,
-        dialogCam:false,
         dialogInvForm: false,
         resolve: null,      // What is this for ?
         isLoading: false,
+        isUploadingInvoiceFile: false,
         isNewInvoice: false,
         message: '',
         options: {
@@ -205,7 +203,53 @@ export default {
 
     methods: {
       openCameraDialog(){
-        this.dialogCam = true;
+        this.$refs.camera.toggleCamera();
+      },
+      
+      async uploadInvoiceMedia(media) {
+        try {
+          this.isUploadingInvoiceFile = true;
+
+          if (!this.invoice.group) {
+            window.alert("Invoice group is required before uploading.");
+            return;
+          }
+
+          // this store the media in the parant folder of the invoice file 'חשבוניות הנהחש'
+          const response = await specificService.uploadInvoiceToGoogleDrive({
+            ...media,
+            group: this.invoice.group,
+          });
+
+          const uploadedFile = response.data.file;
+
+          this.invoice.GDFileId = uploadedFile.fileId;
+          this.invoice.GDFileName = uploadedFile.name;
+        } catch (error) {
+          console.error("Error uploading invoice media:", error);
+
+          const responseData = error.response && error.response.data;
+          const message = this.isUploadTooLargeError(error)
+            ? "The media file is too large. Choose a smaller size or record a shorter video."
+            : responseData && responseData.message
+            ? responseData.message
+            : error.message;
+
+          window.alert("Error uploading invoice media: " + message);
+        } finally {
+          this.isUploadingInvoiceFile = false;
+        }
+      },
+
+      onCameraError(error) {
+        console.error("Camera error:", error);
+      },
+
+      isUploadTooLargeError(error) {
+        return Boolean(
+          (error.response && error.response.status === 413) ||
+          (error.message && error.message.indexOf("413") !== -1)
+        );
       },
 
       async copyToClipboard(GDFileId) {

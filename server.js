@@ -9,10 +9,10 @@ const app = express();
 app.use(cors());
 
 // parse requests of content-type - application/json
-app.use(express.json());
+app.use(express.json({ limit: process.env.REQUEST_BODY_LIMIT || "50mb" }));
 
 // parse requests of content-type - application/x-www-form-urlencoded
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true, limit: process.env.REQUEST_BODY_LIMIT || "50mb" }));
 
 const tokenStore = createFileTokenStore(
   path.join(__dirname, 'app/config/token.json')

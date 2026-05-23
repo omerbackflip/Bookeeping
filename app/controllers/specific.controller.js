@@ -18,6 +18,10 @@ const googleSubmoduleService = require('../../google/backend/services/google-sub
 const backupService = require('../../backup/backend');
 const backupConfig = require('../backup/backup.config');
 const { getModel } = require('../backup/modelResolver');
+const { normalizeCapturedMedia } = require('../../camera/backend');
+const { uploadFile } = require('../../google/backend');
+const { Readable } = require('stream');
+const moment = require('moment');
 
 
 exports.saveInvoicesBulk1 = async (req, res) => {
@@ -233,6 +237,66 @@ exports.getDbInfo = (req,res) => {
 		console.log(error)
 		res.status(500).send({ message: "Error getting db info", error });
 	}
+};
+
+exports.uploadInvoiceMedia = async (req, res) => {
+  let uploadStep = "start";
+
+  try {
+    const { fileContent, group, capturedAt, mediaType } = req.body || {};
+
+    if (!fileContent && !req.body.frames) {
+      return res.status(400).send({ message: "Missing fileContent" });
+    }
+
+    if (!group) {
+      return res.status(400).send({ message: "Missing invoice group" });
+    }
+
+    const folderId = ServerApp.google.storeInvoiceFolderIds && ServerApp.google.storeInvoiceFolderIds[0];
+
+    if (!folderId) {
+      return res.status(500).send({ message: "Missing invoice Google Drive folder configuration" });
+    }
+
+    uploadStep = "google-auth";
+    const oAuth2Client = googleSubmoduleService.getOAuthClientFromStoredTokens();
+
+    uploadStep = "normalize-media";
+    const media = await normalizeCapturedMedia(req.body);
+
+    const prefix = mediaType === "video" || media.mediaType === "video" ? "invoice-video" : "invoice";
+    const safeGroup = String(group).replace(/[^\w.-]+/g, "-");
+    const filename = `${prefix}-${safeGroup}-${moment(new Date()).format("YYYY-MM-DD-HH.mm.ss")}${media.extension}`;
+
+    uploadStep = "google-upload";
+    const file = await uploadFile({
+      oAuth2Client,
+      name: filename,
+      mimeType: media.mimeType,
+      body: Readable.from([media.buffer]),
+      folderId,
+    });
+
+    return res.send({
+      success: true,
+      file: {
+        name: file.name,
+        fileId: file.id,
+        url: file.webViewLink,
+        mimeType: media.mimeType,
+        mediaType: media.mediaType,
+        capturedAt: capturedAt || new Date(),
+      },
+    });
+  } catch (error) {
+    console.error(`uploadInvoiceMedia failed during ${uploadStep}:`, error);
+
+    return res.status(500).send({
+      message: error.message || "Some error while uploading invoice media to Google Drive",
+      step: uploadStep,
+    });
+  }
 };
 
 exports.googleConnectionStatus = async (req, res) => {

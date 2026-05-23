@@ -59,12 +59,8 @@ class SpecificServiceEndPoints {
 		return await axios.get(`${baseUrl}/specific/get-database-info`);
 	}
 
-  async uploadInvoiceToGoogleDrive(formData) { //called from camForm.vue - used to upload specific invoice/file (jpg) to GoogleDrive 
-    return await axios.post(`${baseUrl}/specific/upload-to-google-drive`, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
-    });
+  async uploadInvoiceToGoogleDrive(data) {
+    return await axios.post(`${baseUrl}/specific/upload-invoice-media`, data);
   }
 
   async getGoogleConnectionStatus(){

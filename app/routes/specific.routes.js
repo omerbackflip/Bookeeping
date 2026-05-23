@@ -19,6 +19,7 @@ module.exports = app => {
 
   //Google
   router.get("/get-google-connection-status", specific.googleConnectionStatus);
+  router.post("/upload-invoice-media", specific.uploadInvoiceMedia);
 
   router.post("/backup/run", specific.runBackup);
   router.post("/backup/restore", upload.single('file'), specific.runRestore);

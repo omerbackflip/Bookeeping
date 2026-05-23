@@ -12,3 +12,7 @@
 [submodule "backup"]
 	path = backup
 	url = https://github.com/omerbackflip/backup.git
+[submodule "camera"]
+	path = camera
+	url = https://github.com/omerbackflip/camera.git
+	branch = master
