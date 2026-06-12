@@ -77,7 +77,7 @@
                       </div>
                     </v-col>
                     <v-col cols="8"  class="hebrew">
-                      <v-text-field v-model="invoice.description" label="תאור" @focus="$event.target.select()"></v-text-field>
+                      <v-textarea v-model="invoice.description" label="תאור" auto-grow rows="1" @focus="$event.target.select()"></v-textarea>
                     </v-col>
                     <v-col cols="3">
                       <v-text-field @input="onAmountChange" v-model="invoice.amount" label="סכום" required @focus="$event.target.select()"></v-text-field>

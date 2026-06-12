@@ -63,7 +63,7 @@
           </template>
           <template v-slot:[`item.description`]="{ item }">
             <div class="description-width">
-              <span class="desc-oflow"> {{ item.description }}</span>
+              <span> {{ item.description }}</span>
               <!-- <td @click.stop> -->
                 <!-- <span v-if="isMobile()" @click="getSummary('supplier', item.supplier)" class="summary"> {{ item.supplier }} </span> -->
                 <span v-if="isMobile()" style="margin-left: 0.5rem; font-size: small"> {{ item.date | formatDate }}</span>
