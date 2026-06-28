@@ -248,6 +248,11 @@ export default {
 
         async runRestore(file) {
             try {
+                if (!file || !file.name || !file.name.toLowerCase().startsWith('book')) {
+                    alert("Restore file must start with 'book'.");
+                    return;
+                }
+
                 if (!confirm('This will overwrite ALL data. Continue?')) {
                     return;
                 }
