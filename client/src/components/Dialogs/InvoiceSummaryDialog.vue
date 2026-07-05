@@ -29,7 +29,8 @@
               <v-toolbar-title class="text-center" style="width:100%;">
                 <div>
                   <span>{{ title }} - {{ total.toLocaleString() }}<span v-if="!hideLeft"> (Left: {{ left.toLocaleString() }})</span></span>
-                  <span v-if="budget">{{ ' ------------ תקציב - '  + budget.toLocaleString()}}</span>
+                  -
+                  <span v-if="budget">({{ 'כרטסת - '  + budget}})</span>
                 </div>
               </v-toolbar-title>
 

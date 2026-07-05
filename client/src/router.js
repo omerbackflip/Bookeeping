@@ -33,6 +33,11 @@ export default new Router({
       component: () => import("./components/LinkedListTable")
     },
     {
+      path: "/supplierBalance",
+      name: "supplierBalance",
+      component: () => import("./components/SupplierBalance")
+    },
+    {
       path: "/holdersList",
       name: "holderList",
       component: () => import("./components/HoldersList")

@@ -94,6 +94,7 @@ export const navItems = [
     {icon: 'dashboard', text: 'Book List', route: '/bookingList/' },
     {icon: 'event', text: 'Table List', route: '/tableList'},
     {icon: 'link', text: 'Linked Books', route: '/linkedListTable'},
+    {icon: 'link', text: 'Supplier Balance', route: '/supplierBalance'},
     {icon: 'event', text: 'Holder List', route: '/HoldersList'},
     {icon: 'folder', text: 'Import INVOICEs', route: null, import: 'INVOICES', onClick: 'runModal'},
     {icon: 'folder', text: 'Import Bella BOOKs', route: null, import: 'BOOKS', onClick: 'runModal'},
