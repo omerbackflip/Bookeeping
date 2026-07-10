@@ -114,9 +114,9 @@ export const isMobile = () => {
     }
 };
 
-export const loadTable = async (table_id) => {
+export const loadTable = async (table_id, sort = { table_code: 1 }) => {
     try {
-        const response = await apiService.clientGetEntities(TABLE_MODEL, { table_id });
+        const response = await apiService.clientGetEntities(TABLE_MODEL, { table_id, _sort: JSON.stringify(sort) });
         if (response.data.length > 0) {
             return (response.data)
             // return (response.data.map((code) => code.description))

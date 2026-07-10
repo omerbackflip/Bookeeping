@@ -278,7 +278,7 @@ export default {
     },
 
     async mounted() {
-        this.yearList = (await loadTable(4)).map((code) => code.description).slice().reverse()
+        this.yearList = (await loadTable(4,{ table_code: -1 })).map((code) => code.description).slice()
         this.getDatabaseInformation();
         const lastUpdateArr = (await loadTable(110)).map((code) => code.description);
         this.lastUpdate = lastUpdateArr.length === 1 ? lastUpdateArr[0] : lastUpdateArr;
