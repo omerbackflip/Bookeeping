@@ -195,9 +195,6 @@ export default {
         invoice: [],
         // isModalOpen: false, 
         iframeSrc: '', 
-        folderId:localStorage.getItem('folderId'),
-        // token:localStorage.getItem('googleAccessToken'),
-        // developerKey:localStorage.getItem('developerKey'),
       };
     },
 

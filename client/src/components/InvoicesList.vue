@@ -271,9 +271,6 @@ export default {
       selected: [],
       header: '',
       pending: '',
-      folderId:localStorage.getItem('folderId'),
-      token:localStorage.getItem('googleAccessToken'),
-      developerKey:localStorage.getItem('developerKey')
 		};
 	},
 
