@@ -1,5 +1,5 @@
 module.exports = {
-  driveFolderId: process.env.GOOGLE_BACKUP_FOLDER_ID || process.env.BACKUP_DRIVE_FOLDER_ID,
+  driveFolderId: process.env.GOOGLE_BACKUP_FOLDER_ID,
   zipPrefix: 'book-backup',
 
   models: [
