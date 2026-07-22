@@ -253,7 +253,7 @@ exports.uploadInvoiceMedia = async (req, res) => {
       return res.status(400).send({ message: "Missing invoice group" });
     }
 
-    const folderId = ServerApp.google.storeInvoiceFolderIds && ServerApp.google.storeInvoiceFolderIds[0];
+    const folderId = ServerApp.google.invoiceFolderId;
 
     if (!folderId) {
       return res.status(500).send({ message: "Missing invoice Google Drive folder configuration" });

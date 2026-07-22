@@ -138,6 +138,6 @@ export async function viewGDFile(fileId, modalDialogRef) {
 }
 
 export const GOOGLE_PICKER_PARAMS = {
-  folderId: '1_rZaYVFJQVsyHq_8diKmU_dqb5lbNEyJ',
+  folderId: process.env.VUE_APP_GOOGLE_INVOICE_FOLDER_ID,
   includeFolders: true
 };

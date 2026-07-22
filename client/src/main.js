@@ -11,7 +11,7 @@ setGoogleConfig({
   pickerTokenUrl: `${process.env.VUE_APP_API_URL.replace('/specific', '')}/google/picker-token`,
   clientId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
   apiKey: process.env.VUE_APP_GOOGLE_API_KEY,
-  appId: process.env.VUE_APP_GOOGLE_CLIENT_ID,
+  appId: process.env.VUE_APP_GOOGLE_APP_ID,
   scope: process.env.VUE_APP_GOOGLE_SCOPE,
 });
 
