@@ -15,7 +15,7 @@ app.use(express.json({ limit: process.env.REQUEST_BODY_LIMIT || "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: process.env.REQUEST_BODY_LIMIT || "50mb" }));
 
 app.use('/api/google', createGoogleRouter({
-  scopes: process.env.GOOGLE_SCOPES || process.env.VUE_APP_GOOGLE_SCOPE,
+  scopes: process.env.GOOGLE_SCOPES,
   googleService
 }));
 
