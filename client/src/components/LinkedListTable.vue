@@ -192,11 +192,8 @@
 
 <script>
 import moment from 'moment';
-import { BOOKS_MODEL, TABLE_MODEL } from '../constants/constants';
+import { BOOKS_MODEL, TABLE_IDS, TABLE_MODEL } from '../constants/constants';
 import apiService from '../services/apiService';
-
-const YAZAMUT_TABLE_ID = 20;
-const BITZUIM_TABLE_ID = 21;
 
 const YAZAMUT_COMPANY = 'יזמות';
 const BITZUIM_COMPANY = 'ביצועים';
@@ -236,11 +233,11 @@ export default {
 
   computed: {
     yazamutSummaryRows() {
-      return this.buildSummaryRows(YAZAMUT_TABLE_ID, YAZAMUT_COMPANY);
+      return this.buildSummaryRows(TABLE_IDS.YAZAMUT_CUSTOMERS, YAZAMUT_COMPANY);
     },
 
     bitzuimSummaryRows() {
-      return this.buildSummaryRows(BITZUIM_TABLE_ID, BITZUIM_COMPANY);
+      return this.buildSummaryRows(TABLE_IDS.BITZUIM_CUSTOMERS, BITZUIM_COMPANY);
     },
   },
 
@@ -255,7 +252,7 @@ export default {
       try {
         const tableResponse = await apiService.clientGetEntities(TABLE_MODEL, {
           filter: JSON.stringify({
-            table_id: { $in: [YAZAMUT_TABLE_ID, BITZUIM_TABLE_ID] },
+            table_id: { $in: [TABLE_IDS.YAZAMUT_CUSTOMERS, TABLE_IDS.BITZUIM_CUSTOMERS] },
           }),
         });
 

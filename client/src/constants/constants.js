@@ -1,6 +1,20 @@
 export const BOOKS_MODEL = 'books';
 export const INVOICE_MODEL = 'invoices';
 export const TABLE_MODEL = 'tables';
+export const TABLE_IDS = Object.freeze({
+    CATALOG: 99,
+    USERS: 90,
+    LAST_BACKUP: 110,
+    COMPANIES: 1,
+    PROJECTS: 2,
+    SUPPLIERS: 3,
+    YEARS: 4,
+    BANK_CARDS: 5,
+    CARDS: 6,
+    PAYMENT_TYPES: 7,
+    YAZAMUT_CUSTOMERS: 20,
+    BITZUIM_CUSTOMERS: 21,
+});
 export const REVENUE_MODEL = 'revenues';
 export const HOLDER_MODEL = 'holders';
 export const VAT_PERCENTAGE = 17;

@@ -199,7 +199,7 @@ import apiService from "@/services/apiService";
 import SpecificServiceEndPoints from "@/services/specificServiceEndPoints";
 import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS, 
           TABLE_MODEL, BOOKS_MODEL, NEW_INVOICE, VAT_PERCENTAGE, 
-          loadTable, viewGDFile } from "@/constants/constants";
+          loadTable, TABLE_IDS, viewGDFile } from "@/constants/constants";
 import invoiceForm from "./InvoiceForm.vue"
 import { isMobile } from '@/constants/constants';
 import { GoogleFileViewerModal as modalDialog } from '../../../google/frontend';
@@ -309,7 +309,7 @@ export default {
 
       // 🔹 Supplier-only extra logic
       if (summaryField === 'supplier') {
-        const budgetResponse = await apiService.clientGetEntities(TABLE_MODEL, { table_id: 3, description: summaryItem })
+        const budgetResponse = await apiService.clientGetEntities(TABLE_MODEL, { table_id: TABLE_IDS.SUPPLIERS, description: summaryItem })
         this.summaryBudget = budgetResponse.data[0]?.table_code || 0
       }
 
@@ -542,9 +542,9 @@ export default {
 
 	async mounted() {
 		this.retrieveInvoices();
-    this.companyName = (await loadTable(1)).map((code) => code.description)
-    this.projectName = (await loadTable(2)).map((code) => code.description)
-    this.supplierName = (await loadTable(3)).map((code) => code.description)
+    this.companyName = (await loadTable(TABLE_IDS.COMPANIES)).map((code) => code.description)
+    this.projectName = (await loadTable(TABLE_IDS.PROJECTS)).map((code) => code.description)
+    this.supplierName = (await loadTable(TABLE_IDS.SUPPLIERS)).map((code) => code.description)
     this.$root.$on("addNewInvoice", async () => {
 			this.invoiceID = 0;
       this.invoice = NEW_INVOICE;

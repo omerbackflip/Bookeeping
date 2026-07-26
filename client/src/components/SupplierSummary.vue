@@ -45,7 +45,7 @@
 import Vue from "vue";
 import moment from "moment";
 import apiService from "../services/apiService";
-import { INVOICE_MODEL, SUMMARY_SUPPLIER_HEADERS, loadTable } from "../constants/constants";
+import { INVOICE_MODEL, SUMMARY_SUPPLIER_HEADERS, loadTable, TABLE_IDS } from "../constants/constants";
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -91,7 +91,7 @@ export default {
 	},
 
 	async mounted() {
-    this.supplierList = (await loadTable(3)).map((code) => {
+    this.supplierList = (await loadTable(TABLE_IDS.SUPPLIERS)).map((code) => {
       return {supplier: code.description, budget: code.table_code}
     })
     this.mainSummary();

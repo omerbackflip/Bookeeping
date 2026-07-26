@@ -98,7 +98,7 @@ import moment from "moment";
 import apiService from "../services/apiService";
 import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
-import { INVOICE_MODEL, REVENUE_MODEL, SUMMARY_PROJECT_WEB_HEADERS, SUMMARY_PROJECT_MOBILE_HEADERS, loadTable } from "../constants/constants";
+import { INVOICE_MODEL, REVENUE_MODEL, SUMMARY_PROJECT_WEB_HEADERS, SUMMARY_PROJECT_MOBILE_HEADERS, loadTable, TABLE_IDS } from "../constants/constants";
 import { isMobile } from '../constants/constants';
 
 Vue.filter("formatDate", function (value) {
@@ -198,7 +198,7 @@ export default {
 	},
 
 	async mounted() {
-    this.projectList = (await loadTable(2)).map((code) => {
+    this.projectList = (await loadTable(TABLE_IDS.PROJECTS)).map((code) => {
       return {project: code.description}
     })
     this.mainSummary();

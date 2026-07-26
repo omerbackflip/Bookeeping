@@ -98,7 +98,7 @@
 
 <script>
 import ImportCSV from '@/components/ImportCSV.vue';
-import { navItems, isMobile, loadTable } from '@/constants/constants';
+import { navItems, isMobile, loadTable, TABLE_IDS } from '@/constants/constants';
 import SpecificServiceEndPoints from "@/services/specificServiceEndPoints";
 import { initializeGoogleOnAppLoad } from "../../../../google/frontend";
 import { TABLE_MODEL } from "@/constants/constants";
@@ -221,7 +221,7 @@ export default {
                     this.lastUpdate = "last backup : " + dateStr;
 
                     await apiService.updateEntity(
-                        { table_id: 110, table_code: 1 },
+                        { table_id: TABLE_IDS.LAST_BACKUP, table_code: 1 },
                         { description: this.lastUpdate },
                         { model: TABLE_MODEL }
                     );
@@ -278,9 +278,9 @@ export default {
     },
 
     async mounted() {
-        this.yearList = (await loadTable(4,{ table_code: -1 })).map((code) => code.description).slice()
+        this.yearList = (await loadTable(TABLE_IDS.YEARS,{ table_code: -1 })).map((code) => code.description).slice()
         this.getDatabaseInformation();
-        const lastUpdateArr = (await loadTable(110)).map((code) => code.description);
+        const lastUpdateArr = (await loadTable(TABLE_IDS.LAST_BACKUP)).map((code) => code.description);
         this.lastUpdate = lastUpdateArr.length === 1 ? lastUpdateArr[0] : lastUpdateArr;
         this.checkGoogleConnection();
     },

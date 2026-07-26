@@ -73,7 +73,7 @@ import moment from "moment";
 import apiService from "../services/apiService";
 import RevenueForm from './RevenueForm.vue';
 import ConfirmDialog from './Common/ConfirmDialog.vue';
-import { REVENUE_MODEL, loadTable } from "../constants/constants";
+import { REVENUE_MODEL, loadTable, TABLE_IDS } from "../constants/constants";
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -155,7 +155,7 @@ export default {
 	},
 
 	async mounted() {
-    this.projectList = (await loadTable(2)).map((code) => code.description)
+    this.projectList = (await loadTable(TABLE_IDS.PROJECTS)).map((code) => code.description)
     this.getRevenues();
 	},
 	

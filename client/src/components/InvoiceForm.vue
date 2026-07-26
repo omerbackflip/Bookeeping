@@ -151,7 +151,7 @@
 </template>
 
 <script>
-import { INVOICE_MODEL, loadTable, GOOGLE_PICKER_PARAMS, viewGDFile } from "@/constants/constants";
+import { INVOICE_MODEL, loadTable, TABLE_IDS, GOOGLE_PICKER_PARAMS, viewGDFile } from "@/constants/constants";
 import apiService from "@/services/apiService";
 import specificService from "@/services/specificServiceEndPoints";
 import Camera from "../../../camera/frontend";
@@ -385,9 +385,9 @@ export default {
     },
     
     async mounted(){
-      this.companyName = (await loadTable(1)).map((code) => code.description)
-      this.projectName = (await loadTable(2)).map((code) => code.description)
-      this.supplierName = (await loadTable(3)).map((code) => code.description)
+      this.companyName = (await loadTable(TABLE_IDS.COMPANIES)).map((code) => code.description)
+      this.projectName = (await loadTable(TABLE_IDS.PROJECTS)).map((code) => code.description)
+      this.supplierName = (await loadTable(TABLE_IDS.SUPPLIERS)).map((code) => code.description)
     }
 };
 </script>

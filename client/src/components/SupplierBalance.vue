@@ -154,10 +154,8 @@
 
 <script>
 import moment from 'moment';
-import { BOOKS_MODEL, TABLE_MODEL } from '../constants/constants';
+import { BOOKS_MODEL, TABLE_IDS, TABLE_MODEL } from '../constants/constants';
 import apiService from '../services/apiService';
-
-const SUPPLIERS_TABLE_ID = 3;
 
 export default {
   name: 'SupplierBalance',
@@ -224,7 +222,7 @@ export default {
 
       try {
         const tableResponse = await apiService.clientGetEntities(TABLE_MODEL, {
-          table_id: SUPPLIERS_TABLE_ID,
+          table_id: TABLE_IDS.SUPPLIERS,
         });
 
         this.tableRows = tableResponse.data || [];

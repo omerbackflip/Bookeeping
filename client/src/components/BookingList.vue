@@ -121,7 +121,7 @@ import Vue from "vue";
 import moment from "moment";
 // import VueVirtualTable from 'vue-virtual-table'
 import apiService from '../services/apiService';
-import { BOOKS_MODEL, loadTable } from '../constants/constants';
+import { BOOKS_MODEL, loadTable, TABLE_IDS } from '../constants/constants';
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -312,7 +312,7 @@ export default {
 
 	async mounted() {
 		this.retrieveBooks();
-		this.cardsList = (await loadTable(6)).map((code) => code.description)
+		this.cardsList = (await loadTable(TABLE_IDS.CARDS)).map((code) => code.description)
 		this.$root.$on("yearChange", (year) => {
 			this.selectedCard = '',
 			this.summaryHint = '',

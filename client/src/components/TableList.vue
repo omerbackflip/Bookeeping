@@ -305,7 +305,7 @@
 
 
 <script>
-import { BOOKS_MODEL, TABLE_MODEL } from '../constants/constants';
+import { BOOKS_MODEL, TABLE_IDS, TABLE_MODEL } from '../constants/constants';
 import apiService from '../services/apiService';
 import Vue from "vue";
 import moment from "moment";
@@ -375,7 +375,7 @@ export default {
       apiService.clientGetEntities(TABLE_MODEL)
         .then((response) => {
           this.tables = response.data;
-          this.tableID = response.data.filter(item => item.table_id === 99);
+          this.tableID = response.data.filter(item => item.table_id === TABLE_IDS.CATALOG);
           this.updateTableCode();
         })
         .catch((e) => {
@@ -490,14 +490,14 @@ export default {
 
 
     async showData (item) {
-      if (item.table_id === 5 || item.table_id ===6) {
+      if (item.table_id === TABLE_IDS.BANK_CARDS || item.table_id === TABLE_IDS.CARDS) {
         this.isLoading = true;
         let response = ''
         switch (item.table_id) {
-          case 5 : // take summary from bank records
+          case TABLE_IDS.BANK_CARDS : // take summary from bank records
             response = await apiService.clientGetEntities(BOOKS_MODEL, { asmacta1:item.table_code })
             break;
-          case 6 : // take summary from the exported data
+          case TABLE_IDS.CARDS : // take summary from the exported data
             response = await apiService.clientGetEntities(BOOKS_MODEL, { cust_id:item.table_code })
             break;           
         }

@@ -20,7 +20,7 @@
 <script>
   import Navbar from './components/Common/Navbar.vue'
   import LoginForm from './components/shared/login'
-  import { loadTable } from "../src/constants/constants.js";
+  import { loadTable, TABLE_IDS } from "../src/constants/constants.js";
 
   export default {
     name: "app",
@@ -33,7 +33,7 @@
       }
     },
     async mounted() {
-      this.userInfo = (await loadTable(90)).map((code) => code.description);
+      this.userInfo = (await loadTable(TABLE_IDS.USERS)).map((code) => code.description);
     },
     created() {
       const authFlag = localStorage.getItem('BookAuthenticated');

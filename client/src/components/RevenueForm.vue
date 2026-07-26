@@ -37,7 +37,7 @@
 </template>
 
 <script>
-import { REVENUE_MODEL, loadTable } from "../constants/constants";
+import { REVENUE_MODEL, loadTable, TABLE_IDS } from "../constants/constants";
 import apiService from "../services/apiService";
 import Vue from "vue";
 import moment from "moment";
@@ -96,7 +96,7 @@ export default {
             this.isNewRevenue = isNewRevenue
             this.revenue = revenue 
             this.revenue.date = moment(this.revenue.date).format('YYYY-MM-DD');
-            this.paymentTypeList = (await loadTable(7)).map((code) => code.description)
+            this.paymentTypeList = (await loadTable(TABLE_IDS.PAYMENT_TYPES)).map((code) => code.description)
             this.dialog = true;
             return new Promise((resolve) => {
                 this.resolve = resolve;

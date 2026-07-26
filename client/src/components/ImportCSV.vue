@@ -50,7 +50,7 @@
 
 <script>
 import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
-import { loadTable } from "../constants/constants";
+import { loadTable, TABLE_IDS } from "../constants/constants";
 // import apiService from "../services/apiService";
 
 export default {
@@ -119,7 +119,7 @@ export default {
 		},
 	},
 	async mounted() {
-		this.years = (await loadTable(4)).map((code) => code.description)
+		this.years = (await loadTable(TABLE_IDS.YEARS)).map((code) => code.description)
 		this.dialog = true;
 	}
 };
