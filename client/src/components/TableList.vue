@@ -93,6 +93,7 @@
             <v-data-table :headers="headers" 
                           :items="tableID"
                           :search="search"
+                          :sort-by="['table_code']"
                           disable-pagination
                           hide-default-footer
                           @click:row="filterTbl"
@@ -155,6 +156,7 @@
             <v-data-table :headers="headers" 
                           :items="tableCode"
                           :search="search"
+                          :sort-by="['table_code']"
                           @click:row="showData"
                           disable-pagination
                           hide-default-footer
