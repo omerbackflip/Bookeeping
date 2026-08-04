@@ -3,9 +3,6 @@
     <v-container fluid>
       <v-card outlined class="balance-panel">
         <v-card-title class="balance-panel-title">
-          <div class="balance-heading">
-            <span>Supplier Balance</span>
-          </div>
           <v-text-field
             v-model="search"
             clearable
@@ -15,6 +12,10 @@
             dense
             class="mx-4"
           ></v-text-field>
+          <v-spacer />
+          <div class="balance-heading">
+            <span>ביצועים - כרטסת ספקים</span>
+          </div>
           <v-spacer />
           ({{ summaryRows.length }})
         </v-card-title>
@@ -36,6 +37,10 @@
         >
           <template v-slot:no-data>
             <span>No supplier rows</span>
+          </template>
+
+          <template v-slot:[`item.code`]="{ item }">
+            <span>{{ item.code ? item.code : '' }}</span>
           </template>
 
           <template v-slot:[`item.schum_zchut`]="{ item }">
@@ -171,6 +176,7 @@ export default {
       detailSearch: '',
 
       summaryHeaders: [
+        { text: 'Company', value: 'company', class: 'balance-header' },
         { text: 'Code', value: 'code', class: 'balance-header', width: '90px' },
         { text: 'Supplier', value: 'description', class: 'balance-header', align: 'right' },
         { text: 'schum_zchut', value: 'schum_zchut', class: 'balance-header' },
@@ -203,6 +209,7 @@ export default {
           return {
             code,
             description: tableRow.description,
+            company: this.getCompanyLabel(matchingBooks),
             schum_zchut: schumZchut,
             schum_hova: schumHova,
             balance: schumHova - schumZchut,
@@ -267,6 +274,18 @@ export default {
 
     formatNumber(value) {
       return (Number(value) || 0).toLocaleString();
+    },
+
+    getCompanyLabel(items) {
+      const companies = [...new Set(items.map((item) => item.company).filter(Boolean))];
+      if (!companies.length) {
+        return '';
+      }
+      if (companies.length === 1) {
+        return companies[0];
+      }
+      const sorted = companies.slice().sort();
+      return sorted.join('/');
     },
   },
 };
