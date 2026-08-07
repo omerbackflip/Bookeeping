@@ -12,6 +12,7 @@
             dense
             class="mx-4"
           ></v-text-field>
+          <date-interval-filter @change="dateInterval = $event" />
           <v-spacer />
           <div class="balance-heading">
             <span>ביצועים - כרטסת ספקים</span>
@@ -57,102 +58,11 @@
         </v-data-table>
       </v-card>
 
-      <v-dialog v-model="detailDialog" max-width="1200px">
-        <v-card outlined class="balance-panel">
-          <v-card-title class="balance-panel-title">
-            <div class="balance-heading">
-              <span v-if="selectedSummaryRow">{{ selectedSummaryRow.description }} - {{ selectedSummaryRow.code }}</span>
-            </div>
-            <v-text-field
-              v-if="selectedSummaryRow"
-              v-model="detailSearch"
-              clearable
-              label="Search"
-              single-line
-              hide-details
-              dense
-              class="mx-4"
-            ></v-text-field>
-            <v-spacer />
-            <v-chip
-              v-if="selectedSummaryRow"
-              small
-              color="primary"
-              text-color="white"
-            >
-              schum_zchut: {{ formatNumber(selectedSummaryRow.schum_zchut) }}
-            </v-chip>
-
-            <v-chip
-              v-if="selectedSummaryRow"
-              small
-              color="primary"
-              text-color="white"
-            >
-              schum_hova: {{ formatNumber(selectedSummaryRow.schum_hova) }}
-            </v-chip>
-
-            <v-chip
-              v-if="selectedSummaryRow"
-              small
-              :color="selectedSummaryRow.balance < 0 ? 'error' : 'primary'"
-              text-color="white"
-            >
-              Balance: {{ formatNumber(selectedSummaryRow.balance) }}
-            </v-chip>
-            <v-spacer />
-            ({{ detailRows.length }})
-            <export-excel
-              v-if="detailRows.length"
-              :data="$formatDataForExport(detailRows)"
-              type="xlsx"
-              :name="`${selectedSummaryRow.description} - ${selectedSummaryRow.code}`"
-              :title="`${selectedSummaryRow.description} - ${selectedSummaryRow.code}`"
-              footer="Exported from Book App"
-            >
-              <v-btn icon small color="primary">
-                <v-icon small>mdi-download</v-icon>
-              </v-btn>
-            </export-excel>
-            <v-btn icon small @click="detailDialog = false">
-              <v-icon small>mdi-close</v-icon>
-            </v-btn>
-          </v-card-title>
-
-          <v-data-table
-            :headers="detailHeaders"
-            :items="detailRows"
-            :search="detailSearch"
-            dense
-            fixed-header
-            height="70vh"
-            mobile-breakpoint="0"
-            hide-default-footer
-            disable-pagination
-            class="balance-table book-table"
-          >
-            <template v-slot:no-data>
-              <span>No matching book records</span>
-            </template>
-
-            <template v-slot:[`item.asmchta_date`]="{ item }">
-              <span>{{ formatDate(item.asmchta_date) }}</span>
-            </template>
-
-            <template v-slot:[`item.schum_zchut`]="{ item }">
-              <span>{{ formatNumber(item.schum_zchut) }}</span>
-            </template>
-
-            <template v-slot:[`item.schum_hova`]="{ item }">
-              <span>{{ formatNumber(item.schum_hova) }}</span>
-            </template>
-
-            <template v-slot:[`item.record_schum`]="{ item }">
-              <span :class="{ negative: item.record_schum < 0 }">{{ formatNumber(item.record_schum) }}</span>
-            </template>
-          </v-data-table>
-        </v-card>
-      </v-dialog>
+      <balance-details-dialog
+        v-model="detailDialog"
+        :selected-row="selectedSummaryRow"
+        :rows="detailRows"
+      />
     </v-container>
   </div>
 </template>
@@ -161,9 +71,15 @@
 import moment from 'moment';
 import { BOOKS_MODEL, TABLE_IDS, TABLE_MODEL } from '../constants/constants';
 import apiService from '../services/apiService';
+import BalanceDetailsDialog from './Common/BalanceDetailsDialog.vue';
+import DateIntervalFilter from './Common/DateIntervalFilter.vue';
 
 export default {
   name: 'SupplierBalance',
+  components: {
+    BalanceDetailsDialog,
+    DateIntervalFilter,
+  },
   data() {
     return {
       tableRows: [],
@@ -173,7 +89,7 @@ export default {
       detailDialog: false,
       isLoading: false,
       search: '',
-      detailSearch: '',
+      dateInterval: { from: null, to: null },
 
       summaryHeaders: [
         { text: 'Company', value: 'company', class: 'balance-header' },
@@ -184,25 +100,19 @@ export default {
         { text: 'balance', value: 'balance', class: 'balance-header' },
       ],
 
-      detailHeaders: [
-        { text: 'company', value: 'company', class: 'balance-header' },
-        { text: 'year', value: 'year', class: 'balance-header' },
-        { text: 'asmchta_date', value: 'asmchta_date', class: 'balance-header' },
-        { text: 'asmacta1', value: 'asmacta1', class: 'balance-header' },
-        { text: 'schum_zchut', value: 'schum_zchut', class: 'balance-header' },
-        { text: 'schum_hova', value: 'schum_hova', class: 'balance-header' },
-        { text: 'pratim', value: 'pratim', class: 'balance-header', align: 'right' },
-        { text: 'record_schum', value: 'record_schum', class: 'balance-header' },
-      ],
     };
   },
 
   computed: {
+    filteredBookRows() {
+      return this.bookRows.filter(this.isBookInDateInterval);
+    },
+
     summaryRows() {
       return this.tableRows
         .map((tableRow) => {
           const code = Number(tableRow.table_code);
-          const matchingBooks = this.bookRows.filter((bookRow) => Number(bookRow.cust_id) === code);
+          const matchingBooks = this.filteredBookRows.filter((bookRow) => Number(bookRow.cust_id) === code);
           const schumZchut = this.sumField(matchingBooks, 'schum_zchut');
           const schumHova = this.sumField(matchingBooks, 'schum_hova');
 
@@ -255,9 +165,8 @@ export default {
 
     openDetails(summaryRow) {
       this.selectedSummaryRow = summaryRow;
-      this.detailSearch = '';
 
-      this.detailRows = this.bookRows
+      this.detailRows = this.filteredBookRows
         .filter((bookRow) => Number(bookRow.cust_id) === summaryRow.code)
         .sort((a, b) => new Date(b.asmchta_date) - new Date(a.asmchta_date));
 
@@ -268,8 +177,17 @@ export default {
       return items.reduce((total, item) => total + (Number(item[field]) || 0), 0);
     },
 
-    formatDate(value) {
-      return value ? moment(String(value)).format('DD/MM/YYYY') : '';
+    isBookInDateInterval(bookRow) {
+      if (!this.dateInterval.from && !this.dateInterval.to) {
+        return true;
+      }
+      const recordDate = moment(bookRow.asmchta_date);
+      if (!recordDate.isValid()) {
+        return false;
+      }
+      const afterFrom = !this.dateInterval.from || recordDate.isSameOrAfter(this.dateInterval.from);
+      const beforeTo = !this.dateInterval.to || recordDate.isSameOrBefore(this.dateInterval.to);
+      return afterFrom && beforeTo;
     },
 
     formatNumber(value) {
@@ -329,10 +247,6 @@ export default {
   text-align-last: right;
 }
 
-.book-table {
-  border-top: 0;
-}
-
 ::v-deep .balance-header {
   background: #eef4ff !important;
   color: #1e3a5f !important;
@@ -345,10 +259,6 @@ export default {
 
 ::v-deep .balance-table tbody tr:hover {
   background: #f3f8ff !important;
-}
-
-::v-deep .book-table table {
-  min-width: 860px;
 }
 
 .negative {

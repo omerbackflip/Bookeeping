@@ -203,8 +203,8 @@ import { INVOICE_MOBILE_HEADERS, INVOICE_MODEL, INVOICE_WEB_HEADERS,
 import invoiceForm from "./InvoiceForm.vue"
 import { isMobile } from '@/constants/constants';
 import { GoogleFileViewerModal as modalDialog } from '../../../google/frontend';
-import UnpaidSummaryDialog from './Dialogs/UnpaidSummaryDialog.vue';
-import InvoiceSummaryDialog from './Dialogs/InvoiceSummaryDialog.vue';
+import UnpaidSummaryDialog from './Common/UnpaidSummaryDialog.vue';
+import InvoiceSummaryDialog from './Common/InvoiceSummaryDialog.vue';
 
 Vue.filter("formatDate", function (value) {
 	if (value) {
