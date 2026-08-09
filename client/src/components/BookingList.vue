@@ -28,20 +28,6 @@
 					<v-spacer></v-spacer>
 					<v-text-field v-model="search" label="Search" class="mx-4 sreach-width" clearable></v-text-field>
 					<v-spacer></v-spacer>
-					<v-select
-						v-model="selectedCard"
-						:items="cardsList"
-						:hint="summaryHint"
-						item-text="text"
-						item-value="value"
-						label="בחר כרטסת"
-						persistent-hint
-						return-object
-						single-line
-						@change="onCardChange"
-						class="mx-4 sreach-width"
-						></v-select>
-					<v-spacer></v-spacer>
 					<v-btn x-small @click="removeAllBooks()">delete</v-btn>
 				</v-toolbar>
 			</template>
@@ -207,7 +193,6 @@ export default {
 			selected: [],
 			header: '',
 			cardsList: [],
-			selectedCard: '',
 			summaryHint: '',
 		};
 	},
@@ -287,40 +272,17 @@ export default {
 			this.$emit('findMatch', this.selected[0] || '') 
 		},
 
-		onCardChange(selectedCard) {
-			console.log(selectedCard)
-			if (selectedCard.value != 0){
-				this.filteredList = this.bookList.filter((item) => {
-					return (item.cust_id === selectedCard.value)
-				})
-				let hova = this.filteredList.reduce((currentTotal, item) => {
-					return (item.schum_hova + currentTotal) },0);
-				let zchut = this.filteredList.reduce((currentTotal, item) => {
-					return (item.schum_zchut + currentTotal) },0);				
-				this.summaryHint = 'Zchut: ' + zchut.toLocaleString("en", {minimumFractionDigits: 0, maximumFractionDigits: 0,})
-								+ '..........'
-								+ 'Hova: '	 + hova.toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,})
-								+ '..........'
-								+ 'Balance: '+ (hova-zchut).toLocaleString("en", {minimumFractionDigits: 0,maximumFractionDigits: 0,})
-			} else {
-				this.filteredList = this.bookList;
-				this.summaryHint =''
-			}
-		},
-
 	},
 
 	async mounted() {
 		this.retrieveBooks();
 		this.cardsList = (await loadTable(TABLE_IDS.CARDS)).map((code) => code.description)
 		this.$root.$on("yearChange", (year) => {
-			this.selectedCard = '',
 			this.summaryHint = '',
 			this.selectedYear = year;
 		});
 
 		this.$root.$on("companyChange", (company) => {
-			this.selectedCard = '',
 			this.summaryHint = '',
 			this.selectedCompany = company;
 		});

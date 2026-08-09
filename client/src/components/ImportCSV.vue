@@ -50,8 +50,8 @@
 
 <script>
 import SpecificServiceEndPoints from "../services/specificServiceEndPoints";
-import { loadTable, TABLE_IDS } from "../constants/constants";
-// import apiService from "../services/apiService";
+import { loadTable, TABLE_IDS, TABLE_MODEL } from "../constants/constants";
+import apiService from "../services/apiService";
 
 export default {
 	props: {
@@ -105,10 +105,23 @@ export default {
 					default : alert("switch/case statment not resolved")
 				}
 				if (response.data && response.data.success) {
-					this.message = "CSV Data successfully imported";
+					if (this.importData === "BOOKS") {
+						const dateStr = new Date().toLocaleDateString("en-GB");
+						const description = "last Bela import : " + dateStr;
+
+						await apiService.updateEntity(
+							{table_id: TABLE_IDS.LAST_BELA_IMPORT, table_code: 1},
+							{description},
+							{model: TABLE_MODEL}
+						);
+					}
+
+					this.message = "Data successfully imported";
+
 					setTimeout(() => {
 						this.closeImportDialog();
 					}, 3500);
+
 					window.location.reload();
 				}
 			} catch (error) {

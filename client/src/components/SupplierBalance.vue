@@ -12,10 +12,11 @@
             dense
             class="mx-4"
           ></v-text-field>
+          <v-spacer />
           <date-interval-filter @change="dateInterval = $event" />
           <v-spacer />
           <div class="balance-heading">
-            <span>ביצועים - כרטסת ספקים</span>
+            <span>יזמות/ביצועים - כרטסת ספקים</span>
           </div>
           <v-spacer />
           ({{ summaryRows.length }})

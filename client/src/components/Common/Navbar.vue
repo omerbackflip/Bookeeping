@@ -10,19 +10,20 @@
                     {{local ? 'LocalHost' : 'Production'}}
                 </div>
             </div>
-            <v-btn v-if="!isMobile()" color="primary" dark :loading="loading" @click="runBackup" class="ml-3" small>
-                <v-icon left>mdi-google-drive</v-icon>
-                {{ lastUpdate }}
-            </v-btn>
-            <v-btn
-            small
-            class="ml-2"
-            :loading="loading"
-            @click="triggerRestore"
-            >
-            <v-icon left>mdi-restore</v-icon>
-            Restore
-            </v-btn>
+            <v-template v-if="!isMobile()">
+                <v-btn color="primary" dark :loading="loading" @click="runBackup" class="ml-3" small>
+                    <v-icon left>mdi-google-drive</v-icon>
+                    {{ lastUpdate }}
+                </v-btn>
+                <v-btn  small class="ml-2" :loading="loading" @click="triggerRestore">    
+                    <v-icon left>mdi-restore</v-icon>
+                    Restore
+                </v-btn>
+                <v-btn  color="primary" dark class="ml-2" small @click="runModal('BOOKS')">
+                    <v-icon left>mdi-file-import</v-icon>
+                    {{ lastImport }}
+                </v-btn>
+            </v-template>
             <v-spacer/>
             <template>
                 <div v-if="showControl" class="mt-2 text-center d-flex">
@@ -128,6 +129,7 @@ export default {
             local: false,
             version: '',
             lastUpdate: [],
+            lastImport: '',
             loading: false,
         }
     },
@@ -218,13 +220,14 @@ export default {
                     const match = filename.match(/(\d{4})-(\d{2})-(\d{2})/);
                     const dateStr = match ? `${match[3]}/${match[2]}/${match[1]}` : '';
 
-                    this.lastUpdate = "last backup : " + dateStr;
+                    const description = "last backup : " + dateStr;
 
                     await apiService.updateEntity(
                         { table_id: TABLE_IDS.LAST_BACKUP, table_code: 1 },
-                        { description: this.lastUpdate },
+                        { description },
                         { model: TABLE_MODEL }
                     );
+                    await this.loadLastDates();
                 }
             } catch (error) {
                 console.error(error);
@@ -275,13 +278,26 @@ export default {
                 this.loading = false;
             }
         },
+
+        async loadLastDates() {
+            try {
+                const [backupRecords, importRecords] = await Promise.all([
+                    loadTable(TABLE_IDS.LAST_BACKUP),
+                    loadTable(TABLE_IDS.LAST_BELA_IMPORT)
+                ]);
+
+                this.lastUpdate = backupRecords[0].description;
+                this.lastImport = importRecords[0].description;
+            } catch (error) {
+                console.error("Failed loading last dates", error);
+            }
+        },
     },
 
     async mounted() {
         this.yearList = (await loadTable(TABLE_IDS.YEARS,{ table_code: -1 })).map((code) => code.description).slice()
         this.getDatabaseInformation();
-        const lastUpdateArr = (await loadTable(TABLE_IDS.LAST_BACKUP)).map((code) => code.description);
-        this.lastUpdate = lastUpdateArr.length === 1 ? lastUpdateArr[0] : lastUpdateArr;
+        await this.loadLastDates();
         this.checkGoogleConnection();
     },
 

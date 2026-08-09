@@ -22,7 +22,7 @@
               :loading="isLoading"
               dense
               fixed-header
-              height="80vh"
+              height="79vh"
               mobile-breakpoint="0"
               hide-default-footer
               disable-pagination
@@ -65,7 +65,7 @@
               :loading="isLoading"
               dense
               fixed-header
-              height="80vh"
+              height="79vh"
               mobile-breakpoint="0"
               hide-default-footer
               disable-pagination

@@ -5,6 +5,7 @@ export const TABLE_IDS = Object.freeze({
     CATALOG: 99,
     USERS: 90,
     LAST_BACKUP: 110,
+    LAST_BELA_IMPORT: 111,
     COMPANIES: 1,
     PROJECTS: 2,
     SUPPLIERS: 3,
