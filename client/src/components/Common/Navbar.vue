@@ -102,8 +102,6 @@ import ImportCSV from '@/components/ImportCSV.vue';
 import { navItems, isMobile, loadTable, TABLE_IDS } from '@/constants/constants';
 import SpecificServiceEndPoints from "@/services/specificServiceEndPoints";
 import { initializeGoogleOnAppLoad } from "../../../../google/frontend";
-import { TABLE_MODEL } from "@/constants/constants";
-import apiService from "@/services/apiService";
 
 export default {
     components: { ImportCSV },
@@ -216,17 +214,6 @@ export default {
                 const response = await SpecificServiceEndPoints.runBackup();
 
                 if (response && response.data && response.data.file && response.data.file.filename) {
-                    const filename = response.data.file.filename;
-                    const match = filename.match(/(\d{4})-(\d{2})-(\d{2})/);
-                    const dateStr = match ? `${match[3]}/${match[2]}/${match[1]}` : '';
-
-                    const description = "last backup : " + dateStr;
-
-                    await apiService.updateEntity(
-                        { table_id: TABLE_IDS.LAST_BACKUP, table_code: 1 },
-                        { description },
-                        { model: TABLE_MODEL }
-                    );
                     await this.loadLastDates();
                 }
             } catch (error) {
