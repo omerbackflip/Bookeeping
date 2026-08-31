@@ -10,9 +10,13 @@
           <v-card outlined class="linked-panel">
             <v-card-title class="linked-panel-title">
               <div class="linked-heading">
-                <span>ביצועים</span>
+                <span>{{ showSalaryRows ? 'משכורות' : 'ביצועים' }}</span>
               </div>
               <v-spacer />
+              <v-btn small outlined color="primary" class="salary-toggle" @click="showSalaryRows = !showSalaryRows">
+                <v-icon small class="ml-1">mdi-swap-horizontal</v-icon>
+                {{ showSalaryRows ? 'ביצועים' : 'משכורות' }}
+              </v-btn>
               ({{ bitzuimSummaryRows.length }})
             </v-card-title>
 
@@ -111,6 +115,8 @@ import DateIntervalFilter from './Common/DateIntervalFilter.vue';
 
 const YAZAMUT_COMPANY = 'יזמות';
 const BITZUIM_COMPANY = 'ביצועים';
+const SALARY_CODE_MIN = 3010;
+const SALARY_CODE_MAX = 3050;
 
 export default {
   name: 'LinkedListTable',
@@ -126,6 +132,7 @@ export default {
       detailRows: [],
       detailDialog: false,
       isLoading: false,
+      showSalaryRows: false,
       dateInterval: { from: null, to: null },
 
       summaryHeaders: [
@@ -149,7 +156,8 @@ export default {
     },
 
     bitzuimSummaryRows() {
-      return this.buildSummaryRows(TABLE_IDS.BITZUIM_CUSTOMERS, BITZUIM_COMPANY);
+      return this.buildSummaryRows(TABLE_IDS.BITZUIM_CUSTOMERS, BITZUIM_COMPANY)
+        .filter((row) => this.isSalaryCode(row.code) === this.showSalaryRows);
     },
   },
 
@@ -158,6 +166,10 @@ export default {
   },
 
   methods: {
+    isSalaryCode(code) {
+      return code >= SALARY_CODE_MIN && code <= SALARY_CODE_MAX;
+    },
+
     async retrieveData() {
       this.isLoading = true;
 
@@ -279,6 +291,10 @@ export default {
   padding: 12px 16px;
   gap: 8px;
   direction: rtl;
+}
+
+.salary-toggle {
+  flex: 0 0 auto;
 }
 
 .linked-heading {
