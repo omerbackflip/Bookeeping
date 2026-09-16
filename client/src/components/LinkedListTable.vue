@@ -10,12 +10,12 @@
           <v-card outlined class="linked-panel">
             <v-card-title class="linked-panel-title">
               <div class="linked-heading">
-                <span>{{ showSalaryRows ? 'משכורות' : 'ביצועים' }}</span>
+                <span>{{ bitzuimView.label }}</span>
               </div>
               <v-spacer />
-              <v-btn small outlined color="primary" class="salary-toggle" @click="showSalaryRows = !showSalaryRows">
+              <v-btn small outlined color="primary" class="balance-view-toggle" @click="toggleView('bitzuim')">
                 <v-icon small class="ml-1">mdi-swap-horizontal</v-icon>
-                {{ showSalaryRows ? 'ביצועים' : 'משכורות' }}
+                {{ alternateView('bitzuim').label }}
               </v-btn>
               ({{ bitzuimSummaryRows.length }})
             </v-card-title>
@@ -57,9 +57,13 @@
           <v-card outlined class="linked-panel">
             <v-card-title class="linked-panel-title">
               <div class="linked-heading">
-                <span>יזמות</span>
+                <span>{{ yazamutView.label }}</span>
               </div>
               <v-spacer />
+              <v-btn small outlined color="primary" class="balance-view-toggle" @click="toggleView('yazamut')">
+                <v-icon small class="ml-1">mdi-swap-horizontal</v-icon>
+                {{ alternateView('yazamut').label }}
+              </v-btn>
               ({{ yazamutSummaryRows.length }})
             </v-card-title>
 
@@ -115,8 +119,22 @@ import DateIntervalFilter from './Common/DateIntervalFilter.vue';
 
 const YAZAMUT_COMPANY = 'יזמות';
 const BITZUIM_COMPANY = 'ביצועים';
-const SALARY_CODE_MIN = 3010;
-const SALARY_CODE_MAX = 3050;
+const PANEL_VIEWS = Object.freeze({
+  bitzuim: Object.freeze({
+    primary: Object.freeze({ label: 'ביצועים', tableId: TABLE_IDS.BITZUIM_CUSTOMERS }),
+    alternate: Object.freeze({ label: 'משכורות', tableId: TABLE_IDS.BITZUIM_SALARIES }),
+  }),
+  yazamut: Object.freeze({
+    primary: Object.freeze({ label: 'יזמות', tableId: TABLE_IDS.YAZAMUT_CUSTOMERS }),
+    alternate: Object.freeze({ label: 'דיירים', tableId: TABLE_IDS.YAZAMUT_HOLDERS }),
+  }),
+});
+const ACCOUNT_TABLE_IDS = [
+  TABLE_IDS.YAZAMUT_CUSTOMERS,
+  TABLE_IDS.BITZUIM_CUSTOMERS,
+  TABLE_IDS.YAZAMUT_HOLDERS,
+  TABLE_IDS.BITZUIM_SALARIES,
+];
 
 export default {
   name: 'LinkedListTable',
@@ -132,7 +150,10 @@ export default {
       detailRows: [],
       detailDialog: false,
       isLoading: false,
-      showSalaryRows: false,
+      selectedViews: {
+        bitzuim: 'primary',
+        yazamut: 'primary',
+      },
       dateInterval: { from: null, to: null },
 
       summaryHeaders: [
@@ -147,17 +168,24 @@ export default {
   },
 
   computed: {
+    bitzuimView() {
+      return PANEL_VIEWS.bitzuim[this.selectedViews.bitzuim];
+    },
+
+    yazamutView() {
+      return PANEL_VIEWS.yazamut[this.selectedViews.yazamut];
+    },
+
     filteredBookRows() {
       return this.bookRows.filter(this.isBookInDateInterval);
     },
 
     yazamutSummaryRows() {
-      return this.buildSummaryRows(TABLE_IDS.YAZAMUT_CUSTOMERS, YAZAMUT_COMPANY);
+      return this.buildSummaryRows(this.yazamutView.tableId, YAZAMUT_COMPANY);
     },
 
     bitzuimSummaryRows() {
-      return this.buildSummaryRows(TABLE_IDS.BITZUIM_CUSTOMERS, BITZUIM_COMPANY)
-        .filter((row) => this.isSalaryCode(row.code) === this.showSalaryRows);
+      return this.buildSummaryRows(this.bitzuimView.tableId, BITZUIM_COMPANY);
     },
   },
 
@@ -166,8 +194,13 @@ export default {
   },
 
   methods: {
-    isSalaryCode(code) {
-      return code >= SALARY_CODE_MIN && code <= SALARY_CODE_MAX;
+    alternateView(panel) {
+      const alternateKey = this.selectedViews[panel] === 'primary' ? 'alternate' : 'primary';
+      return PANEL_VIEWS[panel][alternateKey];
+    },
+
+    toggleView(panel) {
+      this.selectedViews[panel] = this.selectedViews[panel] === 'primary' ? 'alternate' : 'primary';
     },
 
     async retrieveData() {
@@ -176,7 +209,7 @@ export default {
       try {
         const tableResponse = await apiService.clientGetEntities(TABLE_MODEL, {
           filter: JSON.stringify({
-            table_id: { $in: [TABLE_IDS.YAZAMUT_CUSTOMERS, TABLE_IDS.BITZUIM_CUSTOMERS] },
+            table_id: { $in: ACCOUNT_TABLE_IDS },
           }),
         });
 
@@ -293,7 +326,7 @@ export default {
   direction: rtl;
 }
 
-.salary-toggle {
+.balance-view-toggle {
   flex: 0 0 auto;
 }
 

@@ -15,6 +15,8 @@ export const TABLE_IDS = Object.freeze({
     PAYMENT_TYPES: 7,
     YAZAMUT_CUSTOMERS: 20,
     BITZUIM_CUSTOMERS: 21,
+    YAZAMUT_HOLDERS: 25,
+    BITZUIM_SALARIES: 26,
 });
 export const REVENUE_MODEL = 'revenues';
 export const HOLDER_MODEL = 'holders';
