@@ -47,16 +47,16 @@
           <v-row class="mx-0">
             <v-col cols="12" md="6" class="px-2">
               <div class="payments-wrapper">
-                <div class="d-flex justify-space-between flex-row-reverse align-center px-4">
-                  <v-btn @click="updatePayment()" class="primary" x-small><v-icon small >mdi-plus</v-icon></v-btn>
-                  <span>תשלומי דירה - {{ totalHomePayments ? totalHomePayments.toLocaleString() : ''}}</span>
+                <div class="payment-heading d-flex justify-space-between flex-row-reverse align-center px-4" @click="showHomePayments = !showHomePayments">
+                  <v-icon small>{{ showHomePayments ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                  <span>תשלומי דירה - {{ formatOptionalNumber(holder.paid) }}</span>
                 </div>
-                <v-list two-line class="hebrew">
+                <v-list v-show="showHomePayments" two-line class="hebrew">
                   <v-list-item-group>
-                      <v-list-item v-for="(payment) in homePayments" :key="payment._id">
-                          <v-list-item-content @click="updatePayment(payment)">
-                            <v-list-item-subtitle>{{ payment.description }} - {{ payment.amount ? payment.amount.toLocaleString() :'' }} - חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
-                            <v-list-item-subtitle>{{ payment.remark || '-' }}</v-list-item-subtitle>
+                      <v-list-item v-for="bookEntry in homePayments" :key="bookEntry._id">
+                          <v-list-item-content>
+                            <v-list-item-subtitle>{{ bookEntry.asmchta_date | formatDate }} - {{ bookEntry.pratim || '-' }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>{{ formatNumber(bookEntry.schum_hova) }} - אסמכתא {{ bookEntry.asmacta1 || '-' }}</v-list-item-subtitle>
                             <v-divider class="ma-0" color="black"></v-divider>
                           </v-list-item-content>
                       </v-list-item>
@@ -66,16 +66,16 @@
             </v-col>
             <v-col cols="12" md="6" class="px-2">
               <div class="payments-wrapper">
-                <div class="d-flex justify-space-between flex-row-reverse align-center px-4">
-                  <v-btn @click="updatePayment()" class="primary" x-small><v-icon small>mdi-plus</v-icon></v-btn>
-                  <span>שינויי דיירים - {{ totalChangePayments ? totalChangePayments.toLocaleString() : ''}}</span>
+                <div class="payment-heading d-flex justify-space-between flex-row-reverse align-center px-4" @click="showChangePayments = !showChangePayments">
+                  <v-icon small>{{ showChangePayments ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+                  <span>שינויי דיירים - {{ formatOptionalNumber(holder.buyerChanges) }}</span>
                 </div>
-                <v-list two-line class="hebrew">
+                <v-list v-show="showChangePayments" two-line class="hebrew">
                   <v-list-item-group>
-                      <v-list-item v-for="(payment) in changePayments" :key="payment._id">
-                          <v-list-item-content @click="updatePayment(payment)">
-                            <v-list-item-subtitle>{{ payment.description }} - {{ payment.amount ? payment.amount.toLocaleString() :'' }} - חשבונית {{  payment.invoiceId }}</v-list-item-subtitle>
-                            <v-list-item-subtitle>{{ payment.remark || '-' }}</v-list-item-subtitle>
+                      <v-list-item v-for="bookEntry in changePayments" :key="bookEntry._id">
+                          <v-list-item-content>
+                            <v-list-item-subtitle>{{ bookEntry.asmchta_date | formatDate }} - {{ bookEntry.pratim || '-' }}</v-list-item-subtitle>
+                            <v-list-item-subtitle>{{ formatNumber(bookEntry.schum_hova) }} - אסמכתא {{ bookEntry.asmacta1 || '-' }}</v-list-item-subtitle>
                             <v-divider class="ma-0" color="black"></v-divider>
                           </v-list-item-content>
                       </v-list-item>
@@ -95,14 +95,12 @@
             <v-icon color="red" @click="dialogHolderForm = false">mdi-close-box</v-icon>
           </v-card-actions>
         </v-card>
-        <revenue-form ref="revenueForm"/>
       </v-dialog>
 </template>
 
 <script>
-import { HOLDER_MODEL, REVENUE_MODEL } from "../constants/constants";
+import { HOLDER_MODEL } from "../constants/constants";
 import apiService from "../services/apiService";
-import RevenueForm from './RevenueForm.vue';
 import Vue from "vue";
 import moment from "moment";
 Vue.filter("formatDate", function (value) {
@@ -113,7 +111,6 @@ Vue.filter("formatDate", function (value) {
 });
 export default {
     name: "holder-form",
-    components: { RevenueForm },
     data() {
       return {
         dialogHolderForm: false,
@@ -133,13 +130,18 @@ export default {
         projectName: [],
         supplierName: [],
         holder: [],
+        showHomePayments: false,
+        showChangePayments: false,
       };
     },
 
     methods: {
       open(holder, isNewHolder) {
         this.isNewHolder = isNewHolder;
-        this.holder = holder 
+        this.holder = holder;
+        // Each Book section starts collapsed whenever a holder is opened.
+        this.showHomePayments = false;
+        this.showChangePayments = false;
         this.dialogHolderForm = true;
         return new Promise((resolve) => {
           this.resolve = resolve;
@@ -150,20 +152,23 @@ export default {
         try {
           this.isLoading = true
           let response = ''
+
+          // Only persist fields that belong to the Holder model. Book totals and entries are read-only view data.
+          const holderPayload = {
+            project: this.holder.project,
+            flatId: this.holder.flatId,
+            holderName: this.holder.holderName,
+            phone: this.holder.phone,
+            signDate: this.holder.signDate,
+            signPrice: this.holder.signPrice,
+            email: this.holder.email,
+            remark: this.holder.remark,
+          };
+
           if (this.isNewHolder)  {
-            response = await apiService.create(this.holder, {model: HOLDER_MODEL});
+            response = await apiService.create(holderPayload, {model: HOLDER_MODEL});
           } else {
-            response = await apiService.updateEntity({_id: this.holder._id}, {...this.holder}, { model: HOLDER_MODEL });
-            if (this.holder.payments) {
-              this.holder.payments.forEach(async (item) => {
-                // await apiService.update(item._id, item, { model: REVENUE_MODEL, upsert: true}); //upsert = true so in case of new payment to create new payment
-                await apiService.updateEntity(
-                  { _id: item._id },        // filter (יכול להיות גם לפי שדה אחר)
-                  item,                     // data (השדות שצריך לעדכן)
-                  { model: REVENUE_MODEL, upsert: true } // query params
-                );
-              }) 
-            }
+            response = await apiService.updateEntity({_id: this.holder._id}, holderPayload, { model: HOLDER_MODEL });
           } 
           if (response) {
             this.dialogHolderForm = false;
@@ -180,30 +185,16 @@ export default {
         }
       },
 
-      async deleteOne(id, description) { // this delete only from REVENUE_MODEL (no need to delete from HOLDER_MODEL)
-        if (window.confirm(`Are you sure you want to delete this item ? ` + description)) {
-          const response = await apiService.deleteOne({model: REVENUE_MODEL,id});
-          if (response) {
-            this.dialogHolderForm = false;
-          }
-        }
-      },
-
       clearForm() {
         this.$refs.form.reset();
       },
 
-      async updatePayment(payment) {
-        let isNewPayment = false
-        if (payment) {
-          null
-        } else {
-          isNewPayment = true
-          payment = { project: this.holder.project, 
-                      flatId: this.holder.flatId,
-                      date: new Date()};
-        }
-        await this.$refs.revenueForm.open(payment, isNewPayment);
+      formatNumber(value) {
+        return (Number(value) || 0).toLocaleString();
+      },
+
+      formatOptionalNumber(value) {
+        return value === null || value === undefined ? '' : this.formatNumber(value);
       },
     },
 
@@ -213,16 +204,15 @@ export default {
 
     computed: {
       homePayments() {
-        return this.holder.payments ? this.holder.payments.filter(payment => payment.paymentType === "תשלומי דירה") : null;
-      },
-      totalHomePayments() {
-        return this.homePayments ? this.homePayments.reduce((total, payment) => total + (payment.amount || 0), 0) : null;
+        // Book debit entries are classified once in HoldersList and displayed here without editing.
+        return this.holder.bookEntries
+          ? this.holder.bookEntries.filter(bookEntry => bookEntry.paymentCategory === "Paid")
+          : [];
       },
       changePayments() {
-        return this.holder.payments ? this.holder.payments.filter(payment => payment.paymentType === "שינויי דיירים") : null;
-      },
-      totalChangePayments() {
-        return this.changePayments ? this.changePayments.reduce((total, payment) => total + (payment.amount || 0), 0) : null;
+        return this.holder.bookEntries
+          ? this.holder.bookEntries.filter(bookEntry => bookEntry.paymentCategory === "Buyer Changes")
+          : [];
       },
     }
 };
@@ -246,6 +236,12 @@ export default {
     border: 3px solid #85a7ff;
     margin-left: 5px !important;
     margin-right: 5px !important;
+}
+
+.payment-heading {
+    min-height: 36px;
+    cursor: pointer;
+    user-select: none;
 }
 
 .hebrew {

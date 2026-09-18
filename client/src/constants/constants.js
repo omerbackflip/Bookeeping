@@ -102,6 +102,10 @@ export const HOLDER_HEADERS = [
     { text: "phone",        value: "phone",         class: "mobile-headers",    groupable: false},
     { text: "signDate",     value: "signDate",      class: "mobile-headers",    groupable: false},
     { text: "signPrice",    value: "signPrice",     class: " mobile-headers",   groupable: false},
+    { text: "Paid",         value: "paid",          class: "mobile-headers",    groupable: false},
+    { text: "VAT Gap",      value: "vatGap",        class: "mobile-headers",    groupable: false},
+    { text: "Remaining Balance", value: "remainingBalance", class: "mobile-headers", groupable: false},
+    { text: "Buyer Changes", value: "buyerChanges", class: "mobile-headers",    groupable: false},
     { text: "remark",       value: "remark",        class: " mobile-headers",   groupable: false},
     { text: "email",        value: "email",         class: " mobile-headers",   groupable: false,   align: "left"},
 ];
