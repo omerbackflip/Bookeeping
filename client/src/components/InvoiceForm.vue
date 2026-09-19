@@ -43,7 +43,14 @@
                       <v-text-field v-model="invoice.year" label="שנה" @focus="$event.target.select()"></v-text-field>
                     </v-col>
                     <v-col cols="3">
-                      <v-text-field v-model="invoice.excelRecID" label="ExcelRecID" @focus="$event.target.select()"></v-text-field>
+                      <v-text-field
+                        v-model="invoice.excelRecID"
+                        label="ExcelRecID"
+                        :hint="!invoice.excelRecID ? 'Click to find a Book match' : ''"
+                        persistent-hint
+                        @click="openBookMatchDialog"
+                        @focus="selectExcelRecId"
+                      ></v-text-field>
                     </v-col>
                     <v-col cols="4" class="no-padding">
                       <div v-if="invoice.GDFileId" class="invoice-box">
@@ -146,6 +153,11 @@
           <modal-dialog ref="modalDialog"/>
 
         </v-dialog>
+        <invoice-book-match-dialog
+          v-model="bookMatchDialog"
+          :invoice="invoice"
+          @selected="applyBookMatch"
+        />
         <camera ref="camera" @captured="uploadInvoiceMedia" @camera-error="onCameraError"/>
       </div>
 </template>
@@ -159,6 +171,7 @@ import Vue from "vue";
 import moment from "moment";
 import { GoogleFileViewerModal as modalDialog } from '../../../google/frontend';
 import GooglePicker from "./GooglePicker.vue";
+import InvoiceBookMatchDialog from "./InvoiceBookMatchDialog.vue";
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -168,7 +181,7 @@ Vue.filter("formatDate", function (value) {
 
 export default {
     name: "invoice-form",
-    components:{ Camera, modalDialog, GooglePicker },
+    components:{ Camera, modalDialog, GooglePicker, InvoiceBookMatchDialog },
     data() {
       return {
         loadTable,
@@ -193,12 +206,31 @@ export default {
         projectName: [], // remark
         supplierName: [], 
         invoice: [],
+        bookMatchDialog: false,
         // isModalOpen: false, 
         iframeSrc: '', 
       };
     },
 
     methods: {
+      openBookMatchDialog() {
+        if (this.invoice.excelRecID) return;
+        if (!this.invoice.company || !this.invoice.year) {
+          window.alert("Company and year are required before finding a Book match.");
+          return;
+        }
+        this.bookMatchDialog = true;
+      },
+
+      selectExcelRecId(event) {
+        if (this.invoice.excelRecID && event && event.target) event.target.select();
+      },
+
+      applyBookMatch(book) {
+        this.$set(this.invoice, "excelRecID", book.record_id);
+        this.$set(this.invoice, "invoiceId", book.asmacta1);
+      },
+
       openCameraDialog(){
         this.$refs.camera.toggleCamera();
       },
