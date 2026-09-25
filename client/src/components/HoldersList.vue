@@ -25,11 +25,25 @@
             <v-toolbar flat>
               <v-toolbar-title> Sales - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
               <v-spacer></v-spacer>
+              Remaining - {{ totalRemaining.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalRemaining, totalSales) }}%)
+              <v-spacer></v-spacer>
+              VAT Gap - {{ totalVatGap.toLocaleString('en-US', {maximumFractionDigits: 0}) }}
+              <v-spacer></v-spacer>
+              Payments - {{ totalPayed.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalPayed, totalSales) }}%)
+              <v-spacer></v-spacer>
+              Buyer Changes - {{ totalBuyerChanges.toLocaleString('en-US', {maximumFractionDigits: 0}) }}
+              <v-spacer></v-spacer>
               Total - {{ totalSales.toLocaleString() }}
               <v-spacer></v-spacer>
-              Payments - {{ totalPayed.toLocaleString() }}
-              <v-spacer></v-spacer>
-              Remaining - {{ totalRemaining.toLocaleString() }}
+              <export-excel
+                :data="$formatDataForExport(holdersExportData)"
+                type="xlsx"
+                name="holders"
+                title="Holders">
+                <v-btn x-small class="btn btn-danger">
+                  <v-icon small>mdi-download</v-icon>
+                </v-btn>
+              </export-excel>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
               <!-- <v-spacer></v-spacer>
@@ -131,6 +145,8 @@ export default {
       totalPayed: 0,
       totalSales: 0,
       totalRemaining: 0,
+      totalVatGap: 0,
+      totalBuyerChanges: 0,
 		};
 	},
 
@@ -142,6 +158,8 @@ export default {
       this.totalSales = 0;
       this.totalPayed = 0;
       this.totalRemaining = 0;
+      this.totalVatGap = 0;
+      this.totalBuyerChanges = 0;
 
       try {
         // Here we fetch the holders and the flat-to-account mapping from table 25 in bulk.
@@ -192,8 +210,13 @@ export default {
           }
 
           const totals = this.summarizeBookEntries(cardId, matchingBooks);
-          this.totalPayed += totals.paid + totals.buyerChanges;
+          // Toolbar Payments represents apartment payments only; Buyer Changes stay separate.
+          this.totalPayed += totals.paid;
+          this.totalBuyerChanges += totals.buyerChanges;
           const vatGap = this.calculateVatGap(holder, cardId, totals);
+          if (vatGap !== null) {
+            this.totalVatGap += vatGap;
+          }
           const remainingBalance = this.calculateRemainingBalance(holder, cardId, totals);
           if (remainingBalance !== null) {
             this.totalRemaining += remainingBalance;
@@ -240,7 +263,6 @@ export default {
 
     summarizeBookEntries(cardId, bookEntries) {
       let paid = 0;
-      let paidBeforeVat = 0;
       let paidThrough2024 = 0;
       let buyerChanges = 0;
       let creditTotal = 0;
@@ -263,10 +285,9 @@ export default {
               paid += debit;
               paymentCategory = 'Paid';
 
-              // Apartment payments are converted to net amounts using the VAT rate on their effective date.
+              // Track pre-2025 apartment payments separately for the informational VAT Gap.
               const paymentVatMultiplier = this.getVatMultiplier(bookEntry.asmchta_date);
               if (paymentVatMultiplier) {
-                paidBeforeVat += debit / paymentVatMultiplier;
                 if (paymentVatMultiplier === 1.17) {
                   paidThrough2024 += debit;
                 }
@@ -289,7 +310,6 @@ export default {
 
       return {
         paid,
-        paidBeforeVat,
         paidThrough2024,
         buyerChanges,
         hasInvalidApartmentPaymentDate,
@@ -327,19 +347,14 @@ export default {
     calculateRemainingBalance(holder, cardId, totals) {
       const hasSignPrice = holder.signPrice !== null && holder.signPrice !== undefined && holder.signPrice !== '';
       const signPrice = Number(holder.signPrice);
-      const signVatMultiplier = this.getVatMultiplier(holder.signDate);
 
-      // Do not show an estimated balance when required accounting dates or the signed price are missing.
-      if (!hasSignPrice || !Number.isFinite(signPrice) || !signVatMultiplier || totals.hasInvalidApartmentPaymentDate) {
+      if (!hasSignPrice || !Number.isFinite(signPrice)) {
         console.warn(`Cannot calculate Remaining Balance for flat ${holder.flatId}, card ${cardId}`);
         return null;
       }
 
-      const signedPriceBeforeVat = signPrice / signVatMultiplier;
-      const remainingBeforeVat = signedPriceBeforeVat - totals.paidBeforeVat;
-
-      // The unpaid net balance is due at the current 18% VAT rate. Negative results expose overpayment.
-      return Math.round(remainingBeforeVat * 1.18);
+      // VAT Gap is informational only; Remaining must reconcile directly with Total and apartment Payments.
+      return signPrice - totals.paid;
     },
 
     isBuyerChangesDescription(value) {
@@ -365,6 +380,11 @@ export default {
       return value === null || value === undefined ? '' : this.formatNumber(value);
     },
 
+    getPercentage(part, total) {
+      if (!Number(total) || !Number.isFinite(Number(total))) return '0.0';
+      return ((Number(part) / Number(total)) * 100).toFixed(1);
+    },
+
 		getHeaders() {
 			if (this.isMobile()) {
 				return HOLDER_HEADERS;
@@ -385,9 +405,26 @@ export default {
 		this.getHolders();
 	},
 	
-  watch: {
+  computed: {
+    holdersExportData() {
+      // Export the visible holder summary only; detailed Book entries remain in the read-only expansion.
+      return this.holdersList.map((holder) => ({
+        FlatID: holder.flatId,
+        holderName: holder.holderName,
+        phone: holder.phone,
+        signDate: holder.signDate,
+        signPrice: holder.signPrice,
+        Paid: holder.paid,
+        'VAT Gap': holder.vatGap,
+        'Remaining Balance': holder.remainingBalance,
+        'Buyer Changes': holder.buyerChanges,
+        remark: holder.remark,
+        email: holder.email,
+      }));
+    },
+  },
 
-	},
+  watch: {},
 };
 </script>
 
