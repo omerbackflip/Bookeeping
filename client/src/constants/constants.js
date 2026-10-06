@@ -97,17 +97,18 @@ export const NEW_INVOICE = {
 };
 
 export const HOLDER_HEADERS = [
-    { text: "FlatID",       value: "flatId",        class: "hdr-styles",        groupable: false},	
-    { text: "holderName",   value: "holderName",    class: "mobile-headers",    groupable: false},	
-    { text: "phone",        value: "phone",         class: "mobile-headers",    groupable: false},
-    { text: "signDate",     value: "signDate",      class: "mobile-headers",    groupable: false},
-    { text: "signPrice",    value: "signPrice",     class: " mobile-headers",   groupable: false},
-    { text: "Paid",         value: "paid",          class: "mobile-headers",    groupable: false},
-    { text: "VAT Gap",      value: "vatGap",        class: "mobile-headers",    groupable: false},
-    { text: "Remaining Balance", value: "remainingBalance", class: "mobile-headers", groupable: false},
-    { text: "Buyer Changes", value: "buyerChanges", class: "mobile-headers",    groupable: false},
-    { text: "remark",       value: "remark",        class: " mobile-headers",   groupable: false},
-    { text: "email",        value: "email",         class: " mobile-headers",   groupable: false,   align: "left"},
+    { text: "FlatID",       value: "flatId",        class: "hdr-styles",        groupable: false, width: "4%"},
+    { text: "holderName",   value: "holderName",    class: "mobile-headers",    groupable: false, width: "12%"},
+    { text: "phone",        value: "phone",         class: "mobile-headers",    groupable: false, width: "8%"},
+    { text: "signDate",     value: "signDate",      class: "mobile-headers",    groupable: false, width: "7%"},
+    { text: "signPrice",    value: "signPrice",     class: " mobile-headers",   groupable: false, width: "8%"},
+    { text: "-2024",        value: "paidThrough2024", class: "mobile-headers",  groupable: false, width: "7%"},
+    { text: "+2025",        value: "paidFrom2025",  class: "mobile-headers",    groupable: false, width: "7%"},
+    { text: "VAT Gap",      value: "vatGap",        class: "mobile-headers",    groupable: false, width: "6%"},
+    { text: "Remaining Balance", value: "remainingBalance", class: "mobile-headers", groupable: false, width: "12%"},
+    { text: "Buyer Changes", value: "buyerChanges", class: "mobile-headers",    groupable: false, width: "7%"},
+    { text: "remark",       value: "remark",        class: " mobile-headers",   groupable: false, width: "10%"},
+    { text: "email",        value: "email",         class: " mobile-headers",   groupable: false,   align: "left", width: "6%"},
 ];
 
 export const navItems = [

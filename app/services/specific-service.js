@@ -25,6 +25,7 @@ exports.getBooksToSave = (data, company) => {
                     schum_zchut: item['schum_zchut'],
                     cust_lname: item['cust_lname'],
                     cust_id: item['cust_id'],
+                    sort_code: item['sort_code'],
                     bs_item_name: item['bs_item_name'],
                     bs_item_id: item['bs_item_id'],
                     bs_group_name: item['bs_group_name'],

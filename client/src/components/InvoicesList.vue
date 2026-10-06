@@ -264,7 +264,7 @@ export default {
 			msg: "",
 			isLoading: true,
 			itemToEdit: "",
-			selectedYear: ['2025', '2026'],
+			selectedYear: ['2026'],
 			selectedCompany: 'ביצועים',
       bookInfo: '',
       dateModal : false,

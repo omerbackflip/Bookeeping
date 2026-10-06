@@ -61,8 +61,11 @@
           <template v-slot:[`item.signPrice`]="{ item }">
             <span style="margin-left: 0.5rem"> {{ item.signPrice ? item.signPrice.toLocaleString() : '' }}</span>
           </template>
-          <template v-slot:[`item.paid`]="{ item }">
-            <span style="margin-left: 0.5rem">{{ formatOptionalNumber(item.paid) }}</span>
+          <template v-slot:[`item.paidThrough2024`]="{ item }">
+            <span style="margin-left: 0.5rem">{{ formatOptionalNumber(item.paidThrough2024) }}</span>
+          </template>
+          <template v-slot:[`item.paidFrom2025`]="{ item }">
+            <span style="margin-left: 0.5rem">{{ formatOptionalNumber(item.paidFrom2025) }}</span>
           </template>
           <template v-slot:[`item.vatGap`]="{ item }">
             <span style="margin-left: 0.5rem">{{ formatOptionalNumber(item.vatGap) }}</span>
@@ -71,7 +74,12 @@
             <span style="margin-left: 0.5rem">{{ formatOptionalNumber(item.buyerChanges) }}</span>
           </template>
           <template v-slot:[`item.remainingBalance`]="{ item }">
-            <span style="margin-left: 0.5rem">{{ formatOptionalNumber(item.remainingBalance) }}</span>
+            <span style="margin-left: 0.5rem">
+              {{ formatOptionalNumber(item.remainingBalance) }}
+              <template v-if="item.remainingBalance !== null && item.remainingBalance !== undefined && Number(item.signPrice)">
+                ({{ getWholePercentage(item.remainingBalance, item.signPrice) }}%)
+              </template>
+            </span>
           </template>
           <template v-slot:expanded-item="{ headers, item }">
             <td :colspan="headers.length" style="text-align: -webkit-center;">
@@ -180,6 +188,7 @@ export default {
             filter: JSON.stringify({
               company: 'יזמות',
               cust_id: { $in: cardIds },
+              sort_code: { $in: [100, 150] },
             }),
           });
           bookRows = bookResponse.data || [];
@@ -202,6 +211,8 @@ export default {
               ...holder,
               signDate: this.formatStoredDate(holder.signDate),
               paid: null,
+              paidThrough2024: null,
+              paidFrom2025: null,
               vatGap: null,
               buyerChanges: null,
               remainingBalance: null,
@@ -226,6 +237,8 @@ export default {
             ...holder,
             signDate: this.formatStoredDate(holder.signDate),
             paid: totals.paid,
+            paidThrough2024: totals.paidThrough2024 || null,
+            paidFrom2025: totals.paidFrom2025 || null,
             vatGap,
             buyerChanges: totals.buyerChanges || null,
             remainingBalance,
@@ -311,6 +324,7 @@ export default {
       return {
         paid,
         paidThrough2024,
+        paidFrom2025: paid - paidThrough2024,
         buyerChanges,
         hasInvalidApartmentPaymentDate,
         bookEntries: preparedEntries,
@@ -385,6 +399,11 @@ export default {
       return ((Number(part) / Number(total)) * 100).toFixed(1);
     },
 
+    getWholePercentage(part, total) {
+      if (!Number(total) || !Number.isFinite(Number(total))) return 0;
+      return Math.round((Number(part) / Number(total)) * 100);
+    },
+
 		getHeaders() {
 			if (this.isMobile()) {
 				return HOLDER_HEADERS;
@@ -414,7 +433,8 @@ export default {
         phone: holder.phone,
         signDate: holder.signDate,
         signPrice: holder.signPrice,
-        Paid: holder.paid,
+        'Paid -2024': holder.paidThrough2024,
+        'Paid 2025+': holder.paidFrom2025,
         'VAT Gap': holder.vatGap,
         'Remaining Balance': holder.remainingBalance,
         'Buyer Changes': holder.buyerChanges,

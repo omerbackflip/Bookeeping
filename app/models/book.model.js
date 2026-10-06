@@ -12,6 +12,7 @@ module.exports = mongoose => {
       schum_zchut: Number,
       cust_lname: String,
       cust_id: Number,
+      sort_code: Number,
       bs_item_name: String,
       bs_item_id: Number,
       bs_group_name: String,
