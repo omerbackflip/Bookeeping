@@ -30,7 +30,11 @@
                 <div>
                   <span>{{ title }} - {{ total.toLocaleString() }}<span v-if="!hideLeft"> (Left: {{ left.toLocaleString() }})</span></span>
                   -
-                  <span v-if="budget">({{ 'כרטסת - '  + budget}})</span>
+                  <span 
+                    v-if="budget"
+                    style="cursor: pointer; color: blue; text-decoration: underline;"
+                    @click.stop="$emit('open-balance', budget)"
+                  >({{'כרטסת - '  + budget}})</span>
                 </div>
               </v-toolbar-title>
 

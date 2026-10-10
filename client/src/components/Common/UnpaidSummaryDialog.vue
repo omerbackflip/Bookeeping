@@ -1,10 +1,9 @@
 <template>
   <v-dialog v-model="internalOpen" max-width="600px">
     <v-card>
-      <v-card-title>
-        Unpaid totals by supplier (Total: {{ pending.toLocaleString() }})
-        <v-spacer />
-        <v-btn icon small @click="closeDialog">
+      <v-card-title class="dialog-title">
+        <span class="title-text">סה"כ נותר לתשלום : {{ pending.toLocaleString() }}</span>
+        <v-btn class="close-button" icon small @click="closeDialog">
           <v-icon>mdi-close</v-icon>
         </v-btn>
       </v-card-title>
@@ -68,6 +67,26 @@ export default {
 </script>
 
 <style scoped>
+.dialog-title {
+  position: relative;
+  justify-content: center;
+  text-align: center;
+  padding-inline: 48px;
+}
+
+.title-text {
+  display: block;
+  width: 100%;
+  text-align: center;
+}
+
+.close-button {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
 ::v-deep .v-data-table__wrapper {
   max-height: 400px;
   overflow-y: auto;

@@ -154,8 +154,14 @@
         @back="handleInvoiceSummaryBack"
         @row-clicked="getInvoiceForEdit"
         @toggle-published="togglePublished"
-        @view-file="clickToView" />
+        @view-file="clickToView"
+        @open-balance="openSupplierBalance" />
 
+        <BalanceDetailsDialog
+          v-model="balanceDetailDialog"
+          :selected-row="balanceSelectedRow"
+          :rows="balanceDetailRows"
+        />
       <invoice-form ref="invoiceForm"/>
 
       <v-dialog v-model="bookDialog" max-width="600px">
@@ -205,6 +211,7 @@ import { isMobile } from '@/constants/constants';
 import { GoogleFileViewerModal as modalDialog } from '../../../google/frontend';
 import UnpaidSummaryDialog from './Common/UnpaidSummaryDialog.vue';
 import InvoiceSummaryDialog from './Common/InvoiceSummaryDialog.vue';
+import BalanceDetailsDialog from './Common/BalanceDetailsDialog.vue';
 
 Vue.filter("formatDate", function (value) {
 	if (value) {
@@ -216,7 +223,7 @@ let gapi = window.gapi;
 export default {
 	name: "invoicesList",
   props: ['showSelect'],
-	components: { invoiceForm, modalDialog, UnpaidSummaryDialog, InvoiceSummaryDialog },
+	components: { invoiceForm, modalDialog, UnpaidSummaryDialog, InvoiceSummaryDialog, BalanceDetailsDialog },
 	data() {
 		return {
       isMobile,
@@ -235,6 +242,10 @@ export default {
       summaryTotal: 0,
       summaryLeft: 0,
       summaryBudget: 0,
+      balanceDetailDialog: false,
+      balanceDetailLoading: false,
+      balanceDetailRows: [],
+      balanceSelectedRow: null,
 			summaryFilter: [],
 			summaryName: "",
       expanded: [],
@@ -307,10 +318,16 @@ export default {
       response = await apiService.clientGetEntities(INVOICE_MODEL, invoiceQuery)
       this.summaryFilter = response.data
 
-      // 🔹 Supplier-only extra logic
+      // Clear any supplier code left from a previous summary.
+      this.summaryBudget = 0;
+
       if (summaryField === 'supplier') {
-        const budgetResponse = await apiService.clientGetEntities(TABLE_MODEL, { table_id: TABLE_IDS.SUPPLIERS, description: summaryItem })
-        this.summaryBudget = budgetResponse.data[0]?.table_code || 0
+        const budgetResponse = await apiService.clientGetEntities(TABLE_MODEL, {
+          table_id: TABLE_IDS.SUPPLIERS,
+          description: summaryItem
+        });
+
+        this.summaryBudget = Number(budgetResponse.data[0]?.table_code) || 0;
       }
 
       this.summaryFilter.sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -326,6 +343,54 @@ export default {
       this.isLoading = false
     },
 
+    async openSupplierBalance(supplierCode) {
+      const code = Number(supplierCode);
+      if (!Number.isFinite(code) || !code || this.balanceDetailLoading) {
+        return;
+      }
+
+      const company = this.selectedCompany;
+      const description = this.summaryName;
+      this.balanceDetailLoading = true;
+
+      try {
+        const response = await apiService.clientGetEntities(BOOKS_MODEL, {
+          cust_id: code,
+          company
+        });
+
+        const rows = (response.data || []).slice().sort(
+          (a, b) => new Date(b.asmchta_date) - new Date(a.asmchta_date)
+        );
+
+        const schumHova = rows.reduce(
+          (total, row) => total + (Number(row.schum_hova) || 0),
+          0
+        );
+
+        const schumZchut = rows.reduce(
+          (total, row) => total + (Number(row.schum_zchut) || 0),
+          0
+        );
+
+        this.balanceDetailRows = rows;
+        this.balanceSelectedRow = {
+          code,
+          description,
+          company,
+          schum_hova: schumHova,
+          schum_zchut: schumZchut,
+          balance: schumHova - schumZchut
+        };
+
+        this.balanceDetailDialog = true;
+      } catch (error) {
+        console.error('Failed to load supplier balance:', error);
+        window.alert('Failed to load supplier ledger records.');
+      } finally {
+        this.balanceDetailLoading = false;
+      }
+    },
 
     async retriveBookData(item){
       const response = await apiService.clientGetEntities(BOOKS_MODEL,{ asmacta1: item.invoiceId, year: item.year, company: item.company});
