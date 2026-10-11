@@ -105,6 +105,7 @@
         v-model="detailDialog"
         :selected-row="selectedSummaryRow"
         :rows="detailRows"
+        :expense-analysis="Boolean(selectedSummaryRow && selectedSummaryRow.company === 'יזמות' && selectedSummaryRow.code === 228)"
       />
     </v-container>
   </div>

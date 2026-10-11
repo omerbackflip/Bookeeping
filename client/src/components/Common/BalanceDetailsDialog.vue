@@ -17,7 +17,7 @@
         ></v-text-field>
         <v-spacer />
         <v-chip
-          v-if="selectedRow"
+          v-if="selectedRow && !expenseAnalysis"
           small
           color="primary"
           :outlined="chartMetric !== 'schum_zchut'"
@@ -29,7 +29,7 @@
           schum_zchut: {{ formatNumber(selectedRow.schum_zchut) }}
         </v-chip>
         <v-chip
-          v-if="selectedRow"
+          v-if="selectedRow && !expenseAnalysis"
           small
           color="primary"
           :outlined="chartMetric !== 'schum_hova'"
@@ -41,7 +41,7 @@
           schum_hova: {{ formatNumber(selectedRow.schum_hova) }}
         </v-chip>
         <v-chip
-          v-if="selectedRow"
+          v-if="selectedRow && !expenseAnalysis"
           small
           :color="selectedRow.balance < 0 ? 'error' : 'primary'"
           :outlined="chartMetric !== 'balance'"
@@ -53,10 +53,10 @@
           Balance: {{ formatNumber(selectedRow.balance) }}
         </v-chip>
         <v-spacer />
-        ({{ rows.length }})
+        ({{ exportRows.length }})
         <export-excel
-          v-if="rows.length"
-          :data="$formatDataForExport(rows)"
+          v-if="exportRows.length"
+          :data="$formatDataForExport(exportRows)"
           type="xlsx"
           :name="title"
           :title="title"
@@ -71,7 +71,18 @@
         </v-btn>
       </v-card-title>
 
-      <section class="year-comparison" aria-label="Year comparison">
+      <marketing-expense-analysis
+        v-if="expenseAnalysis"
+        :active="value"
+        :rows="rows"
+        :chart-rows="expenseChartRows"
+        :visible-rows="tableRows"
+        :categories="expenseCategories"
+        :selection="expenseSelection"
+        @categories-change="expenseCategories = $event"
+        @select="expenseSelection = $event"
+      />
+      <section v-else class="year-comparison" aria-label="Year comparison">
         <div v-if="selectedYear !== null" class="year-comparison-toolbar">
           <v-chip v-if="selectedYear !== null" small close color="primary" outlined @click:close="selectedYear = null">
             Table year: {{ selectedYear }}
@@ -94,9 +105,9 @@
       </section>
 
       <v-data-table
-        :headers="headers"
+        :headers="displayHeaders"
         :items="tableRows"
-        :search="search"
+        :search="expenseAnalysis ? null : search"
         dense
         fixed-header
         height="100%"
@@ -120,6 +131,9 @@
         <template v-slot:[`item.record_schum`]="{ item }">
           <span :class="{ negative: item.record_schum < 0 }">{{ formatNumber(item.record_schum) }}</span>
         </template>
+        <template v-slot:[`item.expense_total`]="{ item }">
+          <span :class="{ negative: item.expense_total < 0 }">{{ formatNumber(item.expense_total) }}</span>
+        </template>
       </v-data-table>
     </v-card>
   </v-dialog>
@@ -128,11 +142,14 @@
 <script>
 import moment from 'moment';
 import VueApexCharts from 'vue-apexcharts';
+import MarketingExpenseAnalysis from './MarketingExpenseAnalysis.vue';
+import { EXPENSE_CATEGORIES, classifyExpense, expenseAmount, expenseMonth } from '../../utils/marketingExpenses';
 
 export default {
   name: 'BalanceDetailsDialog',
-  components: { apexchart: VueApexCharts },
+  components: { apexchart: VueApexCharts, MarketingExpenseAnalysis },
   props: {
+    expenseAnalysis: { type: Boolean, default: false },
     value: {
       type: Boolean,
       default: false,
@@ -149,6 +166,8 @@ export default {
   data() {
     return {
       search: '',
+      expenseCategories: ['facebook', 'google'],
+      expenseSelection: null,
       chartMetric: 'balance',
       selectedYear: null,
       chartMetrics: [
@@ -169,6 +188,28 @@ export default {
     };
   },
   computed: {
+    displayHeaders() {
+      if (!this.expenseAnalysis) return this.headers;
+      return this.headers.filter(header => !['schum_hova', 'schum_zchut', 'record_schum'].includes(header.value)).concat([
+        { text: 'קטגוריה', value: 'expense_category', class: 'balance-details-header' },
+        { text: 'סה״כ הוצאות', value: 'expense_total', class: 'balance-details-header' },
+      ]);
+    },
+    expenseChartRows() {
+      const query = String(this.search || '').trim().toLowerCase();
+      return this.rows.filter(row => this.expenseCategories.includes(classifyExpense(row))).map(row => ({
+        ...row,
+        expense_category: EXPENSE_CATEGORIES.find(category => category.value === classifyExpense(row)).text,
+        expense_total: expenseAmount(row),
+      })).filter(row => !query || this.displayHeaders.some(header => String(row[header.value] == null ? '' : row[header.value]).toLowerCase().includes(query)));
+    },
+    exportRows() {
+      if (!this.expenseAnalysis) return this.rows;
+      return this.tableRows.map(row => {
+        const { expense_category, expense_total, ...record } = row;
+        return { ...record, 'קטגוריה': expense_category, 'סה״כ הוצאות': expense_total };
+      });
+    },
     yearlyTotals() {
       const totals = new Map();
       this.rows.forEach((row) => {
@@ -189,6 +230,7 @@ export default {
       return this.rows.filter((row) => this.getRowYear(row) === null).length;
     },
     tableRows() {
+      if (this.expenseAnalysis) return this.expenseChartRows.filter(row => !this.expenseSelection || (classifyExpense(row) === this.expenseSelection.category && expenseMonth(row) === this.expenseSelection.month));
       return this.selectedYear === null ? this.rows : this.rows.filter((row) => this.getRowYear(row) === this.selectedYear);
     },
     chartSeries() {
@@ -234,6 +276,8 @@ export default {
     value(isOpen) {
       if (isOpen) {
         this.search = '';
+        this.expenseCategories = ['facebook', 'google'];
+        this.expenseSelection = null;
         this.selectedYear = null;
       }
     },
