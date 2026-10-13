@@ -2,6 +2,45 @@
   <div class="list row hebrew">
     <v-layout>
       <v-flex>
+        <section class="sale-price-chart elevation-3" aria-label="Sold flat contract prices">
+            <v-toolbar flat>
+              <v-toolbar-title> Sales - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
+              <v-spacer></v-spacer>
+              Total - {{ totalSales.toLocaleString() }}
+              <v-spacer></v-spacer>
+              Payments - {{ totalPayed.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalPayed, totalSales) }}%)
+              <v-spacer></v-spacer>
+              Remaining - {{ totalRemaining.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalRemaining, totalSales) }}%)
+              <v-spacer></v-spacer>
+              VAT Gap - {{ totalVatGap.toLocaleString('en-US', {maximumFractionDigits: 0}) }}
+              <v-spacer></v-spacer>
+              Buyer Changes - {{ totalBuyerChanges.toLocaleString('en-US', {maximumFractionDigits: 0}) }}
+              <v-spacer></v-spacer>
+              <export-excel
+                :data="$formatDataForExport(holdersExportData)"
+                type="xlsx"
+                name="holders"
+                title="Holders">
+                <v-btn x-small class="btn btn-danger">
+                  <v-icon small>mdi-download</v-icon>
+                </v-btn>
+              </export-excel>
+              <v-spacer></v-spacer>
+              <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
+              <!-- <v-spacer></v-spacer>
+              <v-btn x-small @click="getHolderForEdit">
+                <v-icon small>mdi-plus</v-icon>
+              </v-btn> -->
+            </v-toolbar>
+          <apexchart
+            v-if="soldFlats.length"
+            type="bar"
+            height="280"
+            :options="salePriceChartOptions"
+            :series="salePriceChartSeries"
+          />
+          <div v-else>{{ isLoading ? 'Loading sold flats…' : 'No sold flats available' }}</div>
+        </section>
         <v-data-table
           :headers="getHeaders()"
           :items="holdersList"
@@ -22,7 +61,7 @@
           item-key="flatId"
           :sort-by="['flatId']">
           <template v-slot:top>
-            <v-toolbar flat>
+            <!-- <v-toolbar flat>
               <v-toolbar-title> Sales - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
               <v-spacer></v-spacer>
               Remaining - {{ totalRemaining.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalRemaining, totalSales) }}%)
@@ -46,11 +85,11 @@
               </export-excel>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
-              <!-- <v-spacer></v-spacer>
+              <v-spacer></v-spacer>
               <v-btn x-small @click="getHolderForEdit">
                 <v-icon small>mdi-plus</v-icon>
-              </v-btn> -->
-            </v-toolbar>
+              </v-btn>
+            </v-toolbar> -->
           </template>
           <template v-slot:[`item.flatId`]="{ item }">
             <span style="margin-left: 0.5rem"> {{ String(item.flatId).padStart(2, '0') }}</span>
@@ -121,6 +160,7 @@ import apiService from "../services/apiService";
 import { BOOKS_MODEL, HOLDER_MODEL, HOLDER_HEADERS, TABLE_IDS, TABLE_MODEL } from "../constants/constants";
 import { isMobile } from '../constants/constants';
 import HolderForm from './HolderForm.vue';
+import VueApexCharts from 'vue-apexcharts';
 Vue.filter("formatDate", function (value) {
 	if (value) {
 		//return moment(String(value)).format('MM/DD/YYYY hh:mm')
@@ -129,7 +169,7 @@ Vue.filter("formatDate", function (value) {
 });
 export default {
 	// name: "holders-list",
-	components: { HolderForm },
+	components: { HolderForm, apexchart: VueApexCharts },
 	data() {
 		return {
       isMobile,
@@ -425,6 +465,68 @@ export default {
 	},
 	
   computed: {
+    soldFlats() {
+      return this.holdersList
+        .filter(holder => holder.holderName)
+        .slice()
+        .sort((a, b) => Number(a.flatId) - Number(b.flatId));
+    },
+    salePriceChartSeries() {
+      const prices = this.soldFlats.map(holder => {
+        const price = Number(holder.signPrice);
+        return holder.signPrice === null || holder.signPrice === undefined || holder.signPrice === '' || !Number.isFinite(price)
+          ? null : price;
+      });
+      const payments = this.soldFlats.map(holder => Number(holder.paid) || 0);
+      return [
+        { name: 'Payments', data: prices.map((price, index) => price === null ? null : payments[index]) },
+        { name: 'Remaining', data: prices.map((price, index) => price === null ? null : price - payments[index]) },
+      ];
+    },
+    salePriceChartOptions() {
+      return {
+        chart: { stacked: true, toolbar: { show: false }, animations: { enabled: false } },
+        colors: ['#e53935', '#1976d2'],
+        plotOptions: {
+          bar: {
+            columnWidth: '65%',
+            dataLabels: {
+              total: {
+                enabled: true,
+                formatter: (value, { dataPointIndex }) => {
+                  const holder = this.soldFlats[dataPointIndex];
+                  return holder ? this.formatOptionalNumber(holder.signPrice === null || holder.signPrice === undefined || holder.signPrice === '' ? null : Number(holder.signPrice) / 1000) : '';
+                },
+                offsetY: -8,
+                style: { color: '#333', fontSize: '11px', fontWeight: 400 },
+              },
+            },
+          },
+        },
+        dataLabels: { enabled: false },
+        legend: { onItemClick: { toggleDataSeries: false } },
+        grid: { padding: { top: 24 } },
+        xaxis: {
+          categories: this.soldFlats.map(holder => String(holder.flatId).padStart(2, '0')),
+          title: { text: 'Flat number' },
+        },
+        yaxis: {
+          title: { text: 'Contract price' },
+          labels: { formatter: value => this.formatNumber(value) },
+        },
+        tooltip: {
+          shared: true,
+          intersect: false,
+          x: {
+            formatter: (value, { dataPointIndex }) => {
+              const holder = this.soldFlats[dataPointIndex];
+              return holder ? `Flat ${String(holder.flatId).padStart(2, '0')} · ${holder.holderName}` : value;
+            },
+          },
+          y: { formatter: value => this.formatOptionalNumber(value) },
+        },
+      };
+    },
     holdersExportData() {
       // Export the visible holder summary only; detailed Book entries remain in the read-only expansion.
       return this.holdersList.map((holder) => ({
@@ -449,6 +551,19 @@ export default {
 </script>
 
 <style scoped>
+.sale-price-chart {
+  direction: ltr;
+  text-align: left;
+  background: white;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.sale-price-chart h3 {
+  margin-bottom: 8px;
+  font-size: 1rem;
+}
+
 .list {
   text-align: left;
   max-width: 100%;
