@@ -47,7 +47,7 @@
           :outlined="chartMetric !== 'balance'"
           :text-color="chartMetric === 'balance' ? 'white' : (selectedRow.balance < 0 ? 'error' : 'primary')"
           :aria-pressed="String(chartMetric === 'balance')"
-          title="Show accumulated balance"
+          :title="balanceMode === 'accumulated' ? 'Show accumulated balance' : 'Show yearly balance'"
           @click="chartMetric = 'balance'"
         >
           Balance: {{ formatNumber(selectedRow.balance) }}
@@ -83,7 +83,18 @@
         @select="expenseSelection = $event"
       />
       <section v-else class="year-comparison" aria-label="Year comparison">
-        <div v-if="selectedYear !== null" class="year-comparison-toolbar">
+        <div class="year-comparison-toolbar">
+          <v-btn-toggle
+            v-if="chartMetric === 'balance'"
+            v-model="balanceMode"
+            mandatory
+            dense
+            color="primary"
+            aria-label="Balance calculation"
+          >
+            <v-btn small value="accumulated" :aria-pressed="String(balanceMode === 'accumulated')">Accumulated</v-btn>
+            <v-btn small value="yearly" :aria-pressed="String(balanceMode === 'yearly')">Yearly</v-btn>
+          </v-btn-toggle>
           <v-chip v-if="selectedYear !== null" small close color="primary" outlined @click:close="selectedYear = null">
             Table year: {{ selectedYear }}
           </v-chip>
@@ -169,6 +180,7 @@ export default {
       expenseCategories: ['facebook', 'google'],
       expenseSelection: null,
       chartMetric: 'balance',
+      balanceMode: 'accumulated',
       selectedYear: null,
       chartMetrics: [
         { text: 'Accumulated balance', value: 'balance' },
@@ -222,8 +234,9 @@ export default {
       });
       let balance = 0;
       return [...totals.values()].sort((a, b) => a.year - b.year).map((total) => {
-        balance += total.schum_hova - total.schum_zchut;
-        return { ...total, balance };
+        const yearlyBalance = total.schum_hova - total.schum_zchut;
+        balance += yearlyBalance;
+        return { ...total, balance, yearlyBalance };
       });
     },
     unassignedYearCount() {
@@ -235,8 +248,12 @@ export default {
     },
     chartSeries() {
       return [{
-        name: this.chartMetrics.find((metric) => metric.value === this.chartMetric).text,
-        data: this.yearlyTotals.map((total) => total[this.chartMetric]),
+        name: this.chartMetric === 'balance' && this.balanceMode === 'yearly'
+          ? 'Yearly balance'
+          : this.chartMetrics.find((metric) => metric.value === this.chartMetric).text,
+        data: this.yearlyTotals.map((total) => total[
+          this.chartMetric === 'balance' && this.balanceMode === 'yearly' ? 'yearlyBalance' : this.chartMetric
+        ]),
       }];
     },
     chartOptions() {
@@ -254,7 +271,7 @@ export default {
             formatter: (amount, { dataPointIndex }) => {
               const previous = this.yearlyTotals[dataPointIndex - 1];
               if (!previous) return `${this.formatNumber(amount)} · First included year`;
-              const prior = previous[this.chartMetric];
+              const prior = this.chartSeries[0].data[dataPointIndex - 1];
               const difference = amount - prior;
               const change = `${difference > 0 ? '+' : ''}${this.formatNumber(difference)}`;
               const percent = prior === 0 ? '' : ` (${(difference / Math.abs(prior) * 100).toFixed(1)}%)`;

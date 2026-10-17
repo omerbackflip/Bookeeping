@@ -2,19 +2,29 @@
   <div class="list row hebrew">
     <v-layout>
       <v-flex>
+        <section v-if="mobileView" class="mobile-summary elevation-3" aria-label="סיכום מכירות">
+          <h2>מכירות · {{ holdersCount }}/{{ holdersList.length }}</h2>
+          <div class="mobile-figures">
+            <div><span>סה״כ חוזים</span><strong>{{ formatTotal(totalSales) }}</strong></div>
+            <div><span>שולם עד כה</span><strong>{{ formatTotal(totalPayed) }}</strong></div>
+            <div><span>נותר לתשלום</span><strong>{{ formatTotal(totalRemaining) }}</strong></div>
+            <div><span>הפרשי מע״מ</span><strong>{{ formatTotal(totalVatGap) }}</strong></div>
+            <div><span>שינויי דיירים</span><strong>{{ formatTotal(totalBuyerChanges) }}</strong></div>
+          </div>
+        </section>
         <section class="sale-price-chart elevation-3" aria-label="Sold flat contract prices">
-            <v-toolbar flat>
-              <v-toolbar-title> Sales - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
+            <v-toolbar v-if="!mobileView" flat>
+              <v-toolbar-title> מכירות - {{holdersCount}}/{{holdersList.length}} </v-toolbar-title>
               <v-spacer></v-spacer>
-              Total - {{ totalSales.toLocaleString() }}
+              סה"כ - {{ formatTotal(totalSales) }}
               <v-spacer></v-spacer>
-              Payments - {{ totalPayed.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalPayed, totalSales) }}%)
+              שולם עד כה - {{ totalPayed.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalPayed, totalSales) }}%)
               <v-spacer></v-spacer>
-              Remaining - {{ totalRemaining.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalRemaining, totalSales) }}%)
+              נותר לתשלום - {{ totalRemaining.toLocaleString('en-US', {maximumFractionDigits: 0}) }} ({{ getPercentage(totalRemaining, totalSales) }}%)
               <v-spacer></v-spacer>
-              VAT Gap - {{ totalVatGap.toLocaleString('en-US', {maximumFractionDigits: 0}) }}
+              הפרשי מע"מ - {{ totalVatGap.toLocaleString('en-US', {maximumFractionDigits: 0}) }}
               <v-spacer></v-spacer>
-              Buyer Changes - {{ totalBuyerChanges.toLocaleString('en-US', {maximumFractionDigits: 0}) }}
+              שינויי דיירים - {{ totalBuyerChanges.toLocaleString('en-US', {maximumFractionDigits: 0}) }}
               <v-spacer></v-spacer>
               <export-excel
                 :data="$formatDataForExport(holdersExportData)"
@@ -27,21 +37,70 @@
               </export-excel>
               <v-spacer></v-spacer>
               <v-text-field v-model="search" label="Search" class="mx-4" clearable></v-text-field>
-              <!-- <v-spacer></v-spacer>
-              <v-btn x-small @click="getHolderForEdit">
-                <v-icon small>mdi-plus</v-icon>
-              </v-btn> -->
             </v-toolbar>
-          <apexchart
-            v-if="soldFlats.length"
-            type="bar"
-            height="280"
-            :options="salePriceChartOptions"
-            :series="salePriceChartSeries"
-          />
-          <div v-else>{{ isLoading ? 'Loading sold flats…' : 'No sold flats available' }}</div>
+          <!-- <h3 v-if="mobileView">מחירי דירות שנמכרו <small>· באלפים</small></h3> -->
+          <!-- <p v-if="mobileView" class="chart-hint">גללו לצדדים ולחצו על עמודה לפרטים</p> -->
+          <div class="chart-scroll" :tabindex="mobileView ? 0 : null" aria-label="גרף מחירי דירות">
+            <div :style="mobileView ? { minWidth: Math.max(360, soldFlats.length * 64) + 'px' } : {}">
+              <apexchart
+                v-if="soldFlats.length"
+                type="bar"
+                height="280"
+                :options="salePriceChartOptions"
+                :series="salePriceChartSeries"
+                @dataPointSelection="selectSaleFlat"
+              />
+              <div v-else>{{ isLoading ? 'Loading sold flats…' : 'No sold flats available' }}</div>
+            </div>
+          </div>
+          <div v-if="mobileView && selectedSaleFlat" class="selected-flat" aria-live="polite">
+            <strong>דירה {{ selectedSaleFlat.flatId }} · {{ selectedSaleFlat.holderName }}</strong>
+            <div>מחיר חוזה: {{ formatOptionalNumber(selectedSaleFlat.signPrice) }}</div>
+            <div>שולם: {{ formatOptionalNumber(selectedSaleFlat.paid) }} · נותר: {{ formatOptionalNumber(selectedSaleFlat.remainingBalance) }}</div>
+          </div>
+        </section>
+        <section v-if="mobileView" class="mobile-buyers" aria-label="רוכשים">
+          <v-progress-linear v-if="isLoading" indeterminate aria-label="טוען רוכשים" />
+          <p v-else-if="!filteredMobileHolders.length">לא נמצאו דירות</p>
+          <article v-if="filteredMobileHolders.length" v-for="holder in filteredMobileHolders" :key="holder.flatId" class="buyer-card elevation-2">
+            <div class="buyer-heading">
+              <h3>דירה {{ String(holder.flatId).padStart(2, '0') }} · {{ holder.holderName || 'טרם נמכרה' }}</h3>
+              <v-spacer />
+              <v-btn small outlined @click="getHolderForEdit(holder)">עריכה</v-btn>
+            </div>
+            <div class="mobile-figures buyer-figures">
+              <div><span>מחיר חוזה</span><strong>{{ formatOptionalNumber(holder.signPrice) || '—' }}</strong></div>
+              <div><span>שולם</span><strong>{{ formatOptionalNumber(holder.paid) || '—' }}</strong></div>
+              <div><span>נותר</span><strong>{{ formatOptionalNumber(holder.remainingBalance) || '—' }}</strong></div>
+            </div>
+            <details>
+              <summary>פרטי הרוכש ותנועות</summary>
+              <dl class="buyer-details">
+                <dt>תאריך חתימה</dt><dd>{{ holder.signDate | formatDate }}</dd>
+                <dt>טלפון</dt><dd>{{ holder.phone }}</dd>
+                <dt>דוא״ל</dt><dd>{{ holder.email || '—' }}</dd>
+                <dt>שולם עד 2024</dt><dd>{{ formatOptionalNumber(holder.paidThrough2024) || '—' }}</dd>
+                <dt>שולם מ-2025</dt><dd>{{ formatOptionalNumber(holder.paidFrom2025) || '—' }}</dd>
+                <dt>הפרשי מע״מ</dt><dd>{{ formatOptionalNumber(holder.vatGap) || '—' }}</dd>
+                <dt>שינויי דיירים</dt><dd>{{ formatOptionalNumber(holder.buyerChanges) || '—' }}</dd>
+                <dt>הערות</dt><dd>{{ holder.remark || '—' }}</dd>
+              </dl>
+              <h4>תנועות בכרטיס ({{ holder.bookEntries.length }})</h4>
+              <p v-if="!holder.bookEntries.length">אין תנועות להצגה</p>
+              <details v-for="(entry, index) in holder.bookEntries" :key="entry._id || index" class="payment-card">
+                <summary>
+                  <span>{{ entry.asmchta_date | formatDate }}</span>
+                  <span>{{ entry.pratim || 'ללא תיאור' }}</span>
+                  <span>חובה: {{ formatNumber(entry.schum_hova) }} · זכות: {{ formatNumber(entry.schum_zchut) }}</span>
+                </summary>
+                <div>קטגוריה: {{ entry.paymentCategory || '—' }}</div>
+                <div>אסמכתא: {{ entry.asmacta1 || '—' }}</div>
+              </details>
+            </details>
+          </article>
         </section>
         <v-data-table
+          v-else
           :headers="getHeaders()"
           :items="holdersList"
           :search="search"
@@ -188,6 +247,7 @@ export default {
 			search: "",
 			headers: [],
       expanded: [],
+      selectedSaleFlatId: null,
       dateModal : false,
       isLoading : false,
       totalPayed: 0,
@@ -200,6 +260,10 @@ export default {
 
           /* eslint-disable */
 	methods: {
+    selectSaleFlat(event, chartContext, { dataPointIndex }) {
+      const holder = this.soldFlats[dataPointIndex];
+      this.selectedSaleFlatId = holder ? holder.flatId : null;
+    },
 		async getHolders() {
       this.isLoading = true;
       this.holdersCount = 0;
@@ -356,10 +420,10 @@ export default {
         .sort((a, b) => new Date(b.asmchta_date) - new Date(a.asmchta_date));
 
       // Credits and classified debits should balance; warn if an imported card does not.
-      const difference = creditTotal - paid - buyerChanges;
-      if (Math.abs(difference) > 0.01) {
-        console.warn(`Book totals do not balance for card ${cardId}. Difference: ${difference}`);
-      }
+      // const difference = creditTotal - paid - buyerChanges;
+      // if (Math.abs(difference) > 0.01) {
+      //   console.warn(`Book totals do not balance for card ${cardId}. Difference: ${difference}`);
+      // }
 
       return {
         paid,
@@ -430,6 +494,10 @@ export default {
       return (Number(value) || 0).toLocaleString();
     },
 
+    formatTotal(value) {
+      return (Number(value) || 0).toLocaleString('en-US', { maximumFractionDigits: 0 });
+    },
+
     formatOptionalNumber(value) {
       return value === null || value === undefined ? '' : this.formatNumber(value);
     },
@@ -465,6 +533,25 @@ export default {
 	},
 	
   computed: {
+    mobileView() {
+      return this.$vuetify.breakpoint.smAndDown;
+    },
+    selectedSaleFlat() {
+      return this.soldFlats.find(holder => holder.flatId === this.selectedSaleFlatId);
+    },
+    filteredMobileHolders() {
+      const query = String(this.search || '').trim().toLocaleLowerCase();
+
+      return this.holdersList
+        .filter(holder => holder.holderName && (
+          !query || this.getHeaders().some(header =>
+            String(holder[header.value] ?? '')
+              .toLocaleLowerCase()
+              .includes(query)
+          )
+        ))
+        .sort((a, b) => Number(a.flatId) - Number(b.flatId));
+    },
     soldFlats() {
       return this.holdersList
         .filter(holder => holder.holderName)
@@ -508,15 +595,15 @@ export default {
         grid: { padding: { top: 24 } },
         xaxis: {
           categories: this.soldFlats.map(holder => String(holder.flatId).padStart(2, '0')),
-          title: { text: 'Flat number' },
+          // title: { text: 'Flat number' },
         },
         yaxis: {
-          title: { text: 'Contract price' },
+          // title: { text: 'Contract price' },
           labels: { formatter: value => this.formatNumber(value) },
         },
         tooltip: {
-          shared: true,
-          intersect: false,
+          shared: !this.mobileView,
+          intersect: this.mobileView,
           x: {
             formatter: (value, { dataPointIndex }) => {
               const holder = this.soldFlats[dataPointIndex];
@@ -551,6 +638,111 @@ export default {
 </script>
 
 <style scoped>
+.list > .layout,
+.list > .layout > .flex {
+  min-width: 0;
+}
+
+.chart-scroll {
+  overflow-x: auto;
+  direction: ltr;
+  max-width: 100%;
+}
+
+.mobile-summary,
+.buyer-card {
+  background: white;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 8px;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.mobile-summary h2,
+.buyer-heading h3 {
+  font-size: 1rem;
+  margin: 0;
+}
+
+.mobile-figures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.mobile-figures span,
+.mobile-figures strong {
+  display: block;
+}
+
+.mobile-figures span,
+.chart-hint {
+  font-size: 0.8rem;
+  color: #555;
+}
+
+.mobile-figures strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.buyer-heading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.buyer-details {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px 16px;
+  margin: 16px 0;
+}
+
+.buyer-details dd {
+  margin: 0;
+  white-space: pre-line;
+}
+
+.buyer-card summary {
+  cursor: pointer;
+  padding: 12px 0;
+  min-height: 44px;
+}
+
+.payment-card {
+  border-top: 1px solid #ddd;
+  padding-bottom: 8px;
+}
+
+.payment-card summary span {
+  display: block;
+  margin-top: 4px;
+}
+
+.selected-flat {
+  direction: rtl;
+  text-align: right;
+  padding: 12px;
+  background: #f3f6fa;
+  border-radius: 6px;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 959px) {
+  .list {
+    width: 100%;
+  }
+
+  .sale-price-chart h3,
+  .chart-hint {
+    direction: rtl;
+    text-align: right;
+  }
+}
+
 .sale-price-chart {
   direction: ltr;
   text-align: left;

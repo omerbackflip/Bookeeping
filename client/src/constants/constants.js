@@ -97,18 +97,18 @@ export const NEW_INVOICE = {
 };
 
 export const HOLDER_HEADERS = [
-    { text: "FlatID",       value: "flatId",        class: "hdr-styles",        groupable: false, width: "4%"},
-    { text: "holderName",   value: "holderName",    class: "mobile-headers",    groupable: false, width: "12%"},
-    { text: "phone",        value: "phone",         class: "mobile-headers",    groupable: false, width: "8%"},
-    { text: "signDate",     value: "signDate",      class: "mobile-headers",    groupable: false, width: "7%"},
-    { text: "signPrice",    value: "signPrice",     class: " mobile-headers",   groupable: false, width: "8%"},
+    { text: "מס' דירה",       value: "flatId",        class: "hdr-styles",        groupable: false, width: "4%"},
+    { text: "שם רוכש",   value: "holderName",    class: "mobile-headers",    groupable: false, width: "12%"},
+    { text: "טלפון",        value: "phone",         class: "mobile-headers",    groupable: false, width: "8%"},
+    { text: "תאריך חתימה",     value: "signDate",      class: "mobile-headers",    groupable: false, width: "7%"},
+    { text: "מחיר חתימה",    value: "signPrice",     class: " mobile-headers",   groupable: false, width: "8%"},
     { text: "-2024",        value: "paidThrough2024", class: "mobile-headers",  groupable: false, width: "7%"},
     { text: "+2025",        value: "paidFrom2025",  class: "mobile-headers",    groupable: false, width: "7%"},
-    { text: "VAT Gap",      value: "vatGap",        class: "mobile-headers",    groupable: false, width: "6%"},
-    { text: "Remaining Balance", value: "remainingBalance", class: "mobile-headers", groupable: false, width: "12%"},
-    { text: "Buyer Changes", value: "buyerChanges", class: "mobile-headers",    groupable: false, width: "7%"},
-    { text: "remark",       value: "remark",        class: " mobile-headers",   groupable: false, width: "10%"},
-    { text: "email",        value: "email",         class: " mobile-headers",   groupable: false,   align: "left", width: "6%"},
+    { text: "הפרשי מע'מ",      value: "vatGap",        class: "mobile-headers",    groupable: false, width: "6%"},
+    { text: "יתרה לתשלום", value: "remainingBalance", class: "mobile-headers", groupable: false, width: "12%"},
+    { text: "שינויי דיירים", value: "buyerChanges", class: "mobile-headers",    groupable: false, width: "7%"},
+    { text: "הערה",       value: "remark",        class: " mobile-headers",   groupable: false, width: "10%"},
+    { text: "אימייל",        value: "email",         class: " mobile-headers",   groupable: false,   align: "left", width: "6%"},
 ];
 
 export const navItems = [

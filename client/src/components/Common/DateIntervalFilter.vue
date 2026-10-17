@@ -2,7 +2,6 @@
   <div class="date-interval-filter">
     <v-btn
       small
-      outlined
       :color="mode === 'all' ? 'primary' : undefined"
       @click="selectAll"
     >
@@ -12,19 +11,18 @@
     <div class="interval-group">
       <span class="interval-label">Monthly</span>
       <div class="interval-buttons">
-        <v-btn small icon outlined aria-label="Previous month" @click="moveMonth(-1)">
+        <v-btn small icon aria-label="Previous month" @click="moveMonth(-1)">
           <v-icon small>mdi-chevron-left</v-icon>
         </v-btn>
         <v-btn
           small
-          outlined
           class="interval-value month-value"
           :color="mode === 'month' ? 'primary' : undefined"
           @click="selectMonth"
         >
           {{ monthLabel }}
         </v-btn>
-        <v-btn small icon outlined aria-label="Next month" @click="moveMonth(1)">
+        <v-btn small icon aria-label="Next month" @click="moveMonth(1)">
           <v-icon small>mdi-chevron-right</v-icon>
         </v-btn>
       </div>
@@ -33,19 +31,18 @@
     <div class="interval-group">
       <span class="interval-label">Yearly</span>
       <div class="interval-buttons">
-        <v-btn small icon outlined aria-label="Previous year" @click="moveYear(-1)">
+        <v-btn small icon aria-label="Previous year" @click="moveYear(-1)">
           <v-icon small>mdi-chevron-left</v-icon>
         </v-btn>
         <v-btn
           small
-          outlined
           class="interval-value"
           :color="mode === 'year' ? 'primary' : undefined"
           @click="selectYear"
         >
           {{ selectedYear }}
         </v-btn>
-        <v-btn small icon outlined aria-label="Next year" @click="moveYear(1)">
+        <v-btn small icon aria-label="Next year" @click="moveYear(1)">
           <v-icon small>mdi-chevron-right</v-icon>
         </v-btn>
       </div>
