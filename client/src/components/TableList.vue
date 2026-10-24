@@ -45,7 +45,7 @@
           <v-card-text>
             <v-form ref="form" v-model="formValid">
               <v-row>
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="2">
                   <v-text-field
                     v-model="newItem.table_id"
                     label="ID"
@@ -53,7 +53,7 @@
                     dense
                   />
                 </v-col>
-                <v-col cols="12" md="3">
+                <v-col cols="12" md="2">
                   <v-text-field
                     v-model="newItem.table_code"
                     label="Code"
@@ -66,6 +66,21 @@
                     v-model="newItem.description"
                     label="Description"
                     :rules="fldRules"
+                    dense
+                  />
+                </v-col>
+                <v-col cols="12" md="3">
+                  <v-text-field
+                    v-model="newItem.textValue"
+                    label="Text Value"
+                    dense
+                  />
+                </v-col>
+                <v-col cols="12" md="2">
+                  <v-text-field
+                    v-model="newItem.numeric"
+                    label="Numeric Value"
+                    type="number"
                     dense
                   />
                 </v-col>
@@ -109,6 +124,34 @@
                   </v-icon>
                   <v-icon small v-if="editRowId === item._id" class="mr-2" @click.stop="cancelEdit">mdi-close</v-icon>
                   <v-icon small @click.stop="deleteOne(item._id)">mdi-delete</v-icon>
+                </div>
+              </template>
+
+              <template v-slot:[`item.numeric`]="{ item }">
+                <div v-if="editRowId === item._id">
+                  <v-text-field
+                    v-model="editItem.numeric"
+                    dense
+                    hide-details
+                    :id="`itemEdit-${item._id}`"
+                  />
+                </div>
+                <div v-else>
+                  {{ item.numeric }}
+                </div>
+              </template>
+
+              <template v-slot:[`item.textValue`]="{ item }">
+                <div v-if="editRowId === item._id">
+                  <v-text-field
+                    v-model="editItem.textValue"
+                    dense
+                    hide-details
+                    :id="`itemEdit-${item._id}`"
+                  />
+                </div>
+                <div v-else>
+                  {{ item.textValue }}
                 </div>
               </template>
 
@@ -172,6 +215,24 @@
                   </v-icon>
                   <v-icon small v-if="editRowId === item._id" class="mr-2" @click.stop="cancelEdit">mdi-close</v-icon>
                   <v-icon small @click.stop="deleteOne(item._id)">mdi-delete</v-icon>
+                </div>
+              </template>
+
+              <template v-slot:[`item.numeric`]="{ item }">
+                <div v-if="editRowId === item._id">
+                  <v-text-field v-model="editItem.numeric" dense hide-details />
+                </div>
+                <div v-else>
+                  {{ item.numeric }}
+                </div>
+              </template>
+
+              <template v-slot:[`item.textValue`]="{ item }">
+                <div v-if="editRowId === item._id">
+                  <v-text-field v-model="editItem.textValue" dense hide-details />
+                </div>
+                <div v-else>
+                  {{ item.textValue }}
                 </div>
               </template>
 
@@ -332,6 +393,8 @@ export default {
         { text: "ID", value: "table_id", class: 'success title'},
         { text: "CODE", value: "table_code", class: 'success title'},
         { text: "Description", value: "description", class: 'success title', groupable: false },
+        { text: "Text Value", value: "textValue", class: 'success title', groupable: false },
+        { text: "Numeric Value", value: "numeric", class: 'success title', groupable: false },
         { text: "Act.", value: "actions", sortable: false, class: 'success title', groupable: false  },
       ],
       isLoading: false,
@@ -344,6 +407,8 @@ export default {
         table_id: "",
         table_code: "",
         description: "",
+        textValue: "",
+        numeric: "",
       },
       fldRules: [v => !!v || 'Field is required'],
       summaryHeaders:[
@@ -418,6 +483,8 @@ export default {
         table_id: "",
         table_code: "",
         description: "",
+        textValue: "",
+        numeric: "",
       };
       if (this.$refs.form) {
         this.$refs.form.resetValidation();
