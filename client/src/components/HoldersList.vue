@@ -66,6 +66,7 @@
             <div class="buyer-heading">
               <h3>דירה {{ String(holder.flatId).padStart(2, '0') }} · {{ holder.holderName || 'טרם נמכרה' }}</h3>
               <v-spacer />
+              <v-btn small text @click="$refs.holderStatement.open(holder)">מצב חשבון</v-btn>
               <v-btn small outlined @click="getHolderForEdit(holder)">עריכה</v-btn>
             </div>
             <div class="mobile-figures buyer-figures">
@@ -150,6 +151,11 @@
               </v-btn>
             </v-toolbar> -->
           </template>
+          <template v-slot:[`item.statement`]="{ item }">
+            <v-btn v-if="item.holderName" icon small title="מצב חשבון" aria-label="מצב חשבון" @click.stop="$refs.holderStatement.open(item)">
+              <v-icon small>mdi-file-pdf-box</v-icon>
+            </v-btn>
+          </template>
           <template v-slot:[`item.flatId`]="{ item }">
             <span style="margin-left: 0.5rem"> {{ String(item.flatId).padStart(2, '0') }}</span>
           </template>
@@ -205,6 +211,7 @@
       </v-flex>
 
       <holder-form ref="holderForm"/>
+      <holder-statement ref="holderStatement"/>
 
     </v-layout>
   </div>
@@ -219,6 +226,7 @@ import apiService from "../services/apiService";
 import { BOOKS_MODEL, HOLDER_MODEL, HOLDER_HEADERS, TABLE_IDS, TABLE_MODEL } from "../constants/constants";
 import { isMobile } from '../constants/constants';
 import HolderForm from './HolderForm.vue';
+import HolderStatement from './HolderStatement.vue';
 import VueApexCharts from 'vue-apexcharts';
 Vue.filter("formatDate", function (value) {
 	if (value) {
@@ -228,7 +236,7 @@ Vue.filter("formatDate", function (value) {
 });
 export default {
 	// name: "holders-list",
-	components: { HolderForm, apexchart: VueApexCharts },
+	components: { HolderForm, HolderStatement, apexchart: VueApexCharts },
 	data() {
 		return {
       isMobile,
@@ -482,8 +490,9 @@ export default {
         .replace(/\s+/g, ' ')
         .trim();
 
-      // This stem covers both "שינוי דיירים" and "שינויי דיירים", including longer descriptions.
-      return /שינויי?\s*דייר/.test(description);
+      // Match buyer changes and file-opening fees within longer descriptions.
+      return /(?:^|\s)פתיחת\s+תיק(?:\s|$)/.test(description)
+        || /שינויי?\s*דייר/.test(description);
     },
 
     formatStoredDate(value) {
@@ -514,9 +523,9 @@ export default {
 
 		getHeaders() {
 			if (this.isMobile()) {
-				return HOLDER_HEADERS;
+				return [...HOLDER_HEADERS, { text: 'מצב חשבון', value: 'statement', sortable: false, align: 'right' }];
 			} else {
-				return HOLDER_HEADERS;
+				return [...HOLDER_HEADERS, { text: 'מצב חשבון', value: 'statement', sortable: false, align: 'right' }];
 			}
 		},
 

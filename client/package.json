@@ -17,6 +17,7 @@
     "filepond-plugin-image-preview": "^4.6.12",
     "google-drive-picker": "^1.1.29",
     "googleapis": "^144.0.0",
+    "html2pdf.js": "^0.10.1",
     "material-design-icons-iconfont": "^6.1.0",
     "moment": "^2.29.1",
     "papaparse": "^5.3.1",

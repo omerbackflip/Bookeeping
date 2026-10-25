@@ -16,3 +16,7 @@
 	path = camera
 	url = https://github.com/omerbackflip/camera.git
 	branch = master
+[submodule "client/src/components/shared/pdf"]
+	path = client/src/components/shared/pdf
+	url = https://github.com/omerbackflip/pdf.git
+	branch = master
