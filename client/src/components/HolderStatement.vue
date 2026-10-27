@@ -24,27 +24,37 @@
             </th><th>סכום</th></tr></thead>
             <tbody>
               <tr><th>מחיר הדירה לפי החוזה, כולל מע״מ</th><td><input v-if="summaryEditing" v-model="summaryDraft.signPrice" type="number" min="0" step="any" aria-label="מחיר הדירה לפי החוזה"><template v-else>{{ money(summaryPrice) }}</template></td></tr>
-              <tr v-for="(row, index) in summaryRows" :key="row.key">
-                <th><input v-if="summaryEditing" v-model="row.description" aria-label="תיאור שורה בסיכום"><template v-else>{{ row.description }}</template></th>
-                <td>
-                  <input v-if="summaryEditing" v-model="row.amount" type="number" min="0" step="any" aria-label="סכום שורה בסיכום">
-                  <template v-else>{{ money(row.amount) }}</template>
-                  <v-btn v-if="summaryEditing" icon x-small :aria-label="'מחיקת שורה ' + (index + 1)" @click="summaryRows.splice(index, 1)"><v-icon small>mdi-delete</v-icon></v-btn>
-                </td>
-              </tr>
               <tr v-if="needsVatCalculation"><th>שולם עד 31/12/2024 — מע״מ 17%</th><td><input v-if="summaryEditing" :value="summaryTotals.paidThrough2024" @input="summaryDraft.paidThrough2024 = $event.target.value" type="number" min="0" step="any" aria-label="שולם עד סוף 2024"><template v-else>{{ money(summaryTotals.paidThrough2024) }}</template></td></tr>
               <tr v-if="needsVatCalculation"><th>שולם מ־01/01/2025 — מע״מ 18%</th><td><input v-if="summaryEditing" :value="summaryTotals.paidFrom2025" @input="summaryDraft.paidFrom2025 = $event.target.value" type="number" min="0" step="any" aria-label="שולם משנת 2025"><template v-else>{{ money(summaryTotals.paidFrom2025) }}</template></td></tr>
               <tr v-if="needsVatCalculation"><th>הפרש מע״מ בגין המעבר מ־17% ל־18%</th><td><input v-if="summaryEditing" :value="summaryTotals.vatGap" @input="summaryDraft.vatGap = $event.target.value" type="number" min="0" step="any" aria-label="הפרש מע״מ"><template v-else>{{ money(summaryTotals.vatGap) }}</template></td></tr>
               <tr class="emphasis"><th>סה״כ שולם עבור הדירה</th><td><input v-if="summaryEditing && !needsVatCalculation" :value="summaryTotals.paid" @input="summaryDraft.paid = $event.target.value" type="number" min="0" step="any" aria-label="סה״כ שולם עבור הדירה"><template v-else>{{ money(summaryTotals.paid) }}</template></td></tr>
-              <tr class="emphasis"><th>{{ balanceIncludingVat < 0 ? 'יתרת זכות' : 'יתרה לתשלום' }}</th><td>{{ money(Math.abs(balanceIncludingVat)) }}</td></tr>
+              <tr class="emphasis"><th>{{ balanceBeforeIndexation < 0 ? 'יתרת זכות' : 'יתרה לתשלום' }}</th><td>{{ money(Math.abs(balanceBeforeIndexation)) }}</td></tr>
+              <tr>
+                <th>
+                  הפרשי הצמדה למדד תשומות הבנייה —
+                  <template v-if="summaryEditing">
+                    <label>מדד בסיס <input class="index-input" v-model="indexDraft.base" type="number" min="0" step="any" aria-label="מדד בסיס"></label>
+                    <label>מדד נוכחי <input class="index-input" v-model="indexDraft.current" type="number" min="0" step="any" aria-label="מדד נוכחי"></label>
+                  </template>
+                  <template v-else>מדד בסיס {{ indexDraft.base }}; מדד נוכחי {{ indexDraft.current }}</template>
+                </th>
+                <td>{{ money(indexCalculation.beforeDiscount) }}</td>
+              </tr>
+              <tr v-if="!exporting || Number(indexDraft.discount) !== 0">
+                <th>הנחה על הפרשי ההצמדה —
+                  <input v-if="summaryEditing" class="index-input" v-model="indexDraft.discount" type="number" min="0" max="100" step="any" aria-label="הנחה על הפרשי ההצמדה">
+                  <template v-else>{{ indexDraft.discount }}</template>%
+                </th>
+                <td>{{ money(-indexCalculation.discountAmount) }}</td>
+              </tr>
+              <tr class="emphasis"><th>{{ balanceIncludingVat < 0 ? 'יתרת זכות לאחר הצמדה' : 'יתרה לתשלום לאחר הצמדה' }}</th><td>{{ money(Math.abs(balanceIncludingVat)) }}</td></tr>
             </tbody>
           </table>
           <div v-if="summaryEditing" data-html2canvas-ignore="true" class="payment-edit-actions">
             <v-btn small text @click="resetSummary">איפוס סיכום החשבון</v-btn>
-            <v-btn small text @click="addSummaryRow">הוספת שורה</v-btn>
             <p>עריכת הסיכום משפיעה על היתרה בלבד ואינה משנה את פירוט התשלומים. עריכת תשלומים מחדש תאפס את סכומי התשלום והמע״מ שהוזנו בסיכום. היתרה מחושבת אוטומטית.</p>
           </div>
-          <v-alert v-if="!validSummary && !exporting" data-html2canvas-ignore="true" type="warning" dense>יש להזין בסיכום סכומים תקינים שאינם שליליים ותיאור לכל שורה שנוספה.</v-alert>
+          <v-alert v-if="!validSummary && !exporting" data-html2canvas-ignore="true" type="warning" dense>יש להזין סכומים תקינים שאינם שליליים, מדדים גדולים מאפס והנחה בין 0% ל־100%.</v-alert>
           <div class="payment-heading">
             <h2>פירוט תשלומים עבור הדירה</h2>
             <v-btn v-if="!exporting" data-html2canvas-ignore="true" x-small text @click="editing = !editing">
@@ -136,7 +146,7 @@ import moment from 'moment';
 import { generatePdfFromElement } from './shared/pdf';
 
 export default {
-  data: () => ({ visible: false, holder: {}, statementDate: '', fileDate: '', exporting: false, error: '', editing: false, draftPayments: [], nextPaymentKey: 0, editingCharges: false, draftCharges: [], nextChargeKey: 0, editingSummary: false, summaryRows: [], nextSummaryKey: 0, summaryDraft: { signPrice: '', paidThrough2024: null, paidFrom2025: null, paid: null, vatGap: null } }),
+  data: () => ({ visible: false, holder: {}, statementDate: '', fileDate: '', exporting: false, error: '', editing: false, draftPayments: [], nextPaymentKey: 0, editingCharges: false, draftCharges: [], nextChargeKey: 0, editingSummary: false, indexDraft: { base: 134, current: 144.25, discount: 100 }, summaryDraft: { signPrice: '', paidThrough2024: null, paidFrom2025: null, paid: null, vatGap: null } }),
   watch: {
     draftPayments: {
       deep: true,
@@ -149,14 +159,26 @@ export default {
     },
   },
   computed: {
-    summaryRowsTotal() {
-      return this.summaryRows.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+    validIndexDraft() {
+      const d = this.indexDraft;
+      return ['base', 'current', 'discount'].every(key => String(d[key]).trim() !== '' && Number.isFinite(Number(d[key])))
+        && Number(d.base) > 0 && Number(d.current) > 0 && Number(d.discount) >= 0 && Number(d.discount) <= 100
+        && Number.isFinite(Math.max(0, this.balanceBeforeIndexation) * (Number(d.current) / Number(d.base) - 1));
+    },
+    indexCalculation() {
+      if (!this.validIndexDraft) return { indexedPrincipal: 0, percent: 0, beforeDiscount: 0, discountAmount: 0, amount: 0 };
+      const d = this.indexDraft;
+      const percent = (Number(d.current) / Number(d.base) - 1) * 100;
+      const indexedPrincipal = Math.max(0, this.balanceBeforeIndexation) * 0.5;
+      const raw = indexedPrincipal * percent / 100;
+      const beforeDiscount = Math.max(0, raw);
+      const discountAmount = beforeDiscount * Number(d.discount) / 100;
+      return { indexedPrincipal, percent, beforeDiscount, discountAmount, amount: Math.round((beforeDiscount - discountAmount) * 100) / 100 };
     },
     summaryEditing() { return this.editingSummary && !this.exporting; },
     summaryPrice() { return Number(this.summaryDraft.signPrice); },
     validSummary() {
-      return this.summaryRows.every(row => String(row.description || '').trim() && String(row.amount).trim() !== ''
-        && Number.isFinite(Number(row.amount)) && Number(row.amount) >= 0)
+      return this.validIndexDraft
         && Object.values(this.summaryDraft).every(value => value === null
         || (String(value).trim() !== '' && Number.isFinite(Number(value)) && Number(value) >= 0));
     },
@@ -194,8 +216,11 @@ export default {
       return Boolean(this.holder.signDate) && moment(this.holder.signDate).isValid()
         && moment(this.holder.signDate).isBefore('2025-01-01', 'day');
     },
+    balanceBeforeIndexation() {
+      return this.summaryPrice - this.summaryTotals.paid + this.summaryTotals.vatGap;
+    },
     balanceIncludingVat() {
-      return this.summaryPrice + this.summaryRowsTotal - this.summaryTotals.paid + this.summaryTotals.vatGap;
+      return this.balanceBeforeIndexation + this.indexCalculation.amount;
     },
     validPayments() {
       return this.draftPayments.every(entry => moment(entry.asmchta_date, 'YYYY-MM-DD', true).isValid()
@@ -231,11 +256,8 @@ export default {
       this.error = '';
       this.visible = true;
     },
-    addSummaryRow() {
-      this.summaryRows.push({ key: this.nextSummaryKey++, description: '', amount: '' });
-    },
     resetSummary() {
-      this.summaryRows = [];
+      this.indexDraft = { base: 134, current: 144.25, discount: 100 };
       this.summaryDraft = { signPrice: this.holder.signPrice, paidThrough2024: null, paidFrom2025: null, paid: null, vatGap: null };
     },
     chargeAmountKnown(charge) {
@@ -283,7 +305,7 @@ export default {
         await this.$nextTick();
         await document.fonts.ready;
         await Promise.all(Array.from(this.$refs.statement.querySelectorAll('img')).map(image => image.decode()));
-        await generatePdfFromElement(this.$refs.statement, `מצב-חשבון-דירה-${this.holder.flatId}-${this.fileDate}.pdf`);
+        await generatePdfFromElement(this.$refs.statement, `דירה ${this.holder.flatId} - מצב חשבון ${this.fileDate}.pdf`);
       } catch (error) {
         this.error = 'הפקת ה־PDF נכשלה. ניתן לנסות שוב.';
       } finally {
@@ -295,6 +317,7 @@ export default {
 </script>
 
 <style scoped>
+.statement-summary .index-input { width: 90px; margin: 4px; display: inline-block; }
 .payment-heading { display: flex; align-items: center; gap: 8px; margin: 24px 0 10px; }
 .payment-heading h2 { margin: 0 !important; }
 .payment-edit-actions { margin-top: 8px; }
