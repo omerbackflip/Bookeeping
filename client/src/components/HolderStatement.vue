@@ -16,36 +16,107 @@
           </header>
           <table class="statement-summary">
             <colgroup><col style="width: 72%"><col style="width: 28%"></colgroup>
-            <thead><tr><th>סיכום החשבון</th><th>סכום</th></tr></thead>
+            <thead><tr><th>סיכום החשבון
+              <v-btn v-if="!exporting" data-html2canvas-ignore="true" x-small text @click="editingSummary = !editingSummary">
+                <v-icon small>{{ editingSummary ? 'mdi-check' : 'mdi-pencil' }}</v-icon>
+                {{ editingSummary ? 'סיום עריכה' : 'עריכה' }}
+              </v-btn>
+            </th><th>סכום</th></tr></thead>
             <tbody>
-              <tr><th>מחיר הדירה לפי החוזה, כולל מע״מ</th><td>{{ money(holder.signPrice) }}</td></tr>
-              <tr v-if="needsVatCalculation"><th>שולם עד 31/12/2024 — מע״מ 17%</th><td>{{ money(holder.paidThrough2024) }}</td></tr>
-              <tr v-if="needsVatCalculation"><th>שולם מ־01/01/2025 — מע״מ 18%</th><td>{{ money(holder.paidFrom2025) }}</td></tr>
-              <tr v-if="needsVatCalculation"><th>הפרש מע״מ בגין המעבר מ־17% ל־18%</th><td>{{ holder.vatGap == null ? '—' : money(holder.vatGap) }}</td></tr>
-              <tr class="emphasis"><th>סה״כ שולם עבור הדירה</th><td>{{ money(holder.paid) }}</td></tr>
+              <tr><th>מחיר הדירה לפי החוזה, כולל מע״מ</th><td><input v-if="summaryEditing" v-model="summaryDraft.signPrice" type="number" min="0" step="any" aria-label="מחיר הדירה לפי החוזה"><template v-else>{{ money(summaryPrice) }}</template></td></tr>
+              <tr v-for="(row, index) in summaryRows" :key="row.key">
+                <th><input v-if="summaryEditing" v-model="row.description" aria-label="תיאור שורה בסיכום"><template v-else>{{ row.description }}</template></th>
+                <td>
+                  <input v-if="summaryEditing" v-model="row.amount" type="number" min="0" step="any" aria-label="סכום שורה בסיכום">
+                  <template v-else>{{ money(row.amount) }}</template>
+                  <v-btn v-if="summaryEditing" icon x-small :aria-label="'מחיקת שורה ' + (index + 1)" @click="summaryRows.splice(index, 1)"><v-icon small>mdi-delete</v-icon></v-btn>
+                </td>
+              </tr>
+              <tr v-if="needsVatCalculation"><th>שולם עד 31/12/2024 — מע״מ 17%</th><td><input v-if="summaryEditing" :value="summaryTotals.paidThrough2024" @input="summaryDraft.paidThrough2024 = $event.target.value" type="number" min="0" step="any" aria-label="שולם עד סוף 2024"><template v-else>{{ money(summaryTotals.paidThrough2024) }}</template></td></tr>
+              <tr v-if="needsVatCalculation"><th>שולם מ־01/01/2025 — מע״מ 18%</th><td><input v-if="summaryEditing" :value="summaryTotals.paidFrom2025" @input="summaryDraft.paidFrom2025 = $event.target.value" type="number" min="0" step="any" aria-label="שולם משנת 2025"><template v-else>{{ money(summaryTotals.paidFrom2025) }}</template></td></tr>
+              <tr v-if="needsVatCalculation"><th>הפרש מע״מ בגין המעבר מ־17% ל־18%</th><td><input v-if="summaryEditing" :value="summaryTotals.vatGap" @input="summaryDraft.vatGap = $event.target.value" type="number" min="0" step="any" aria-label="הפרש מע״מ"><template v-else>{{ money(summaryTotals.vatGap) }}</template></td></tr>
+              <tr class="emphasis"><th>סה״כ שולם עבור הדירה</th><td><input v-if="summaryEditing && !needsVatCalculation" :value="summaryTotals.paid" @input="summaryDraft.paid = $event.target.value" type="number" min="0" step="any" aria-label="סה״כ שולם עבור הדירה"><template v-else>{{ money(summaryTotals.paid) }}</template></td></tr>
               <tr class="emphasis"><th>{{ balanceIncludingVat < 0 ? 'יתרת זכות' : 'יתרה לתשלום' }}</th><td>{{ money(Math.abs(balanceIncludingVat)) }}</td></tr>
             </tbody>
           </table>
-          <h2>פירוט תשלומים עבור הדירה</h2>
+          <div v-if="summaryEditing" data-html2canvas-ignore="true" class="payment-edit-actions">
+            <v-btn small text @click="resetSummary">איפוס סיכום החשבון</v-btn>
+            <v-btn small text @click="addSummaryRow">הוספת שורה</v-btn>
+            <p>עריכת הסיכום משפיעה על היתרה בלבד ואינה משנה את פירוט התשלומים. עריכת תשלומים מחדש תאפס את סכומי התשלום והמע״מ שהוזנו בסיכום. היתרה מחושבת אוטומטית.</p>
+          </div>
+          <v-alert v-if="!validSummary && !exporting" data-html2canvas-ignore="true" type="warning" dense>יש להזין בסיכום סכומים תקינים שאינם שליליים ותיאור לכל שורה שנוספה.</v-alert>
+          <div class="payment-heading">
+            <h2>פירוט תשלומים עבור הדירה</h2>
+            <v-btn v-if="!exporting" data-html2canvas-ignore="true" x-small text @click="editing = !editing">
+              <v-icon small>{{ editing ? 'mdi-check' : 'mdi-pencil' }}</v-icon>
+              {{ editing ? 'סיום עריכה' : 'עריכה' }}
+            </v-btn>
+          </div>
           <table class="statement-payments">
             <colgroup><col style="width: 19%"><col style="width: 15%"><col :style="{ width: needsVatCalculation ? '30%' : '42%' }"><col v-if="needsVatCalculation" style="width: 12%"><col style="width: 24%"></colgroup>
             <thead><tr><th>תאריך תשלום</th><th>אסמכתא</th><th>תיאור</th><th v-if="needsVatCalculation">שיעור מע״מ</th><th>סכום ששולם</th></tr></thead>
             <tbody>
-              <tr v-for="(entry, index) in payments" :key="entry._id || index">
-                <td>{{ date(entry.asmchta_date) }}</td><td>{{ entry.asmacta1 || '—' }}</td>
-                <td>{{ entry.pratim || 'תשלום על חשבון הדירה' }}</td><td v-if="needsVatCalculation">{{ vat(entry.asmchta_date) }}</td><td>{{ money(entry.schum_hova) }}</td>
+              <tr v-for="(entry, index) in (paymentEditing ? draftPayments : payments)" :key="entry.statementKey">
+                <td><input v-if="paymentEditing" v-model="entry.asmchta_date" type="date" aria-label="תאריך תשלום"><template v-else>{{ date(entry.asmchta_date) }}</template></td>
+                <td><input v-if="paymentEditing" v-model="entry.asmacta1" aria-label="אסמכתא"><template v-else>{{ entry.asmacta1 || '—' }}</template></td>
+                <td><input v-if="paymentEditing" v-model="entry.pratim" aria-label="תיאור"><template v-else>{{ entry.pratim || 'תשלום על חשבון הדירה' }}</template></td>
+                <td v-if="needsVatCalculation">{{ vat(entry.asmchta_date) }}</td>
+                <td>
+                  <template v-if="paymentEditing">
+                    <input v-model="entry.schum_hova" type="number" min="0.01" step="any" aria-label="סכום ששולם">
+                    <v-btn icon x-small :aria-label="'מחיקת תשלום ' + (index + 1)" @click="draftPayments.splice(index, 1)"><v-icon small>mdi-delete</v-icon></v-btn>
+                  </template>
+                  <template v-else>{{ money(entry.schum_hova) }}</template>
+                </td>
               </tr>
               <tr v-if="!payments.length"><td :colspan="needsVatCalculation ? 5 : 4">לא נרשמו תשלומים עבור הדירה</td></tr>
             </tbody>
-            <tfoot><tr><th :colspan="needsVatCalculation ? 4 : 3">סה״כ שולם</th><td>{{ money(holder.paid) }}</td></tr></tfoot>
+            <tfoot><tr><th :colspan="needsVatCalculation ? 4 : 3">סה״כ שולם</th><td>{{ money(paymentTotals.paid) }}</td></tr></tfoot>
           </table>
+          <div v-if="paymentEditing" data-html2canvas-ignore="true" class="payment-edit-actions">
+            <v-btn small text @click="addPayment">הוספת תשלום</v-btn>
+            <v-btn small text @click="resetPayments">איפוס לתשלומים המקוריים</v-btn>
+          </div>
+          <v-alert v-if="!validPayments && !exporting" data-html2canvas-ignore="true" type="warning" dense>יש להזין לכל תשלום תאריך תקין וסכום חיובי לפני הורדת ה־PDF.</v-alert>
+          <div class="payment-heading">
+            <h2>חיובים נוספים לפי החוזה</h2>
+            <v-btn v-if="!exporting" data-html2canvas-ignore="true" x-small text @click="editingCharges = !editingCharges">
+              <v-icon small>{{ editingCharges ? 'mdi-check' : 'mdi-pencil' }}</v-icon>
+              {{ editingCharges ? 'סיום עריכה' : 'עריכה' }}
+            </v-btn>
+          </div>
+          <table class="statement-charges">
+            <colgroup><col style="width: 14%"><col style="width: 60%"><col style="width: 26%"></colgroup>
+            <thead><tr><th>סעיף בחוזה</th><th>תיאור החיוב</th><th>סכום לתשלום כולל מע״מ</th></tr></thead>
+            <tbody>
+              <tr v-for="(charge, index) in draftCharges" :key="charge.key">
+                <td><input v-if="chargesEditing" v-model="charge.clause" aria-label="סעיף בחוזה"><template v-else>{{ charge.clause || '—' }}</template></td>
+                <td><input v-if="chargesEditing" v-model="charge.description" aria-label="תיאור החיוב"><template v-else>{{ charge.description }}</template></td>
+                <td><input v-if="chargesEditing" v-model="charge.amount" type="number" min="0" step="any" placeholder="טרם נקבע" aria-label="סכום החיוב כולל מע״מ"><template v-else>{{ chargeAmountKnown(charge) ? money(charge.amount) : 'טרם נקבע' }}</template>
+                  <v-btn v-if="chargesEditing" icon x-small :aria-label="'מחיקת חיוב ' + (index + 1)" @click="draftCharges.splice(index, 1)"><v-icon small>mdi-delete</v-icon></v-btn>
+                </td>
+              </tr>
+              <tr v-if="!draftCharges.length"><td colspan="3">אין חיובים נוספים</td></tr>
+            </tbody>
+            <tfoot><tr><th colspan="2">סה״כ חיובים שנקבעו</th><td>{{ money(chargeTotals.amount) }}</td></tr></tfoot>
+          </table>
+          <div v-if="chargesEditing" data-html2canvas-ignore="true" class="payment-edit-actions">
+            <v-btn small text @click="addCharge">הוספת חיוב</v-btn>
+            <v-btn small text @click="resetCharges">איפוס לחיובים הרגילים</v-btn>
+          </div>
+          <v-alert v-if="!validCharges && !exporting" data-html2canvas-ignore="true" type="warning" dense>יש להזין תיאור וסכומים תקינים שאינם שליליים. ניתן להשאיר את סכום החיוב ריק אם טרם נקבע.</v-alert>
+          <p class="statement-note">סכומים שטרם נקבעו אינם כלולים בסיכום. האגרות והחיובים כפופים לסכומים החלים לפי החוזה.</p>
           <footer class="statement-footer">
-            <table v-if="needsVatCalculation && holder.vatGap != null" class="statement-summary statement-final">
+            <table class="statement-summary statement-final">
               <colgroup><col style="width: 72%"><col style="width: 28%"></colgroup>
-              <tbody><tr class="emphasis"><th>{{  'יתרה לתשלום' }}</th><td>{{ money(Math.abs(balanceIncludingVat)) }}</td></tr></tbody>
+              <tbody>
+                <tr><th>יתרה עבור הדירה, כולל הפרש מע״מ ככל שחל</th><td>{{ money(balanceIncludingVat) }}</td></tr>
+                <tr><th>יתרה בגין חיובים נוספים שנקבעו</th><td>{{ money(chargeTotals.balance) }}</td></tr>
+                <tr class="emphasis"><th>{{ totalBalance < 0 ? 'סה״כ יתרת זכות' : 'סה״כ יתרה לתשלום' }}</th><td>{{ money(Math.abs(totalBalance)) }}</td></tr>
+              </tbody>
             </table>
             <p class="statement-note">לתשומת לבכם: כל איחור בתשלום יגרום לביטול ההנחה בגין הצמדה למדד.</p>
-            <p class="statement-note">הדוח מתייחס לרכישת הדירה בלבד. חיובים ותשלומים בגין שינויי דיירים אינם נכללים.</p>
+            <p class="statement-note">הדוח כולל את רכישת הדירה והחיובים הנוספים המפורטים לעיל. חיובים ותשלומים בגין שינויי דיירים אינם נכללים.</p>
             <p class="statement-note">כל הסכומים בש״ח וכוללים מע״מ, ומוצגים בעיגול לשקל שלם.</p>
           </footer>
         </div>
@@ -54,7 +125,7 @@
       <v-card-actions>
         <v-btn text :disabled="exporting" @click="visible = false">סגירה</v-btn>
         <v-spacer />
-        <v-btn color="primary" :disabled="!available" :loading="exporting" @click="download">הורדה כ־PDF</v-btn>
+        <v-btn color="primary" :disabled="!available || !validSummary || !validPayments || !validCharges" :loading="exporting" @click="download">הורדה כ־PDF</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -65,30 +136,134 @@ import moment from 'moment';
 import { generatePdfFromElement } from './shared/pdf';
 
 export default {
-  data: () => ({ visible: false, holder: {}, statementDate: '', fileDate: '', exporting: false, error: '' }),
+  data: () => ({ visible: false, holder: {}, statementDate: '', fileDate: '', exporting: false, error: '', editing: false, draftPayments: [], nextPaymentKey: 0, editingCharges: false, draftCharges: [], nextChargeKey: 0, editingSummary: false, summaryRows: [], nextSummaryKey: 0, summaryDraft: { signPrice: '', paidThrough2024: null, paidFrom2025: null, paid: null, vatGap: null } }),
+  watch: {
+    draftPayments: {
+      deep: true,
+      handler() {
+        this.summaryDraft.paidThrough2024 = null;
+        this.summaryDraft.paidFrom2025 = null;
+        this.summaryDraft.paid = null;
+        this.summaryDraft.vatGap = null;
+      },
+    },
+  },
   computed: {
+    summaryRowsTotal() {
+      return this.summaryRows.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+    },
+    summaryEditing() { return this.editingSummary && !this.exporting; },
+    summaryPrice() { return Number(this.summaryDraft.signPrice); },
+    validSummary() {
+      return this.summaryRows.every(row => String(row.description || '').trim() && String(row.amount).trim() !== ''
+        && Number.isFinite(Number(row.amount)) && Number(row.amount) >= 0)
+        && Object.values(this.summaryDraft).every(value => value === null
+        || (String(value).trim() !== '' && Number.isFinite(Number(value)) && Number(value) >= 0));
+    },
+    summaryTotals() {
+      const paidThrough2024 = this.summaryDraft.paidThrough2024 === null ? this.paymentTotals.paidThrough2024 : Number(this.summaryDraft.paidThrough2024);
+      const paidFrom2025 = this.summaryDraft.paidFrom2025 === null ? this.paymentTotals.paidFrom2025 : Number(this.summaryDraft.paidFrom2025);
+      const paid = this.needsVatCalculation ? paidThrough2024 + paidFrom2025
+        : this.summaryDraft.paid === null ? this.paymentTotals.paid : Number(this.summaryDraft.paid);
+      const vatGap = this.needsVatCalculation ? this.summaryDraft.vatGap === null
+        ? Math.round(Math.max(0, this.summaryPrice - paidThrough2024) / 1.17 * 0.01) : Number(this.summaryDraft.vatGap) : 0;
+      return { paidThrough2024, paidFrom2025, paid, vatGap };
+    },
+    chargesEditing() {
+      return this.editingCharges && !this.exporting;
+    },
+    validCharges() {
+      return this.draftCharges.every(charge => String(charge.description || '').trim()
+        && (!this.chargeAmountKnown(charge)
+          || (Number.isFinite(Number(charge.amount)) && Number(charge.amount) >= 0)));
+    },
+    chargeTotals() {
+      return this.draftCharges.filter(this.chargeAmountKnown).reduce((totals, charge) => {
+        totals.amount += Number(charge.amount) || 0;
+        totals.balance = totals.amount;
+        return totals;
+      }, { amount: 0, balance: 0 });
+    },
+    totalBalance() {
+      return this.balanceIncludingVat + this.chargeTotals.balance;
+    },
+    paymentEditing() {
+      return this.editing && !this.exporting;
+    },
     needsVatCalculation() {
       return Boolean(this.holder.signDate) && moment(this.holder.signDate).isValid()
         && moment(this.holder.signDate).isBefore('2025-01-01', 'day');
     },
     balanceIncludingVat() {
-      return Number(this.holder.remainingBalance) + (this.needsVatCalculation ? Number(this.holder.vatGap || 0) : 0);
+      return this.summaryPrice + this.summaryRowsTotal - this.summaryTotals.paid + this.summaryTotals.vatGap;
+    },
+    validPayments() {
+      return this.draftPayments.every(entry => moment(entry.asmchta_date, 'YYYY-MM-DD', true).isValid()
+        && Number.isFinite(Number(entry.schum_hova)) && Number(entry.schum_hova) > 0);
+    },
+    paymentTotals() {
+      const paid = this.draftPayments.reduce((sum, entry) => sum + (Number(entry.schum_hova) || 0), 0);
+      const paidThrough2024 = this.draftPayments.reduce((sum, entry) => sum + (
+        moment(entry.asmchta_date, 'YYYY-MM-DD', true).isValid() && moment(entry.asmchta_date).isBefore('2025-01-01', 'day')
+          ? (Number(entry.schum_hova) || 0) : 0), 0);
+      const vatGap = this.needsVatCalculation
+        ? Math.round(Math.max(0, Number(this.holder.signPrice) - paidThrough2024) / 1.17 * 0.01) : 0;
+      return { paid, paidThrough2024, paidFrom2025: paid - paidThrough2024, vatGap };
     },
     available() {
       return this.holder.remainingBalance != null && this.holder.paid != null;
     },
     payments() {
-      return (this.holder.bookEntries || []).filter(entry => entry.paymentCategory === 'Paid')
-        .slice().sort((a, b) => new Date(a.asmchta_date) - new Date(b.asmchta_date));
+      return this.draftPayments.slice().sort((a, b) => new Date(a.asmchta_date) - new Date(b.asmchta_date));
     },
   },
   methods: {
     open(holder) {
       this.holder = holder;
+      this.resetSummary();
+      this.editingSummary = false;
+      this.resetPayments();
+      this.resetCharges();
+      this.editing = false;
+      this.editingCharges = false;
       this.statementDate = moment().format('DD/MM/YYYY');
       this.fileDate = moment().format('YYYY-MM-DD');
       this.error = '';
       this.visible = true;
+    },
+    addSummaryRow() {
+      this.summaryRows.push({ key: this.nextSummaryKey++, description: '', amount: '' });
+    },
+    resetSummary() {
+      this.summaryRows = [];
+      this.summaryDraft = { signPrice: this.holder.signPrice, paidThrough2024: null, paidFrom2025: null, paid: null, vatGap: null };
+    },
+    chargeAmountKnown(charge) {
+      return charge.amount !== '' && charge.amount !== null && charge.amount !== undefined;
+    },
+    resetCharges() {
+      this.draftCharges = [
+        { clause: '2.7.3.1', description: 'פיקדונות וחיבורי מים, גז וחשמל בדירה', amount: '' },
+        { clause: '2.7.3.2', description: 'אגרות רישום מקרקעין ומשכנתא', amount: 500 },
+        { clause: '2.7.3.3', description: 'חלק יחסי במונים ובחיבורי הרכוש המשותף', amount: 4130 },
+        { clause: '2.7.3.4', description: 'רישום הבית המשותף וזכויות הדירה, לרבות תשריטים ומסמכים', amount: 4130 },
+      ].map(charge => ({ ...charge, key: this.nextChargeKey++ }));
+    },
+    addCharge() {
+      this.draftCharges.push({ key: this.nextChargeKey++, clause: '', description: '', amount: '' });
+    },
+    resetPayments() {
+      this.draftPayments = (this.holder.bookEntries || []).filter(entry => entry.paymentCategory === 'Paid')
+        .map(entry => ({
+          statementKey: this.nextPaymentKey++,
+          asmchta_date: entry.asmchta_date && moment(entry.asmchta_date).isValid() ? moment(entry.asmchta_date).format('YYYY-MM-DD') : '',
+          asmacta1: entry.asmacta1 == null ? '' : String(entry.asmacta1),
+          pratim: entry.pratim || '',
+          schum_hova: entry.schum_hova,
+        }));
+    },
+    addPayment() {
+      this.draftPayments.push({ statementKey: this.nextPaymentKey++, asmchta_date: moment().format('YYYY-MM-DD'), asmacta1: '', pratim: '', schum_hova: '' });
     },
     money(value) {
       return `${(Number(value) || 0).toLocaleString('he-IL', { maximumFractionDigits: 0 })} ₪`;
@@ -101,6 +276,7 @@ export default {
       return moment(value).isBefore('2025-01-01', 'day') ? '17%' : '18%';
     },
     async download() {
+      if (!this.available || !this.validSummary || !this.validPayments || !this.validCharges || this.exporting) return;
       this.exporting = true;
       this.error = '';
       try {
@@ -119,6 +295,10 @@ export default {
 </script>
 
 <style scoped>
+.payment-heading { display: flex; align-items: center; gap: 8px; margin: 24px 0 10px; }
+.payment-heading h2 { margin: 0 !important; }
+.payment-edit-actions { margin-top: 8px; }
+.payment-edit-actions p { font-size: 12px; margin: 4px 0; }
 .holder-statement { background: white; color: #222; padding: 20px; text-align: right; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.6; }
 .holder-statement h1 { font-size: 24px; margin: 0 0 8px; }
 .statement-header { margin-bottom: 24px; break-inside: avoid; display: flow-root; }
